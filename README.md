@@ -1,4 +1,4 @@
-# Discrete Agent DB Service
+# Job Manager DB Service
 
 A service that exposes a gateway to the jobs & task management database. 
 
