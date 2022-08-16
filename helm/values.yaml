@@ -5,52 +5,91 @@ global:
   environment: {}
 
 enabled: true
-environment: development
+environment: "development"
 replicaCount: 1
 initialDelaySeconds: 60
 nodePort: 30030 #for minikube deployment only
 resetOnConfigChange: true
 
 cloudProvider:
-  dockerRegistryUrl: my-registry-url.io
-  imagePullSecretName: 'my-registry-secret'
-  flavor: openshift
-
-caSecretName: ''
-caPath: '/usr/local/share/ca-certificates'
-caKey: 'ca.crt'
+  dockerRegistryUrl: "my-registry-url.io"
+  flavor: "openshift"
+  imagePullSecretName: ""
 
 image:
-  repository: ts-server-boilerplate
-  tag: 'latest'
+  repository: "job-manager"
+  tag: "latest"
+
+authentication:
+  ssl:
+    enabled: false
+    useExternal: false
+    externalSecretName: ""
+
+rasterCommon:
+  ca:
+    secretName: ''
+    path: '/usr/local/share/ca-certificates'
+    key: 'ca.crt'
+  db:
+    host: "localhost"
+    name: "raster"
+    port: 5432
+    sslEnabled: false
+    secrets:
+      useExternal: false
+      externalSecretName: ''
+
+# ====================================================================================================
+# Local certificate files variables
+# ====================================================================================================
+
+local:
+  certs:
+    ca: "certs/ca.crt"
+    ssl: "certs/openssl.cnf"
+  db:
+    createSecret: false
+    userName: postgres
+    password: postgres
+    certs:
+      ca: certs/ca.pem
+      key: certs/key.pem
+      cert: certs/cert.pem
 
 env:
-  port: 8080
+  port: 80
   targetPort: 8080
-  protocol: TCP
-  logLevel: info
+  protocol: "TCP"
+  openApiFilPath: "./openapi3.yaml"
+  logLevel: "warn"
   logPrettyPrintEnabled: false
   responseCompressionEnabled: true
-  requestPayloadLimit: 1mb
+  requestPayloadLimit: "10mb"
   tracing:
     enabled: false
-    url: http://localhost:55681/v1/trace
+    url: "http://localhost:55681/v1/trace"
   metrics:
     enabled: false
-    url: http://localhost:55681/v1/metrics
-
+    url: "http://localhost:55681/v1/metrics"
+  db:
+    nameOverride: ""
+    schema: "public"
+    logging: false
+    rejectUnauthorized: true
+  
 resources:
   enabled: true
   value:
     limits:
-      cpu: 100m
-      memory: 128Mi
+      cpu: "100m"
+      memory: "128Mi"
     requests:
-      cpu: 100m
-      memory: 128Mi
+      cpu: "100m"
+      memory: "128Mi"
 
 route:
-  enabled: true
+  enabled: false
   path: /
   timeout:
     enabled: false # defaults to 30s by openshift
@@ -58,8 +97,9 @@ route:
 
 ingress:
   enabled: false
+  type: 'nginx-org' # supported values: 'nginx-org' | 'nginx-kubernetes'
   path: /
-  host: 'localhost'
+  host: "localhost"
   cors:
     enabled: true
     origin: '*'

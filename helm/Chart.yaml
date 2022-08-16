@@ -1,6 +1,6 @@
 apiVersion: v2
-name: ts-server-boilerplate
-description: A Helm chart for ts-server-boilerplate service
+name: job-manager
+description: A Helm chart for job-manager service
 type: application
-version: 1.0.0
-appVersion: 1.0.0
+version: 2.2.0
+appVersion: 2.2.0

@@ -4,7 +4,6 @@ import httpStatusCodes from 'http-status-codes';
 
 import { getApp } from '../../../src/app';
 import { SERVICES } from '../../../src/common/constants';
-import { IResourceNameModel } from '../../../src/resourceName/models/resourceNameManager';
 import { DocsRequestSender } from './helpers/docsRequestSender';
 
 describe('resourceName', function () {

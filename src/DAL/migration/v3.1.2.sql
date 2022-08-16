@@ -1,0 +1,7 @@
+SET search_path TO "JobManager", public; -- CHANGE SCHEMA NAME TO MATCH ENVIRONMENT
+
+ALTER TABLE "Job"
+  ALTER COLUMN reason TYPE TEXT;
+
+ALTER TABLE "Task"
+  ALTER COLUMN reason TYPE TEXT;

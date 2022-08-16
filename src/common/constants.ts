@@ -13,4 +13,24 @@ export const SERVICES: Record<string, symbol> = {
   TRACER: Symbol('Tracer'),
   METER: Symbol('Meter'),
 };
+export enum Status {
+  PENDING = 'Pending',
+  PROGRESS = 'In-Progress',
+  COMPLETED = 'Completed',
+  FAILED = 'Failed',
+}
+export enum SearchOrder {
+  ASC = 'ASC',
+  DESC = 'DESC',
+}
+export enum ResponseCodes {
+  JOB_UPDATED = 'JOB_UPDATED_SUCCESSFULLY',
+  JOB_DELETED = 'JOB_DELETED_SUCCESSFULLY',
+  JOB_RESET = 'JOB_RESET_SUCCESSFULLY',
+  JOB_ABORTED = 'JOB_ABORTED_SUCCESSFULLY',
+  TASK_UPDATED = 'TASK_UPDATED_SUCCESSFULLY',
+  TASK_DELETED = 'TASK_DELETED_SUCCESSFULLY',
+  UPDATE_EXPIRED_STATUS = 'UPDATE_EXPIRED_STATUS_SUCCESSFULLY',
+}
+
 /* eslint-enable @typescript-eslint/naming-convention */
