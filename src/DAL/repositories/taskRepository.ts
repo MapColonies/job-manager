@@ -67,7 +67,7 @@ export class TaskRepository extends GeneralRepository<TaskEntity> {
           } else {
             const error = err as Error;
             const message = 'failed create task';
-            this.appLogger.warn({ jobId: request.jobId, err: error, msg: message });
+            this.appLogger.error({ jobId: request.jobId, taskType: request.type, err: error, msg: message });
             throw err;
           }
         }
@@ -96,7 +96,7 @@ export class TaskRepository extends GeneralRepository<TaskEntity> {
     this.appLogger.info({ jobId: req.jobId, taskId: req.taskId, msg: 'Start task update successfully' });
     if (!(await this.exists(req))) {
       const message = 'task for update not found with provided jobId and taskId';
-      this.appLogger.warn({ jobId: req.jobId, taskId: req.taskId, msg: message });
+      this.appLogger.error({ jobId: req.jobId, taskId: req.taskId, msg: message });
       throw new NotFoundError(message);
     }
     const entity = this.taskConvertor.updateModelToEntity(req);
@@ -107,7 +107,7 @@ export class TaskRepository extends GeneralRepository<TaskEntity> {
   public async deleteTask(taskIdentifier: ISpecificTaskParams): Promise<void> {
     if (!(await this.exists(taskIdentifier))) {
       const message = 'provided task not found for delete';
-      this.appLogger.warn({ id: taskIdentifier.taskId, jobId: taskIdentifier.jobId, msg: message });
+      this.appLogger.error({ id: taskIdentifier.taskId, jobId: taskIdentifier.jobId, msg: message });
       throw new NotFoundError(message);
     }
     await this.delete({ id: taskIdentifier.taskId, jobId: taskIdentifier.jobId });

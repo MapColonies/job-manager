@@ -78,8 +78,8 @@ export class JobRepository extends GeneralRepository<JobEntity> {
       const error = err as Error & { code: string };
       if (error.code === pgExclusionViolationErrorCode) {
         if (error.message.includes('UQ_uniqueness_on_active_tasks')) {
-          const message = `failed to create job because another active job exists for provided resource, version` + ` and identifiers.`;
-          this.appLogger.warn({
+          const message = 'failed to create job because another active job exists for provided resource, version and identifiers.';
+          this.appLogger.error({
             resourceId: req.resourceId,
             version: req.version,
             type: req.type,
@@ -89,15 +89,15 @@ export class JobRepository extends GeneralRepository<JobEntity> {
           throw new ConflictError(message);
         }
         if (error.message.includes('UQ_uniqness_on_job_and_type')) {
-          const message = `failed to create job, for provided resource:, version` + `and identifiers, because it contains duplicate tasks.`;
-          this.appLogger.warn({
+          const message = 'failed to create job, for provided resource:, version and identifiers, because it contains duplicate tasks.';
+          this.appLogger.error({
             resourceId: req.resourceId,
             version: req.version,
             type: req.type,
             identifiers: req.additionalIdentifiers as string,
             msg: message,
           });
-          throw new DBConstraintError(`request contains duplicate tasks.`);
+          throw new DBConstraintError('request contains duplicate tasks.');
         }
       }
       throw err;
@@ -118,8 +118,8 @@ export class JobRepository extends GeneralRepository<JobEntity> {
   public async updateJob(req: IUpdateJobRequest): Promise<void> {
     this.appLogger.info({ jobId: req.jobId, msg: 'start job update' });
     if (!(await this.exists(req.jobId))) {
-      const message = `job was not found for provided update request`;
-      this.appLogger.warn({ jobId: req.jobId, msg: message });
+      const message = 'job was not found for provided update request';
+      this.appLogger.error({ jobId: req.jobId, msg: message });
       throw new NotFoundError(message);
     }
     const entity = this.jobConvertor.updateModelToEntity(req);
@@ -135,7 +135,7 @@ export class JobRepository extends GeneralRepository<JobEntity> {
   public async deleteJob(id: string): Promise<void> {
     if (!(await this.exists(id))) {
       const message = 'job id was not found for delete request';
-      this.appLogger.warn({ id: id, msg: message });
+      this.appLogger.error({ id: id, msg: message });
       throw new NotFoundError(message);
     }
     try {
@@ -145,10 +145,10 @@ export class JobRepository extends GeneralRepository<JobEntity> {
       const pgForeignKeyConstraintViolationErrorCode = '23503';
       const error = err as Error & { code: string };
       if (error.code === pgForeignKeyConstraintViolationErrorCode) {
-        this.appLogger.warn({ jobId: id, errorMessage: error.message, errorCode: error.code, msg: `failed job deletion because it have tasks` });
+        this.appLogger.error({ jobId: id, errorMessage: error.message, errorCode: error.code, msg: 'failed job deletion because it have tasks' });
         throw new DBConstraintError(`job ${id} have tasks`);
       } else {
-        this.appLogger.warn({ jobId: id, errorMessage: error.message, errorCode: error.code, msg: `failed job deletion` });
+        this.appLogger.error({ jobId: id, errorMessage: error.message, errorCode: error.code, msg: 'failed job deletion' });
         throw err;
       }
     }
