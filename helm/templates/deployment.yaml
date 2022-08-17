@@ -48,7 +48,7 @@ spec:
     spec:
       {{- if $cloudProviderImagePullSecretName }}
       imagePullSecrets:
-          - name: {{ $cloudProviderImagePullSecretName | quote }}
+        - name: {{ $cloudProviderImagePullSecretName | quote }}
       {{- end }}
       containers:
         - name: {{ $releaseName }}-{{ $chartName }}-deployment

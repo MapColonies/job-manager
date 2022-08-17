@@ -1,5 +1,6 @@
 import { Logger } from '@map-colonies/js-logger';
 import { Meter } from '@map-colonies/telemetry';
+import { NotFoundError} from '@map-colonies/error-types';
 import { BoundCounter } from '@opentelemetry/api-metrics';
 import { RequestHandler } from 'express';
 import { ErrorResponse } from '@map-colonies/error-express-handler';
@@ -9,7 +10,6 @@ import { ResponseCodes, SERVICES } from '../../common/constants';
 import { IFindInactiveTasksRequest, IGetTaskResponse, IRetrieveAndStartRequest } from '../../common/dataModels/tasks';
 import { DefaultResponse } from '../../common/interfaces';
 import { TaskManagementManager } from '../models/taskManagementManger';
-import { EntityNotFound } from '../../common/errors';
 import { IJobsParams } from '../../common/dataModels/jobs';
 
 type RetrieveAndStartHandler = RequestHandler<IRetrieveAndStartRequest, IGetTaskResponse | ErrorResponse>;
@@ -35,7 +35,7 @@ export class TaskManagementController {
       const task = await this.manager.retrieveAndStart(req.params);
       return res.status(httpStatus.OK).json(task);
     } catch (err) {
-      if (err instanceof EntityNotFound) {
+      if (err instanceof NotFoundError) {
         res.status(httpStatus.NOT_FOUND).json({ message: err.message });
         return;
       }

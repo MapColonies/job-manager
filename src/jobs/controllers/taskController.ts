@@ -1,6 +1,7 @@
 import { ErrorResponse } from '@map-colonies/error-express-handler';
 import { Logger } from '@map-colonies/js-logger';
 import { Meter } from '@map-colonies/telemetry';
+import { NotFoundError} from '@map-colonies/error-types';
 import { BoundCounter } from '@opentelemetry/api-metrics';
 import { RequestHandler } from 'express';
 import httpStatus from 'http-status-codes';
@@ -21,7 +22,6 @@ import {
 } from '../../common/dataModels/tasks';
 import { DefaultResponse } from '../../common/interfaces';
 import { TaskManager } from '../models/taskManager';
-import { EntityNotFound } from '../../common/errors';
 
 type CreateResourceHandler = RequestHandler<IAllTasksParams, CreateTasksResponse, CreateTasksBody>;
 type GetResourcesHandler = RequestHandler<IAllTasksParams, GetTasksResponse>;
@@ -64,7 +64,7 @@ export class TaskController {
       const tasksRes = await this.manager.findTasks(req.body);
       return res.status(httpStatus.OK).json(tasksRes);
     } catch (err) {
-      if (err instanceof EntityNotFound) {
+      if (err instanceof NotFoundError) {
         this.logger.warn(`findTasks found nothing on ${JSON.stringify(req.body)}`);
         return res.status(httpStatus.NOT_FOUND).json({ message: err.message });
       }

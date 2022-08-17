@@ -1,4 +1,5 @@
 import { Logger } from '@map-colonies/js-logger';
+import { NotFoundError} from '@map-colonies/error-types';
 import { inject, injectable } from 'tsyringe';
 import { SERVICES } from '../../common/constants';
 
@@ -16,7 +17,6 @@ import {
   IResetJobRequest,
 } from '../../common/dataModels/jobs';
 import { JobRepository } from '../../DAL/repositories/jobRepository';
-import { EntityNotFound } from '../../common/errors';
 import { TransactionActions } from '../../DAL/repositories/transactionActions';
 
 @injectable()
@@ -45,7 +45,7 @@ export class JobManager {
     const repo = await this.getRepository();
     const res = await repo.getJob(req.jobId, query.shouldReturnTasks);
     if (res === undefined) {
-      throw new EntityNotFound('Job not found');
+      throw new NotFoundError('Job not found');
     }
     return res;
   }

@@ -1,6 +1,7 @@
 import { EntityRepository, FindManyOptions, LessThan, Brackets, Between, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 import { container } from 'tsyringe';
 import { Logger } from '@map-colonies/js-logger';
+import {UnprocessableEntityError, ConflictError, NotFoundError} from '@map-colonies/error-types';
 import { SERVICES } from '../../common/constants';
 import { JobEntity } from '../entity/job';
 import {
@@ -12,7 +13,6 @@ import {
   IUpdateJobRequest,
 } from '../../common/dataModels/jobs';
 import { JobModelConvertor } from '../convertors/jobModelConverter';
-import { DBConstraintError, EntityAlreadyExists, EntityNotFound } from '../../common/errors';
 import { OperationStatus } from '../../common/dataModels/enums';
 import { GeneralRepository } from './generalRepository';
 
@@ -65,7 +65,9 @@ export class JobRepository extends GeneralRepository<JobEntity> {
   public async createJob(req: ICreateJobBody): Promise<ICreateJobResponse> {
     try {
       let entity = this.jobConvertor.createModelToEntity(req);
+      this.appLogger.debug(req, 'Create-job parameters');
       entity = await this.save(entity);
+      this.appLogger.info({resourceId: entity.resourceId, version: entity.version, type: entity.type ,msg:'Job was created successfully'});  
       return {
         id: entity.id,
         taskIds: entity.tasks ? entity.tasks.map((task) => task.id) : [],
@@ -77,16 +79,16 @@ export class JobRepository extends GeneralRepository<JobEntity> {
         if (error.message.includes('UQ_uniqueness_on_active_tasks')) {
           const message =
             `failed to create ${req.type} job  because another active job exists for resource: ${req.resourceId} ` +
-            `with version: ${req.version} and identefiers:"${req.additionalIdentifiers as string}" .`;
+            `with version: ${req.version} and identifiers:"${req.additionalIdentifiers as string}" .`;
           this.appLogger.warn(message);
-          throw new EntityAlreadyExists(message);
+          throw new ConflictError(message);
         }
         if (error.message.includes('UQ_uniqness_on_job_and_type')) {
           const message =
             `failed to create ${req.type} job, for resource: ${req.resourceId} with version: ${req.version} ` +
-            `and identefiers:"${req.additionalIdentifiers as string}", because it contains duplicate tasks.`;
+            `and identifiers:"${req.additionalIdentifiers as string}", because it contains duplicate tasks.`;
           this.appLogger.warn(message);
-          throw new DBConstraintError(`request contains duplicate tasks.`);
+          throw new UnprocessableEntityError(`request contains duplicate tasks.`);
         }
       }
       throw err;
@@ -106,8 +108,9 @@ export class JobRepository extends GeneralRepository<JobEntity> {
 
   public async updateJob(req: IUpdateJobRequest): Promise<void> {
     if (!(await this.exists(req.jobId))) {
-      throw new EntityNotFound(` job ${req.jobId} was not found for update request`);
+      throw new NotFoundError(` job ${req.jobId} was not found for update request`);
     }
+    this.appLogger.debug(req, 'Update-job parameters')
     const entity = this.jobConvertor.updateModelToEntity(req);
     await this.save(entity);
   }
@@ -119,7 +122,7 @@ export class JobRepository extends GeneralRepository<JobEntity> {
 
   public async deleteJob(id: string): Promise<void> {
     if (!(await this.exists(id))) {
-      throw new EntityNotFound(` job ${id} was not found for delete request`);
+      throw new NotFoundError(` job ${id} was not found for delete request`);
     }
     try {
       await this.delete(id);
@@ -128,7 +131,7 @@ export class JobRepository extends GeneralRepository<JobEntity> {
       const error = err as Error & { code: string };
       if (error.code === pgForeignKeyConstraintViolationErrorCode) {
         this.appLogger.info(`failed to delete job ${id} because it have tasks`);
-        throw new DBConstraintError(`job ${id} have tasks`);
+        throw new UnprocessableEntityError(`job ${id} have tasks`);
       } else {
         throw err;
       }

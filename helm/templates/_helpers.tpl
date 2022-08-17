@@ -89,6 +89,7 @@ Returns the cloud provider docker registry url from global if exists or from the
 {{- end -}}
 {{- end -}}
 
+{{/*
 Returns the cloud provider image pull secret name from global if exists or from the chart's values
 */}}
 {{- define "job-manager.cloudProviderImagePullSecretName" -}}

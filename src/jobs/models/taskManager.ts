@@ -1,9 +1,9 @@
 import { Logger } from '@map-colonies/js-logger';
+import { NotFoundError} from '@map-colonies/error-types';
 import { inject, injectable } from 'tsyringe';
 import { SERVICES } from '../../common/constants';
 
 import { ConnectionManager } from '../../DAL/connectionManager';
-import { EntityNotFound } from '../../common/errors';
 import { TaskRepository } from '../../DAL/repositories/taskRepository';
 import {
   CreateTasksRequest,
@@ -47,7 +47,7 @@ export class TaskManager {
     const repo = await this.getRepository();
     const res = await repo.getTask(req);
     if (res === undefined) {
-      throw new EntityNotFound('Task not found');
+      throw new NotFoundError('Task not found');
     }
     return res;
   }
@@ -56,7 +56,7 @@ export class TaskManager {
     const repo = await this.getRepository();
     const res = await repo.findTasks(req);
     if (res.length === 0) {
-      throw new EntityNotFound('Tasks not found');
+      throw new NotFoundError('Tasks not found');
     }
     return res;
   }

@@ -1,6 +1,6 @@
 import { singleton } from 'tsyringe';
 import { ObjectType, QueryRunner } from 'typeorm';
-import { BadRequestError } from '../../common/errors';
+import { BadRequestError } from '@map-colonies/error-types';
 import { OperationStatus } from '../../common/dataModels/enums';
 import { ConnectionManager } from '../connectionManager';
 import { JobRepository } from './jobRepository';

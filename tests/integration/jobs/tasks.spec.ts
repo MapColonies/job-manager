@@ -1,11 +1,11 @@
 import httpStatusCodes from 'http-status-codes';
+import { NotFoundError} from '@map-colonies/error-types';
 import { getContainerConfig, resetContainer } from '../testContainerConfig';
 import { TaskRepository } from '../../../src/DAL/repositories/taskRepository';
 import { TaskEntity } from '../../../src/DAL/entity/task';
 import { registerRepository, initTypeOrmMocks, RepositoryMocks } from '../../mocks/DBMock';
 import { JobRepository } from '../../../src/DAL/repositories/jobRepository';
 import { ICreateTaskBody, IGetTaskResponse, IGetTasksStatus } from '../../../src/common/dataModels/tasks';
-import { EntityNotFound } from '../../../src/common/errors';
 import { IFindTasksRequest } from '../../../src/common/dataModels/tasks';
 import { JobEntity } from '../../../src/DAL/entity/job';
 
@@ -469,7 +469,7 @@ describe('tasks', function () {
       const jobRepositoryMocks = registerRepository(JobRepository, new JobRepository());
       const jobFindOneMock = jobRepositoryMocks.findOneMock;
       jobFindOneMock.mockImplementation(() => {
-        throw new EntityNotFound('not found');
+        throw new NotFoundError('not found');
       });
 
       const response = await requestSender.getTasksStatus(jobId);

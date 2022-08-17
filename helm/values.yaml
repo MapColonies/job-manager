@@ -61,7 +61,6 @@ env:
   port: 80
   targetPort: 8080
   protocol: "TCP"
-  openApiFilPath: "./openapi3.yaml"
   logLevel: "warn"
   logPrettyPrintEnabled: false
   responseCompressionEnabled: true

@@ -1,8 +1,8 @@
 import { EntityRepository, In, LessThan, Brackets, UpdateResult } from 'typeorm';
 import { container } from 'tsyringe';
 import { Logger } from '@map-colonies/js-logger';
+import { ConflictError, NotFoundError} from '@map-colonies/error-types';
 import { SERVICES } from '../../common/constants';
-import { EntityAlreadyExists, EntityNotFound } from '../../common/errors';
 import { TaskEntity } from '../entity/task';
 import { TaskModelConvertor } from '../convertors/taskModelConvertor';
 import {
@@ -51,6 +51,7 @@ export class TaskRepository extends GeneralRepository<TaskEntity> {
   }
 
   public async createTask(req: CreateTasksRequest): Promise<CreateTasksResponse> {
+    this.appLogger.debug(req, 'Create-Task request parameters')
     if (Array.isArray(req)) {
       const ids: string[] = [];
       const errors: string[] = [];
@@ -59,7 +60,7 @@ export class TaskRepository extends GeneralRepository<TaskEntity> {
           const res = await this.createSingleTask(request);
           ids.push(res.id);
         } catch (err) {
-          if (err instanceof EntityAlreadyExists) {
+          if (err instanceof ConflictError) {
             const error = err as Error;
             errors.push(error.message);
           } else {
@@ -85,8 +86,9 @@ export class TaskRepository extends GeneralRepository<TaskEntity> {
   }
 
   public async updateTask(req: IUpdateTaskRequest): Promise<void> {
+    this.appLogger.debug(req, 'Update-Task request parameters')
     if (!(await this.exists(req))) {
-      throw new EntityNotFound(`task not found for update: job id: ${req.jobId} task id: ${req.taskId}`);
+      throw new NotFoundError(`task not found for update: job id: ${req.jobId} task id: ${req.taskId}`);
     }
     const entity = this.taskConvertor.updateModelToEntity(req);
     await this.save(entity);
@@ -94,7 +96,7 @@ export class TaskRepository extends GeneralRepository<TaskEntity> {
 
   public async deleteTask(taskIdentifier: ISpecificTaskParams): Promise<void> {
     if (!(await this.exists(taskIdentifier))) {
-      throw new EntityNotFound(`task not found for delete: job id: ${taskIdentifier.jobId} task id: ${taskIdentifier.taskId}`);
+      throw new NotFoundError(`task not found for delete: job id: ${taskIdentifier.jobId} task id: ${taskIdentifier.taskId}`);
     }
     await this.delete({ id: taskIdentifier.taskId, jobId: taskIdentifier.jobId });
   }
@@ -247,12 +249,12 @@ export class TaskRepository extends GeneralRepository<TaskEntity> {
       if (error.code === pgForeignKeyViolationErrorCode && error.message.includes('FK_task_job_id')) {
         const message = `failed to create task for job: ${req.jobId}, job id was not found.`;
         this.appLogger.error(message);
-        throw new EntityNotFound(message);
+        throw new NotFoundError(message);
       }
       if (error.code === pgExclusionViolationErrorCode && error.message.includes('UQ_uniqueness_on_job_and_type')) {
         const message = `failed to create ${req.type as string} task for job ${req.jobId} because it already exists.`;
         this.appLogger.warn(message);
-        throw new EntityAlreadyExists(message);
+        throw new ConflictError(message);
       }
       throw err;
     }

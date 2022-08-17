@@ -1,8 +1,8 @@
 import { Logger } from '@map-colonies/js-logger';
+import { NotFoundError} from '@map-colonies/error-types';
 import { inject, injectable } from 'tsyringe';
 import { SERVICES } from '../../common/constants';
 import { ConnectionManager } from '../../DAL/connectionManager';
-import { EntityNotFound } from '../../common/errors';
 import { TaskRepository } from '../../DAL/repositories/taskRepository';
 import { IFindInactiveTasksRequest, IGetTaskResponse, IRetrieveAndStartRequest } from '../../common/dataModels/tasks';
 import { JobRepository } from '../../DAL/repositories/jobRepository';
@@ -22,7 +22,7 @@ export class TaskManagementManager {
     const res = await repo.retrieveAndUpdate(req.jobType, req.taskType);
     if (res === undefined) {
       this.logger.debug(`Pending task was not found for job type: ${req.jobType}, task type: ${req.taskType}`);
-      throw new EntityNotFound('Pending task was not found');
+      throw new NotFoundError('Pending task was not found');
     }
     this.logger.info(`started task: ${res.id} of job: ${res.jobId}`);
     return res;

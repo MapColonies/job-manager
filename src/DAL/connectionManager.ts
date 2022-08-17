@@ -1,11 +1,10 @@
 import { readFileSync } from 'fs';
-import { createConnection, Connection, ObjectType, QueryRunner } from 'typeorm';
+import { createConnection, Connection, ObjectType, QueryRunner, ConnectionOptions} from 'typeorm';
 import { inject, singleton } from 'tsyringe';
-import { ConnectionOptions } from 'typeorm';
 import { Logger } from '@map-colonies/js-logger';
+import { InternalServerError } from '@map-colonies/error-types';
 import { SERVICES } from '../common/constants';
 import { IConfig, IDbConfig } from '../common/interfaces';
-import { DBConnectionError } from '../common/errors';
 import { JobRepository } from './repositories/jobRepository';
 import { TaskRepository } from './repositories/taskRepository';
 
@@ -27,7 +26,7 @@ export class ConnectionManager {
     } catch (err) {
       const errString = JSON.stringify(err, Object.getOwnPropertyNames(err));
       this.logger.error(`failed to connect to database: ${errString}`);
-      throw new DBConnectionError();
+      throw new InternalServerError(`failed to connect to database: ${errString}`);
     }
   }
 
@@ -64,7 +63,7 @@ export class ConnectionManager {
     if (!this.isConnected()) {
       const msg = 'failed to send request to database: no open connection';
       this.logger.error(msg);
-      throw new DBConnectionError();
+      throw new InternalServerError(msg);
     } else {
       const connection = this.connection as Connection;
       return connection.getCustomRepository(repository);

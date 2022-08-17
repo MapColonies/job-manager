@@ -13,12 +13,7 @@ export const SERVICES: Record<string, symbol> = {
   TRACER: Symbol('Tracer'),
   METER: Symbol('Meter'),
 };
-export enum Status {
-  PENDING = 'Pending',
-  PROGRESS = 'In-Progress',
-  COMPLETED = 'Completed',
-  FAILED = 'Failed',
-}
+
 export enum SearchOrder {
   ASC = 'ASC',
   DESC = 'DESC',
