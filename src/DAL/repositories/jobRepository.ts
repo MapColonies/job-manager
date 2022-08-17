@@ -1,7 +1,8 @@
 import { EntityRepository, FindManyOptions, LessThan, Brackets, Between, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 import { container } from 'tsyringe';
 import { Logger } from '@map-colonies/js-logger';
-import { UnprocessableEntityError, ConflictError, NotFoundError } from '@map-colonies/error-types';
+import { ConflictError, NotFoundError } from '@map-colonies/error-types';
+import { DBConstraintError } from '../../common/errors';
 import { SERVICES } from '../../common/constants';
 import { JobEntity } from '../entity/job';
 import {
@@ -77,7 +78,7 @@ export class JobRepository extends GeneralRepository<JobEntity> {
       const error = err as Error & { code: string };
       if (error.code === pgExclusionViolationErrorCode) {
         if (error.message.includes('UQ_uniqueness_on_active_tasks')) {
-          const message = `failed to create job because another active job exists for provided resource, version` + `and identifiers.`;
+          const message = `failed to create job because another active job exists for provided resource, version` + ` and identifiers.`;
           this.appLogger.warn({
             resourceId: req.resourceId,
             version: req.version,
@@ -96,7 +97,7 @@ export class JobRepository extends GeneralRepository<JobEntity> {
             identifiers: req.additionalIdentifiers as string,
             msg: message,
           });
-          throw new UnprocessableEntityError(`request contains duplicate tasks.`);
+          throw new DBConstraintError(`request contains duplicate tasks.`);
         }
       }
       throw err;
@@ -145,7 +146,7 @@ export class JobRepository extends GeneralRepository<JobEntity> {
       const error = err as Error & { code: string };
       if (error.code === pgForeignKeyConstraintViolationErrorCode) {
         this.appLogger.warn({ jobId: id, errorMessage: error.message, errorCode: error.code, msg: `failed job deletion because it have tasks` });
-        throw new UnprocessableEntityError(`job ${id} have tasks`);
+        throw new DBConstraintError(`job ${id} have tasks`);
       } else {
         this.appLogger.warn({ jobId: id, errorMessage: error.message, errorCode: error.code, msg: `failed job deletion` });
         throw err;

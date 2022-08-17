@@ -19,7 +19,7 @@ spec:
   ports:
     - port: {{ .Values.env.port }}
       targetPort: {{ .Values.env.targetPort }}
-      protocol: {{ .Values.env.protocol }}
+      protocol: "TCP"
       name: http
       {{- if eq $cloudProviderFlavor "minikube" }}
       nodePort: {{ .Values.nodePort }}

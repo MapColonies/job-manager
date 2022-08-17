@@ -60,7 +60,6 @@ local:
 env:
   port: 80
   targetPort: 8080
-  protocol: "TCP"
   logLevel: "warn"
   logPrettyPrintEnabled: false
   responseCompressionEnabled: true
