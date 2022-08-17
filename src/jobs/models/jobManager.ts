@@ -57,7 +57,7 @@ export class JobManager {
   }
 
   public async deleteJob(req: IJobsParams): Promise<void> {
-    this.logger.info({jobId:req.jobId, msg: 'deleting job'});
+    this.logger.info({ jobId: req.jobId, msg: 'deleting job' });
     const repo = await this.getRepository();
     const res = await repo.deleteJob(req.jobId);
     return res;

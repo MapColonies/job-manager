@@ -111,7 +111,7 @@ export class TaskRepository extends GeneralRepository<TaskEntity> {
       throw new NotFoundError(message);
     }
     await this.delete({ id: taskIdentifier.taskId, jobId: taskIdentifier.jobId });
-    this.appLogger.info({ id: taskIdentifier.taskId, jobId: taskIdentifier.jobId , msg: 'Finish task deletion successfully' });
+    this.appLogger.info({ id: taskIdentifier.taskId, jobId: taskIdentifier.jobId, msg: 'Finish task deletion successfully' });
   }
 
   public async retrieveAndUpdate(jobType: string, taskType: string): Promise<IGetTaskResponse | undefined> {

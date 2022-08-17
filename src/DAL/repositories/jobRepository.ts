@@ -77,17 +77,25 @@ export class JobRepository extends GeneralRepository<JobEntity> {
       const error = err as Error & { code: string };
       if (error.code === pgExclusionViolationErrorCode) {
         if (error.message.includes('UQ_uniqueness_on_active_tasks')) {
-          const message =
-            `failed to create job because another active job exists for provided resource, version` +
-            `and identifiers.`;
-          this.appLogger.warn({ resourceId: req.resourceId, version: req.version, type: req.type, identifiers: req.additionalIdentifiers as string, msg: message });
+          const message = `failed to create job because another active job exists for provided resource, version` + `and identifiers.`;
+          this.appLogger.warn({
+            resourceId: req.resourceId,
+            version: req.version,
+            type: req.type,
+            identifiers: req.additionalIdentifiers as string,
+            msg: message,
+          });
           throw new ConflictError(message);
         }
         if (error.message.includes('UQ_uniqness_on_job_and_type')) {
-          const message =
-            `failed to create job, for provided resource:, version` +
-            `and identifiers, because it contains duplicate tasks.`;
-          this.appLogger.warn({resourceId: req.resourceId, version: req.version, type: req.type, identifiers: req.additionalIdentifiers as string, msg: message});
+          const message = `failed to create job, for provided resource:, version` + `and identifiers, because it contains duplicate tasks.`;
+          this.appLogger.warn({
+            resourceId: req.resourceId,
+            version: req.version,
+            type: req.type,
+            identifiers: req.additionalIdentifiers as string,
+            msg: message,
+          });
           throw new UnprocessableEntityError(`request contains duplicate tasks.`);
         }
       }
@@ -109,13 +117,13 @@ export class JobRepository extends GeneralRepository<JobEntity> {
   public async updateJob(req: IUpdateJobRequest): Promise<void> {
     this.appLogger.info({ jobId: req.jobId, msg: 'start job update' });
     if (!(await this.exists(req.jobId))) {
-      const message =`job was not found for provided update request`;
-      this.appLogger.warn({jobId: req.jobId, msg: message});
+      const message = `job was not found for provided update request`;
+      this.appLogger.warn({ jobId: req.jobId, msg: message });
       throw new NotFoundError(message);
     }
     const entity = this.jobConvertor.updateModelToEntity(req);
     await this.save(entity);
-    this.appLogger.info({jobId: req.jobId, msg: 'Job was updated successfully' });
+    this.appLogger.info({ jobId: req.jobId, msg: 'Job was updated successfully' });
   }
 
   public async exists(id: string): Promise<boolean> {
@@ -131,15 +139,15 @@ export class JobRepository extends GeneralRepository<JobEntity> {
     }
     try {
       await this.delete(id);
-      this.appLogger.info({ id: id, msg: 'Finish job deletion successfully'});
+      this.appLogger.info({ id: id, msg: 'Finish job deletion successfully' });
     } catch (err) {
       const pgForeignKeyConstraintViolationErrorCode = '23503';
       const error = err as Error & { code: string };
       if (error.code === pgForeignKeyConstraintViolationErrorCode) {
-        this.appLogger.warn({jobId: id, errorMessage: error.message, errorCode : error.code, msg: `failed job deletion because it have tasks`});
+        this.appLogger.warn({ jobId: id, errorMessage: error.message, errorCode: error.code, msg: `failed job deletion because it have tasks` });
         throw new UnprocessableEntityError(`job ${id} have tasks`);
       } else {
-        this.appLogger.warn({jobId: id, errorMessage: error.message, errorCode : error.code,msg : `failed job deletion`});
+        this.appLogger.warn({ jobId: id, errorMessage: error.message, errorCode: error.code, msg: `failed job deletion` });
         throw err;
       }
     }
