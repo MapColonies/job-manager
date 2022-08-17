@@ -1,4 +1,4 @@
--- v2.1.1 db creation script --
+-- full scheme db creation script --
 -- please note that the update date is updated by typeOrm and not by trigger --
 SET search_path TO public;
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
