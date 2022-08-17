@@ -35,8 +35,8 @@ export class JobManager {
   }
 
   public async createJob(req: ICreateJobBody): Promise<ICreateJobResponse> {
+    this.logger.debug(req, 'Create-job parameters');
     const repo = await this.getRepository();
-    this.logger.info('creating job');
     const res = await repo.createJob(req);
     return res;
   }
@@ -51,14 +51,14 @@ export class JobManager {
   }
 
   public async updateJob(req: IUpdateJobRequest): Promise<void> {
+    this.logger.debug(req, 'Update-job parameters');
     const repo = await this.getRepository();
-    this.logger.info(`updating job ${req.jobId}`);
     await repo.updateJob(req);
   }
 
   public async deleteJob(req: IJobsParams): Promise<void> {
+    this.logger.info({jobId:req.jobId, msg: 'deleting job'});
     const repo = await this.getRepository();
-    this.logger.info(`deleting job ${req.jobId}`);
     const res = await repo.deleteJob(req.jobId);
     return res;
   }

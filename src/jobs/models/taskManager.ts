@@ -36,9 +36,8 @@ export class TaskManager {
   }
 
   public async createTask(req: CreateTasksRequest): Promise<CreateTasksResponse> {
+    this.logger.debug(req, 'Create-task request parameters');
     const repo = await this.getRepository();
-    const jobId = Array.isArray(req) ? req[0].jobId : req.jobId;
-    this.logger.info(`creating task(s) for job ${jobId}`);
     const res = await repo.createTask(req);
     return res;
   }
@@ -62,8 +61,8 @@ export class TaskManager {
   }
 
   public async updateTask(req: IUpdateTaskRequest): Promise<void> {
+    this.logger.debug(req, 'Update-Task request parameters');
     const repo = await this.getRepository();
-    this.logger.info(`updating task ${req.taskId} from job ${req.jobId}`);
     await repo.updateTask(req);
   }
 
