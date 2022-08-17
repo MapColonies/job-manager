@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs';
-import { createConnection, Connection, ObjectType, QueryRunner, ConnectionOptions} from 'typeorm';
+import { createConnection, Connection, ObjectType, QueryRunner, ConnectionOptions } from 'typeorm';
 import { inject, singleton } from 'tsyringe';
 import { Logger } from '@map-colonies/js-logger';
 import { InternalServerError } from '@map-colonies/error-types';

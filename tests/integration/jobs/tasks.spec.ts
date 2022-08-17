@@ -1,5 +1,5 @@
 import httpStatusCodes from 'http-status-codes';
-import { NotFoundError} from '@map-colonies/error-types';
+import { NotFoundError } from '@map-colonies/error-types';
 import { getContainerConfig, resetContainer } from '../testContainerConfig';
 import { TaskRepository } from '../../../src/DAL/repositories/taskRepository';
 import { TaskEntity } from '../../../src/DAL/entity/task';

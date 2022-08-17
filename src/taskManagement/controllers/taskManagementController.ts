@@ -1,6 +1,6 @@
 import { Logger } from '@map-colonies/js-logger';
 import { Meter } from '@map-colonies/telemetry';
-import { NotFoundError} from '@map-colonies/error-types';
+import { NotFoundError } from '@map-colonies/error-types';
 import { BoundCounter } from '@opentelemetry/api-metrics';
 import { RequestHandler } from 'express';
 import { ErrorResponse } from '@map-colonies/error-express-handler';

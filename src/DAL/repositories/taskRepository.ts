@@ -1,7 +1,7 @@
 import { EntityRepository, In, LessThan, Brackets, UpdateResult } from 'typeorm';
 import { container } from 'tsyringe';
 import { Logger } from '@map-colonies/js-logger';
-import { ConflictError, NotFoundError} from '@map-colonies/error-types';
+import { ConflictError, NotFoundError } from '@map-colonies/error-types';
 import { SERVICES } from '../../common/constants';
 import { TaskEntity } from '../entity/task';
 import { TaskModelConvertor } from '../convertors/taskModelConvertor';
@@ -51,7 +51,7 @@ export class TaskRepository extends GeneralRepository<TaskEntity> {
   }
 
   public async createTask(req: CreateTasksRequest): Promise<CreateTasksResponse> {
-    this.appLogger.debug(req, 'Create-Task request parameters')
+    this.appLogger.debug(req, 'Create-Task request parameters');
     if (Array.isArray(req)) {
       const ids: string[] = [];
       const errors: string[] = [];
@@ -86,7 +86,7 @@ export class TaskRepository extends GeneralRepository<TaskEntity> {
   }
 
   public async updateTask(req: IUpdateTaskRequest): Promise<void> {
-    this.appLogger.debug(req, 'Update-Task request parameters')
+    this.appLogger.debug(req, 'Update-Task request parameters');
     if (!(await this.exists(req))) {
       throw new NotFoundError(`task not found for update: job id: ${req.jobId} task id: ${req.taskId}`);
     }

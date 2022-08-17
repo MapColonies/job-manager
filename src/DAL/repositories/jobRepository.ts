@@ -1,7 +1,7 @@
 import { EntityRepository, FindManyOptions, LessThan, Brackets, Between, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 import { container } from 'tsyringe';
 import { Logger } from '@map-colonies/js-logger';
-import {UnprocessableEntityError, ConflictError, NotFoundError} from '@map-colonies/error-types';
+import { UnprocessableEntityError, ConflictError, NotFoundError } from '@map-colonies/error-types';
 import { SERVICES } from '../../common/constants';
 import { JobEntity } from '../entity/job';
 import {
@@ -67,7 +67,7 @@ export class JobRepository extends GeneralRepository<JobEntity> {
       let entity = this.jobConvertor.createModelToEntity(req);
       this.appLogger.debug(req, 'Create-job parameters');
       entity = await this.save(entity);
-      this.appLogger.info({resourceId: entity.resourceId, version: entity.version, type: entity.type ,msg:'Job was created successfully'});  
+      this.appLogger.info({ resourceId: entity.resourceId, version: entity.version, type: entity.type, msg: 'Job was created successfully' });
       return {
         id: entity.id,
         taskIds: entity.tasks ? entity.tasks.map((task) => task.id) : [],
@@ -110,7 +110,7 @@ export class JobRepository extends GeneralRepository<JobEntity> {
     if (!(await this.exists(req.jobId))) {
       throw new NotFoundError(` job ${req.jobId} was not found for update request`);
     }
-    this.appLogger.debug(req, 'Update-job parameters')
+    this.appLogger.debug(req, 'Update-job parameters');
     const entity = this.jobConvertor.updateModelToEntity(req);
     await this.save(entity);
   }
