@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: Job Service
   description: Job Service
-  version: 1.0.0
+  version: 1.0.1
 paths:
   /jobs:
     get:
@@ -21,7 +21,7 @@ paths:
       tags:
         - jobs
       responses:
-        200:
+        '200':
           description: Array of jobs
           content:
             application/json:
@@ -41,31 +41,32 @@ paths:
             schema:
               $ref: '#/components/schemas/createJobPayload'
       responses:
-        201:
+        '201':
           description: Job created successfully
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/createJobResponse'
-        400:
+        '400':
           description: Invalid request, could not create job
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorMessage'
-        409:
-          description: An ingestion process with the same resourceId/version is already in progress (unique violation).
+        '409':
+          description: >-
+            An ingestion process with the same resourceId/version is already in
+            progress (unique violation).
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorMessage'
-        422:
+        '422':
           description: request contains conflicting tasks
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorMessage'
-
   /jobs/{jobId}:
     parameters:
       - $ref: '#/components/parameters/jobId'
@@ -76,13 +77,13 @@ paths:
       tags:
         - jobs
       responses:
-        200:
+        '200':
           description: Job data
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/jobResponse'
-        404:
+        '404':
           description: Job not found
           content:
             application/json:
@@ -100,21 +101,21 @@ paths:
             schema:
               $ref: '#/components/schemas/updateJobPayload'
       responses:
-        200:
+        '200':
           description: Job updated successfully
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/defaultOkMessage'
               example:
-                code: 'JOB_UPDATED_SUCCESSFULLY'
-        400:
+                code: JOB_UPDATED_SUCCESSFULLY
+        '400':
           description: Invalid request, could not update job
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorMessage'
-        404:
+        '404':
           description: Job not found
           content:
             application/json:
@@ -124,21 +125,21 @@ paths:
       operationId: deleteJob
       summary: Delete a job
       responses:
-        200:
+        '200':
           description: Job deleted successfully
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/defaultOkMessage'
               example:
-                code: 'JOB_DELETED_SUCCESSFULLY'
-        404:
+                code: JOB_DELETED_SUCCESSFULLY
+        '404':
           description: Job not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorMessage'
-        422:
+        '422':
           description: Job have tasks
           content:
             application/json:
@@ -146,7 +147,6 @@ paths:
                 $ref: '#/components/schemas/errorMessage'
       tags:
         - jobs
-
   /jobs/{jobId}/resettable:
     parameters:
       - $ref: '#/components/parameters/jobId'
@@ -156,13 +156,12 @@ paths:
       tags:
         - jobs
       responses:
-        200:
+        '200':
           description: resettable status
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/jobResettableStatus'
-
   /jobs/{jobId}/reset:
     parameters:
       - $ref: '#/components/parameters/jobId'
@@ -178,27 +177,26 @@ paths:
             schema:
               $ref: '#/components/schemas/resetJobPayload'
       responses:
-        200:
+        '200':
           description: Job has been reset
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/defaultOkMessage'
               example:
-                code: 'JOB_RESET_SUCCESSFULLY'
-        400:
+                code: JOB_RESET_SUCCESSFULLY
+        '400':
           description: job is not resettable
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorMessage'
-        500:
+        '500':
           description: Internal Server Error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorMessage'
-
   /jobs/{jobId}/tasks:
     parameters:
       - $ref: '#/components/parameters/jobId'
@@ -208,13 +206,13 @@ paths:
         - tasks
       summary: Get all the tasks of a job
       responses:
-        200:
+        '200':
           description: Array of tasks
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/tasksResponse'
-        404:
+        '404':
           description: Job not found
           content:
             application/json:
@@ -236,7 +234,7 @@ paths:
                   items:
                     $ref: '#/components/schemas/createTaskPayload'
       responses:
-        201:
+        '201':
           description: Task created successfully
           content:
             application/json:
@@ -244,25 +242,26 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/createTaskResponse'
                   - $ref: '#/components/schemas/createMultipleTasksResponse'
-        400:
+        '400':
           description: Invalid task input
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorMessage'
-        404:
+        '404':
           description: No such job in the database
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorMessage'
-        409:
-          description: An ingestion process with the same resourceId/version is already in progress (unique violation).
+        '409':
+          description: >-
+            An ingestion process with the same resourceId/version is already in
+            progress (unique violation).
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorMessage'
-
   /jobs/{jobId}/tasks/{taskId}:
     parameters:
       - $ref: '#/components/parameters/jobId'
@@ -271,13 +270,13 @@ paths:
       operationId: getTask
       summary: Get task by task ID
       responses:
-        200:
+        '200':
           description: Requested task
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/taskResponse'
-        404:
+        '404':
           description: No such task in the database
           content:
             application/json:
@@ -295,21 +294,21 @@ paths:
             schema:
               $ref: '#/components/schemas/updateTaskPayload'
       responses:
-        200:
+        '200':
           description: Update task data
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/defaultOkMessage'
               example:
-                code: 'TASK_UPDATED_SUCCESSFULLY'
-        400:
+                code: TASK_UPDATED_SUCCESSFULLY
+        '400':
           description: Invalid request, could not update task
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorMessage'
-        404:
+        '404':
           description: Job/Task not found
           content:
             application/json:
@@ -321,15 +320,15 @@ paths:
       operationId: deleteTask
       summary: Delete an existing task
       responses:
-        200:
+        '200':
           description: task deleted successfully
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/defaultOkMessage'
               example:
-                code: 'TASK_DELETED_SUCCESSFULLY'
-        404:
+                code: TASK_DELETED_SUCCESSFULLY
+        '404':
           description: Job/Task not found
           content:
             application/json:
@@ -337,7 +336,6 @@ paths:
                 $ref: '#/components/schemas/errorMessage'
       tags:
         - tasks
-
   /jobs/{jobId}/tasksStatus:
     parameters:
       - $ref: '#/components/parameters/jobId'
@@ -347,21 +345,20 @@ paths:
         - tasks
       summary: Get all tasks statuses of a job
       responses:
-        200:
+        '200':
           description: An object with information about tasks status
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/taskStatus'
-        204:
+        '204':
           description: No tasks
-        404:
+        '404':
           description: Job not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorMessage'
-
   /tasks/find:
     post:
       operationId: findTasks
@@ -375,40 +372,41 @@ paths:
             schema:
               $ref: '#/components/schemas/findTaskRequest'
       responses:
-        200:
+        '200':
           description: Retrieved matching Tasks
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/tasksResponse'
-        400:
+        '400':
           description: Invalid request
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorMessage'
-        404:
+        '404':
           description: tasks not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorMessage'
-
   /tasks/{jobType}/{taskType}/startPending:
     parameters:
       - $ref: '#/components/parameters/jobType'
       - $ref: '#/components/parameters/taskType'
     post:
       operationId: startPendingTask
-      summary: retrive the highest priority pending task and update its status to In-Progress
+      summary: >-
+        retrive the highest priority pending task and update its status to
+        In-Progress
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/taskResponse'
-        404:
+        '404':
           description: no pending task available
           content:
             application/json:
@@ -416,7 +414,6 @@ paths:
                 $ref: '#/components/schemas/errorMessage'
       tags:
         - tasksManagement
-
   /tasks/findInactive:
     post:
       operationId: findInactiveTasks
@@ -428,13 +425,13 @@ paths:
             schema:
               $ref: '#/components/schemas/findInactiveTasksRequest'
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/taskIdList'
-        400:
+        '400':
           description: Invalid request
           content:
             application/json:
@@ -442,7 +439,6 @@ paths:
                 $ref: '#/components/schemas/errorMessage'
       tags:
         - tasksManagement
-
   /tasks/releaseInactive:
     post:
       operationId: releaseInactiveTasks
@@ -454,7 +450,7 @@ paths:
             schema:
               $ref: '#/components/schemas/taskIdList'
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -462,20 +458,21 @@ paths:
                 $ref: '#/components/schemas/taskIdList'
       tags:
         - tasksManagement
-
   /tasks/updateExpiredStatus:
     post:
       operationId: updateExpiredStatus
-      summary: update status of open jobs and tasks to "Expired" if their expiration date has passed
+      summary: >-
+        update status of open jobs and tasks to "Expired" if their expiration
+        date has passed
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/defaultOkMessage'
               example:
-                code: 'UPDATE_EXPIRED_STATUS_SUCCESSFULLY'
+                code: UPDATE_EXPIRED_STATUS_SUCCESSFULLY
       tags:
         - tasksManagement
   /tasks/abort/{jobId}:
@@ -485,15 +482,15 @@ paths:
       operationId: abortTasksAndJob
       summary: updates job and pending tasks statuses to "Aborted"
       responses:
-        200:
+        '200':
           description: aborted pending tasks
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/defaultOkMessage'
               example:
-                code: 'JOB_ABORTED_SUCCESSFULLY'
-        404:
+                code: JOB_ABORTED_SUCCESSFULLY
+        '404':
           description: job not found
           content:
             application/json:
@@ -501,7 +498,6 @@ paths:
                 $ref: '#/components/schemas/errorMessage'
       tags:
         - tasksManagement
-
 components:
   parameters:
     jobId:
@@ -605,7 +601,6 @@ components:
       required: true
       schema:
         type: string
-
   schemas:
     findTaskRequest:
       type: object
@@ -671,7 +666,7 @@ components:
         - Failed
         - Expired
         - Aborted
-      example: 'Pending'
+      example: Pending
     jobResponse:
       type: object
       required:
@@ -853,7 +848,6 @@ components:
         - type
         - parameters
       additionalProperties: false
-
     createJobResponse:
       type: object
       properties:
@@ -898,7 +892,6 @@ components:
         productType:
           type: string
       additionalProperties: false
-
     jobResettableStatus:
       type: object
       properties:
@@ -907,17 +900,15 @@ components:
           format: uuid
         isResettable:
           type: boolean
-
     errorMessage:
       type: object
       properties:
-        message::
+        'message:':
           type: string
         stacktrace:
           type: string
       required:
         - message
-
     defaultOkMessage:
       type: object
       properties:
@@ -931,10 +922,9 @@ components:
             - TASK_UPDATED_SUCCESSFULLY
             - TASK_DELETED_SUCCESSFULLY
             - UPDATE_EXPIRED_STATUS_SUCCESSFULLY
-          example: 'JOB_UPDATED_SUCCESSFULLY'
+          example: JOB_UPDATED_SUCCESSFULLY
       required:
         - code
-
     createTaskPayload:
       type: object
       properties:
