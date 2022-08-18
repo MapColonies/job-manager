@@ -1,87 +1,1032 @@
 openapi: 3.0.1
 info:
-  title: service-name
-  description: basic template for map colonies service
+  title: Job Service
+  description: Job Service
   version: 1.0.0
-  license:
-    name: MIT
-    url: https://opensource.org/licenses/MIT
-
 paths:
-  /anotherResource:
+  /jobs:
     get:
-      operationId: getAnotherResource
+      operationId: findJobs
+      parameters:
+        - $ref: '#/components/parameters/resourceId'
+        - $ref: '#/components/parameters/version'
+        - $ref: '#/components/parameters/isCleaned'
+        - $ref: '#/components/parameters/status'
+        - $ref: '#/components/parameters/type'
+        - $ref: '#/components/parameters/shouldReturnTasks'
+        - $ref: '#/components/parameters/fromDate'
+        - $ref: '#/components/parameters/tillDate'
+        - $ref: '#/components/parameters/productType'
+      summary: find jobs by criteria
       tags:
-        - anotherResource
-      summary: gets the resource
+        - jobs
       responses:
         200:
-          description: OK
+          description: Array of jobs
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/anotherResource'
-  /resourceName:
-    get:
-      operationId: getResourceName
-      tags:
-        - resourceName
-      summary: gets the resource
-      responses:
-        200:
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/resource'
+                type: array
+                items:
+                  $ref: '#/components/schemas/jobResponse'
     post:
-      operationId: createResource
+      operationId: createJob
+      summary: Creates a new job
       tags:
-        - resourceName
-      summary: creates a new record of type resource
+        - jobs
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/createJobPayload'
       responses:
         201:
-          description: created
+          description: Job created successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/resource'
+                $ref: '#/components/schemas/createJobResponse'
         400:
-          description: Bad Request
+          description: Invalid request, could not create job
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: '#/components/schemas/errorMessage'
+        409:
+          description: An ingestion process with the same resourceId/version is already in progress (unique violation).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMessage'
+        422:
+          description: request contains conflicting tasks
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMessage'
+
+  /jobs/{jobId}:
+    parameters:
+      - $ref: '#/components/parameters/jobId'
+      - $ref: '#/components/parameters/shouldReturnTasks'
+    get:
+      operationId: getJob
+      summary: Get job by id
+      tags:
+        - jobs
+      responses:
+        200:
+          description: Job data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/jobResponse'
+        404:
+          description: Job not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMessage'
+    put:
+      operationId: updateJob
+      summary: Updates a job
+      tags:
+        - jobs
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/updateJobPayload'
+      responses:
+        200:
+          description: Job updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/defaultOkMessage'
+              example:
+                code: 'JOB_UPDATED_SUCCESSFULLY'
+        400:
+          description: Invalid request, could not update job
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMessage'
+        404:
+          description: Job not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMessage'
+    delete:
+      operationId: deleteJob
+      summary: Delete a job
+      responses:
+        200:
+          description: Job deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/defaultOkMessage'
+              example:
+                code: 'JOB_DELETED_SUCCESSFULLY'
+        404:
+          description: Job not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMessage'
+        422:
+          description: Job have tasks
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMessage'
+      tags:
+        - jobs
+
+  /jobs/{jobId}/resettable:
+    parameters:
+      - $ref: '#/components/parameters/jobId'
+    post:
+      operationId: isJobResettable
+      summary: checks if job is resettable
+      tags:
+        - jobs
+      responses:
+        200:
+          description: resettable status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/jobResettableStatus'
+
+  /jobs/{jobId}/reset:
+    parameters:
+      - $ref: '#/components/parameters/jobId'
+    post:
+      operationId: resetJob
+      summary: reset a resettable job
+      tags:
+        - jobs
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/resetJobPayload'
+      responses:
+        200:
+          description: Job has been reset
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/defaultOkMessage'
+              example:
+                code: 'JOB_RESET_SUCCESSFULLY'
+        400:
+          description: job is not resettable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMessage'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMessage'
+
+  /jobs/{jobId}/tasks:
+    parameters:
+      - $ref: '#/components/parameters/jobId'
+    get:
+      operationId: getTasks
+      tags:
+        - tasks
+      summary: Get all the tasks of a job
+      responses:
+        200:
+          description: Array of tasks
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tasksResponse'
+        404:
+          description: Job not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMessage'
+    post:
+      operationId: createTask
+      tags:
+        - tasks
+      summary: Create new task for job
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/createTaskPayload'
+                - type: array
+                  items:
+                    $ref: '#/components/schemas/createTaskPayload'
+      responses:
+        201:
+          description: Task created successfully
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/createTaskResponse'
+                  - $ref: '#/components/schemas/createMultipleTasksResponse'
+        400:
+          description: Invalid task input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMessage'
+        404:
+          description: No such job in the database
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMessage'
+        409:
+          description: An ingestion process with the same resourceId/version is already in progress (unique violation).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMessage'
+
+  /jobs/{jobId}/tasks/{taskId}:
+    parameters:
+      - $ref: '#/components/parameters/jobId'
+      - $ref: '#/components/parameters/taskId'
+    get:
+      operationId: getTask
+      summary: Get task by task ID
+      responses:
+        200:
+          description: Requested task
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/taskResponse'
+        404:
+          description: No such task in the database
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMessage'
+      tags:
+        - tasks
+    put:
+      operationId: updateTask
+      summary: Update task by task Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/updateTaskPayload'
+      responses:
+        200:
+          description: Update task data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/defaultOkMessage'
+              example:
+                code: 'TASK_UPDATED_SUCCESSFULLY'
+        400:
+          description: Invalid request, could not update task
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMessage'
+        404:
+          description: Job/Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMessage'
+      tags:
+        - tasks
+    delete:
+      operationId: deleteTask
+      summary: Delete an existing task
+      responses:
+        200:
+          description: task deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/defaultOkMessage'
+              example:
+                code: 'TASK_DELETED_SUCCESSFULLY'
+        404:
+          description: Job/Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMessage'
+      tags:
+        - tasks
+
+  /jobs/{jobId}/tasksStatus:
+    parameters:
+      - $ref: '#/components/parameters/jobId'
+    get:
+      operationId: getTasksStatus
+      tags:
+        - tasks
+      summary: Get all tasks statuses of a job
+      responses:
+        200:
+          description: An object with information about tasks status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/taskStatus'
+        204:
+          description: No tasks
+        404:
+          description: Job not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMessage'
+
+  /tasks/find:
+    post:
+      operationId: findTasks
+      summary: return list of matching tasks
+      tags:
+        - tasks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/findTaskRequest'
+      responses:
+        200:
+          description: Retrieved matching Tasks
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tasksResponse'
+        400:
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMessage'
+        404:
+          description: tasks not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMessage'
+
+  /tasks/{jobType}/{taskType}/startPending:
+    parameters:
+      - $ref: '#/components/parameters/jobType'
+      - $ref: '#/components/parameters/taskType'
+    post:
+      operationId: startPendingTask
+      summary: retrive the highest priority pending task and update its status to In-Progress
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/taskResponse'
+        404:
+          description: no pending task available
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMessage'
+      tags:
+        - tasksManagement
+
+  /tasks/findInactive:
+    post:
+      operationId: findInactiveTasks
+      summary: retrive list of inactive task ids
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/findInactiveTasksRequest'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/taskIdList'
+        400:
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMessage'
+      tags:
+        - tasksManagement
+
+  /tasks/releaseInactive:
+    post:
+      operationId: releaseInactiveTasks
+      summary: release inactive tasks and return the ids of the released tasks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/taskIdList'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/taskIdList'
+      tags:
+        - tasksManagement
+
+  /tasks/updateExpiredStatus:
+    post:
+      operationId: updateExpiredStatus
+      summary: update status of open jobs and tasks to "Expired" if their expiration date has passed
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/defaultOkMessage'
+              example:
+                code: 'UPDATE_EXPIRED_STATUS_SUCCESSFULLY'
+      tags:
+        - tasksManagement
+  /tasks/abort/{jobId}:
+    parameters:
+      - $ref: '#/components/parameters/jobId'
+    post:
+      operationId: abortTasksAndJob
+      summary: updates job and pending tasks statuses to "Aborted"
+      responses:
+        200:
+          description: aborted pending tasks
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/defaultOkMessage'
+              example:
+                code: 'JOB_ABORTED_SUCCESSFULLY'
+        404:
+          description: job not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMessage'
+      tags:
+        - tasksManagement
+
 components:
+  parameters:
+    jobId:
+      in: path
+      name: jobId
+      description: ID of Job
+      required: true
+      schema:
+        $ref: '#/components/schemas/jobId'
+    taskId:
+      in: path
+      name: taskId
+      description: ID of requested task
+      required: true
+      schema:
+        $ref: '#/components/schemas/taskId'
+    resourceId:
+      in: query
+      name: resourceId
+      description: Id of resource
+      required: false
+      schema:
+        type: string
+    version:
+      in: query
+      name: version
+      description: |
+        Version of resource.
+        If this parameter is used, the 'resourceId' parameter must be present.
+      required: false
+      schema:
+        type: string
+    isCleaned:
+      in: query
+      name: isCleaned
+      description: |
+        Whether the job is cleaned or not.
+      required: false
+      schema:
+        type: boolean
+    status:
+      in: query
+      name: status
+      description: |
+        The status of the job.
+      required: false
+      schema:
+        $ref: '#/components/schemas/status'
+    shouldReturnTasks:
+      in: query
+      name: shouldReturnTasks
+      description: |
+        Whether the job should return its contained tasks. default=true
+      required: false
+      schema:
+        type: boolean
+        default: true
+    type:
+      in: query
+      name: type
+      description: |
+        The type of the job.
+      required: false
+      schema:
+        type: string
+    fromDate:
+      in: query
+      name: fromDate
+      description: results start update date
+      required: false
+      schema:
+        type: string
+        format: date-time
+    tillDate:
+      in: query
+      name: tillDate
+      description: results end update date
+      required: false
+      schema:
+        type: string
+        format: date-time
+    productType:
+      in: query
+      name: productType
+      description: |
+        The product type of the resource.
+      required: false
+      schema:
+        type: string
+    jobType:
+      in: path
+      name: jobType
+      description: the type of the job
+      required: true
+      schema:
+        type: string
+    taskType:
+      in: path
+      name: taskType
+      description: the type of the task
+      required: true
+      schema:
+        type: string
+
   schemas:
-    error:
+    findTaskRequest:
       type: object
-      required:
-        - message
+      description: task find model
       properties:
-        message:
-          type: string
-    resource:
+        id:
+          $ref: '#/components/schemas/taskId'
+        percentage:
+          $ref: '#/components/schemas/percentage'
+        jobId:
+          $ref: '#/components/schemas/jobId'
+        creationTime:
+          $ref: '#/components/schemas/creationTime'
+        updateTime:
+          $ref: '#/components/schemas/updateTime'
+        description:
+          $ref: '#/components/schemas/description'
+        type:
+          $ref: '#/components/schemas/type'
+        reason:
+          $ref: '#/components/schemas/reason'
+        status:
+          $ref: '#/components/schemas/status'
+        attempts:
+          $ref: '#/components/schemas/attempts'
+        parameters:
+          $ref: '#/components/schemas/parameters'
+      additionalProperties: false
+    parameters:
+      type: object
+    attempts:
+      type: number
+    type:
+      type: string
+      maxLength: 250
+    reason:
+      type: string
+    description:
+      type: string
+      maxLength: 2000
+    creationTime:
+      type: string
+      format: date-time
+    updateTime:
+      type: string
+      format: date-time
+    jobId:
+      type: string
+      format: uuid
+    taskId:
+      type: string
+      format: uuid
+    percentage:
+      type: integer
+      minimum: 0
+      maximum: 100
+    status:
+      type: string
+      enum:
+        - Pending
+        - In-Progress
+        - Completed
+        - Failed
+        - Expired
+        - Aborted
+      example: 'Pending'
+    jobResponse:
       type: object
       required:
         - id
-        - name
+        - created
+        - updated
+        - taskCount
+        - completedTasks
+        - failedTasks
+        - expiredTasks
+        - pendingTasks
+        - inProgressTasks
+        - abortedTasks
+        - status
+        - percentage
+        - reason
+        - isCleaned
+        - priority
+        - expirationDate
+        - internalId
+        - producerName
+        - productName
+        - productType
+        - resourceId
+        - version
         - description
+        - type
+      description: job Response model
       properties:
         id:
-          type: number
-          format: int64
-        name:
+          $ref: '#/components/schemas/jobId'
+        created:
           type: string
+          format: date-time
+        updated:
+          type: string
+          format: date-time
+        taskCount:
+          type: integer
+        completedTasks:
+          type: integer
+        failedTasks:
+          type: integer
+        expiredTasks:
+          type: integer
+        pendingTasks:
+          type: integer
+        inProgressTasks:
+          type: integer
+        abortedTasks:
+          type: integer
+        status:
+          $ref: '#/components/schemas/status'
+        percentage:
+          $ref: '#/components/schemas/percentage'
+        reason:
+          type: string
+        isCleaned:
+          type: boolean
+        priority:
+          type: integer
+        expirationDate:
+          type: string
+          format: date-time
+        internalId:
+          type: string
+          format: uuid
+        producerName:
+          type: string
+        productName:
+          type: string
+        productType:
+          type: string
+        resourceId:
+          type: string
+          maxLength: 300
+        version:
+          type: string
+          maxLength: 30
         description:
           type: string
-    anotherResource:
+          maxLength: 2000
+        parameters:
+          type: object
+        type:
+          type: string
+          maxLength: 255
+        additionalIdentifiers:
+          type: string
+        tasks:
+          $ref: '#/components/schemas/tasksResponse'
+    tasksResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/taskResponse'
+    taskResponse:
       type: object
       required:
-        - kind
-        - isAlive
+        - id
+        - jobId
+        - description
+        - created
+        - updated
+        - status
+        - percentage
+        - attempts
+        - resettable
       properties:
-        kind:
+        id:
+          $ref: '#/components/schemas/taskId'
+        jobId:
+          $ref: '#/components/schemas/jobId'
+        description:
           type: string
-        isAlive:
+        parameters:
+          type: object
+        created:
+          type: string
+          format: date-time
+        updated:
+          type: string
+          format: date-time
+        status:
+          $ref: '#/components/schemas/status'
+        percentage:
+          $ref: '#/components/schemas/percentage'
+        reason:
+          type: string
+        attempts:
+          type: number
+        resettable:
           type: boolean
+    createJobPayload:
+      type: object
+      properties:
+        resourceId:
+          type: string
+          maxLength: 300
+        version:
+          type: string
+          maxLength: 30
+        description:
+          type: string
+          maxLength: 2000
+        parameters:
+          type: object
+        status:
+          $ref: '#/components/schemas/status'
+        reason:
+          type: string
+        type:
+          type: string
+          maxLength: 255
+        percentage:
+          $ref: '#/components/schemas/percentage'
+        priority:
+          type: integer
+        expirationDate:
+          type: string
+          format: date-time
+        internalId:
+          type: string
+          format: uuid
+        producerName:
+          type: string
+        productName:
+          type: string
+        productType:
+          type: string
+        additionalIdentifiers:
+          type: string
+        tasks:
+          type: array
+          items:
+            $ref: '#/components/schemas/createTaskPayload'
+      required:
+        - resourceId
+        - version
+        - type
+        - parameters
+      additionalProperties: false
+
+    createJobResponse:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/jobId'
+        taskIds:
+          type: array
+          items:
+            $ref: '#/components/schemas/taskId'
+      additionalProperties: false
+    resetJobPayload:
+      type: object
+      properties:
+        newExpirationDate:
+          type: string
+          format: date-time
+    updateJobPayload:
+      type: object
+      properties:
+        parameters:
+          type: object
+        status:
+          $ref: '#/components/schemas/status'
+        percentage:
+          $ref: '#/components/schemas/percentage'
+        reason:
+          type: string
+        isCleaned:
+          type: boolean
+        priority:
+          type: integer
+        expirationDate:
+          type: string
+          format: date-time
+        internalId:
+          type: string
+          format: uuid
+        producerName:
+          type: string
+        productName:
+          type: string
+        productType:
+          type: string
+      additionalProperties: false
+
+    jobResettableStatus:
+      type: object
+      properties:
+        jobId:
+          type: string
+          format: uuid
+        isResettable:
+          type: boolean
+
+    errorMessage:
+      type: object
+      properties:
+        message::
+          type: string
+        stacktrace:
+          type: string
+      required:
+        - message
+
+    defaultOkMessage:
+      type: object
+      properties:
+        code:
+          type: string
+          enum:
+            - JOB_UPDATED_SUCCESSFULLY
+            - JOB_DELETED_SUCCESSFULLY
+            - JOB_RESET_SUCCESSFULLY
+            - JOB_ABORTED_SUCCESSFULLY
+            - TASK_UPDATED_SUCCESSFULLY
+            - TASK_DELETED_SUCCESSFULLY
+            - UPDATE_EXPIRED_STATUS_SUCCESSFULLY
+          example: 'JOB_UPDATED_SUCCESSFULLY'
+      required:
+        - code
+
+    createTaskPayload:
+      type: object
+      properties:
+        description:
+          type: string
+          maxLength: 2000
+        parameters:
+          type: object
+        reason:
+          type: string
+        percentage:
+          $ref: '#/components/schemas/percentage'
+        type:
+          type: string
+          maxLength: 255
+        status:
+          $ref: '#/components/schemas/status'
+        attempts:
+          type: integer
+        blockDuplication:
+          type: boolean
+          default: false
+      required:
+        - parameters
+        - type
+      additionalProperties: false
+    createTaskResponse:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/taskId'
+    createMultipleTasksResponse:
+      type: object
+      properties:
+        ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/taskId'
+    updateTaskPayload:
+      type: object
+      properties:
+        description:
+          type: string
+        parameters:
+          type: object
+        status:
+          $ref: '#/components/schemas/status'
+        percentage:
+          $ref: '#/components/schemas/percentage'
+        reason:
+          type: string
+        attempts:
+          type: integer
+      required:
+        - status
+      additionalProperties: false
+    findInactiveTasksRequest:
+      type: object
+      properties:
+        inactiveTimeSec:
+          type: integer
+        types:
+          $ref: '#/components/schemas/taskTypes'
+        ignoreTypes:
+          $ref: '#/components/schemas/taskTypes'
+      required:
+        - inactiveTimeSec
+    taskTypes:
+      type: array
+      items:
+        $ref: '#/components/schemas/taskType'
+    taskType:
+      type: object
+      properties:
+        jobType:
+          type: string
+        taskType:
+          type: string
+    taskIdList:
+      type: array
+      items:
+        $ref: '#/components/schemas/taskId'
+    taskStatus:
+      type: object
+      properties:
+        allTasksCompleted:
+          type: boolean
+        failedTasksCount:
+          type: number
+        completedTasksCount:
+          type: number
+        resourceId:
+          type: string
+        resourceVersion:
+          type: string

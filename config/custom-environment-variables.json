@@ -38,5 +38,29 @@
         }
       }
     }
+  },
+  "typeOrm": {
+    "host": "DB_HOST",
+    "port": {
+      "__name": "DB_PORT",
+      "__format": "number"
+    },
+    "username": "DB_USER",
+    "password": "DB_PASSWORD",
+    "database": "DB_NAME",
+    "schema": "DB_SCHEMA",
+    "logging": {
+      "__name": "DB_LOGGING",
+      "__format": "boolean"
+    },
+    "enableSslAuth": {
+      "__name": "DB_SSL_ENABLE",
+      "__format": "boolean"
+    },
+    "sslPaths": {
+      "ca": "DB_SSL_CA",
+      "key": "DB_SSL_KEY",
+      "cert": "DB_SSL_CERT"
+    }
   }
 }
