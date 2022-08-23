@@ -33,6 +33,7 @@ export interface IUpdateTaskBody {
   percentage?: number;
   reason?: string;
   attempts?: number;
+  resettable?: boolean;
 }
 
 export interface IUpdateTaskRequest extends ISpecificTaskParams, IUpdateTaskBody {}

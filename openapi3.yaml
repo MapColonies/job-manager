@@ -978,6 +978,8 @@ components:
           type: string
         attempts:
           type: integer
+        resettable:
+          type: boolean
       required:
         - status
       additionalProperties: false
