@@ -51,19 +51,18 @@ export class ServerBuilder {
 
   private registerPreRoutesMiddleware(): void {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    // const customLogLevel = (req: object, res: { statusCode: number | undefined }, err: object | undefined): LevelWithSilent => {
-    //   const ress = res as Response;
-    //   return err !== undefined ||
-    //     (res.statusCode !== undefined &&
-    //       // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-    //       res.statusCode >= 400 &&
-    //       !(res.statusCode == statusCodes.NOT_FOUND && ress.req.url.endsWith('startPending')))
-    //     ? 'error'
-    //     : 'info';
-    // };
+    const customLogLevel = (req: object, res: { statusCode: number | undefined }, err: object | undefined): LevelWithSilent => {
+      const ress = res as Response;
+      return err !== undefined ||
+        (res.statusCode !== undefined &&
+          // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+          res.statusCode >= 400 &&
+          !(res.statusCode == statusCodes.NOT_FOUND && ress.req.url.endsWith('startPending')))
+        ? 'error'
+        : 'info';
+    };
 
-    // this.serverInstance.use(httpLogger({ logger: this.logger, customLogLevel }));
-    this.serverInstance.use(httpLogger({ logger: this.logger }));
+    this.serverInstance.use(httpLogger({ logger: this.logger, customLogLevel }));
 
     this.serverInstance.use(this.queryDecoder.getUrlParamDecoderMiddleware());
 
