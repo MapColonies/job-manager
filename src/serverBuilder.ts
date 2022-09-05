@@ -1,6 +1,8 @@
-import express, { Router } from 'express';
+import express, { Response, Router } from 'express';
 import bodyParser from 'body-parser';
 import compression from 'compression';
+import statusCodes from 'http-status-codes';
+import { LevelWithSilent } from 'pino';
 import { OpenapiViewerRouter, OpenapiRouterConfig } from '@map-colonies/openapi-express-viewer';
 import { getErrorHandlerMiddleware } from '@map-colonies/error-express-handler';
 import { middleware as OpenApiMiddleware } from 'express-openapi-validator';
@@ -48,7 +50,21 @@ export class ServerBuilder {
   }
 
   private registerPreRoutesMiddleware(): void {
-    this.serverInstance.use(httpLogger({ logger: this.logger }));
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const customLogLevel = (req: object, res: { statusCode: number | undefined }, err: object | undefined): LevelWithSilent => {
+      const ress = res as Response;
+      return err !== undefined ||
+        (res.statusCode !== undefined &&
+          // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+          res.statusCode >= 400 &&
+          !(res.statusCode == statusCodes.NOT_FOUND && ress.req.url.endsWith('startPending')))
+        ? 'error'
+        : 'info';
+    };
+
+    this.serverInstance.use(httpLogger({ logger: this.logger, customLogLevel }));
+    // this.serverInstance.use(httpLogger({ logger: this.logger }));
+
     this.serverInstance.use(this.queryDecoder.getUrlParamDecoderMiddleware());
 
     if (this.config.get<boolean>('server.response.compression.enabled')) {
