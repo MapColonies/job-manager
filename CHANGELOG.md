@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.6](https://github.com/MapColonies/job-manager/compare/v1.0.5...v1.0.6) (2022-09-08)
+
+
+### Bug Fixes
+
+* log level info for not found on start pending ([87f072a](https://github.com/MapColonies/job-manager/commit/87f072a367ed6b2ba93334911220d7b189e6d2c8))
+
 ### [1.0.5](https://github.com/MapColonies/job-manager/compare/v1.0.4...v1.0.5) (2022-08-29)
 
 ### [1.0.4](https://github.com/MapColonies/job-manager/compare/v1.0.3...v1.0.4) (2022-08-23)
