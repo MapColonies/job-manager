@@ -17,6 +17,7 @@ paths:
         - $ref: '#/components/parameters/fromDate'
         - $ref: '#/components/parameters/tillDate'
         - $ref: '#/components/parameters/productType'
+        - $ref: '#/components/parameters/internalId'
       summary: find jobs by criteria
       tags:
         - jobs
@@ -601,6 +602,14 @@ components:
       required: true
       schema:
         type: string
+    internalId:
+      in: query
+      name: internalId
+      description: record catalog id
+      required: false
+      schema:
+        type: string
+        format: uuid
   schemas:
     findTaskRequest:
       type: object

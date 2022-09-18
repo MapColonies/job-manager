@@ -20,6 +20,7 @@ export interface IFindJobsRequest {
   productType?: string;
   fromDate?: string;
   tillDate?: string;
+  internalId?: string;
 }
 
 export interface ICreateJobBody {
