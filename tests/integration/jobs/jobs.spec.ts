@@ -16,7 +16,7 @@ import { TaskRepository } from '../../../src/DAL/repositories/taskRepository';
 import { OperationStatus } from '../../../src/common/dataModels/enums';
 import { TaskEntity } from '../../../src/DAL/entity/task';
 import { ResponseCodes } from '../../../src/common/constants';
-import { JobsRequestSender } from './helpers/jobsRequestSender';
+import { JobsRequestSender, SearchTasksParams } from './helpers/jobsRequestSender';
 
 let jobRepositoryMocks: RepositoryMocks;
 let taskRepositoryMocks: RepositoryMocks;
@@ -285,6 +285,24 @@ describe('job', function () {
         expect(response.status).toBe(httpStatusCodes.OK);
         expect(jobsFindMock).toHaveBeenCalledTimes(1);
         expect(jobsFindMock).toHaveBeenCalledWith({ relations: ['tasks'], where: {} });
+
+        const jobs = response.body as unknown;
+        expect(jobs).toEqual([jobModel]);
+      });
+
+      it('should get the job by internal id and return 200 with tasks', async function () {
+        const jobModel = createJobDataForFind();
+        const jobEntity = jobModelToEntity(jobModel);
+        const jobsFindMock = jobRepositoryMocks.findMock;
+        const parmas: SearchTasksParams  = { internalId: '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d' };
+        jobsFindMock.mockResolvedValue([jobEntity]);
+
+        const response = await requestSender.getResources({...parmas});
+        expect(response).toSatisfyApiSpec();
+
+        expect(response.status).toBe(httpStatusCodes.OK);
+        expect(jobsFindMock).toHaveBeenCalledTimes(1);
+        expect(jobsFindMock).toHaveBeenCalledWith({ relations: ['tasks'], where: parmas });
 
         const jobs = response.body as unknown;
         expect(jobs).toEqual([jobModel]);

@@ -9,6 +9,7 @@ export interface SearchTasksParams {
   shouldReturnTasks?: boolean;
   fromDate?: string;
   tillDate?: string;
+  internalId?: string;
 }
 
 export class JobsRequestSender {
