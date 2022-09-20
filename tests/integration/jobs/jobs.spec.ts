@@ -294,10 +294,10 @@ describe('job', function () {
         const jobModel = createJobDataForFind();
         const jobEntity = jobModelToEntity(jobModel);
         const jobsFindMock = jobRepositoryMocks.findMock;
-        const parmas: SearchTasksParams  = { internalId: '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d' };
+        const parmas: SearchTasksParams = { internalId: '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d' };
         jobsFindMock.mockResolvedValue([jobEntity]);
 
-        const response = await requestSender.getResources({...parmas});
+        const response = await requestSender.getResources({ ...parmas });
         expect(response).toSatisfyApiSpec();
 
         expect(response.status).toBe(httpStatusCodes.OK);
