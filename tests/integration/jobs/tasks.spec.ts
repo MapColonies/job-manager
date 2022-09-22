@@ -241,6 +241,7 @@ describe('tasks', function () {
 
       const response = await requestSender.updateResource(jobId, taskId, {
         status: 'In-Progress',
+        resettable: true,
       });
       expect(response).toSatisfyApiSpec();
 
@@ -252,6 +253,7 @@ describe('tasks', function () {
         id: taskId,
         jobId: jobId,
         status: 'In-Progress',
+        resettable: true,
       });
     });
 

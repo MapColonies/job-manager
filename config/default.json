@@ -18,36 +18,36 @@
         "limit": "10mb"
       }
     },
-    "typeOrm": {
-      "type": "postgres",
-      "host": "",
-      "port": 5432,
-      "username": "",
-      "password": "",
-      "enableSslAuth": false,
-      "sslPaths": {
-        "ca": "",
-        "key": "",
-        "cert": ""
-      },
-      "database": "raster",
-      "schema": "public",
-      "synchronize": false,
-      "logging": false,
-      "entities": ["**/DAL/entity/**/*.js"],
-      "migrations": [],
-      "subscribers": ["**/DAL/subscriber/**/*.js"],
-      "cli": {
-        "entitiesDir": "src/DAL/entity",
-        "migrationsDir": "src/DAL/migration",
-        "subscribersDir": "src/DAL/subscriber"
-      }
-    },
     "response": {
       "compression": {
         "enabled": true,
         "options": null
       }
+    }
+  },
+  "typeOrm": {
+    "type": "postgres",
+    "host": "",
+    "port": 5432,
+    "username": "",
+    "password": "",
+    "enableSslAuth": false,
+    "sslPaths": {
+      "ca": "",
+      "key": "",
+      "cert": ""
+    },
+    "database": "raster",
+    "schema": "public",
+    "synchronize": false,
+    "logging": false,
+    "entities": ["**/DAL/entity/**/*.js"],
+    "migrations": [],
+    "subscribers": ["**/DAL/subscriber/**/*.js"],
+    "cli": {
+      "entitiesDir": "src/DAL/entity",
+      "migrationsDir": "src/DAL/migration",
+      "subscribersDir": "src/DAL/subscriber"
     }
   }
 }

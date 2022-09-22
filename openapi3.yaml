@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: Job Service
   description: Job Service
-  version: 1.0.2
+  version: 1.0.6
 paths:
   /jobs:
     get:
@@ -987,6 +987,8 @@ components:
           type: string
         attempts:
           type: integer
+        resettable:
+          type: boolean
       required:
         - status
       additionalProperties: false
