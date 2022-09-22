@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.1.0](https://github.com/MapColonies/job-manager/compare/v1.0.6...v1.1.0) (2022-09-22)
+
+
+### Features
+
+* added internalId as optional query param ([#8](https://github.com/MapColonies/job-manager/issues/8)) ([0697e63](https://github.com/MapColonies/job-manager/commit/0697e63a98399f47ec80acc51ab75342873e6873))
+
 ### [1.0.6](https://github.com/MapColonies/job-manager/compare/v1.0.5...v1.0.6) (2022-09-08)
 
 
