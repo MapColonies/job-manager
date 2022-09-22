@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs';
-import { createConnection, Connection, ObjectType, QueryRunner, ConnectionOptions } from 'typeorm';
+import { createConnection, Connection, ObjectType, QueryRunner, DataSourceOptions } from 'typeorm';
 import { inject, singleton } from 'tsyringe';
 import { Logger } from '@map-colonies/js-logger';
 import { DBConnectionError } from '../common/errors';
@@ -20,7 +20,7 @@ export class ConnectionManager {
     this.logger.info(`connection to database ${connectionConfig.database as string} on ${connectionConfig.host as string}`);
     try {
       if (this.connectionStatusPromise === undefined) {
-        this.connectionStatusPromise = createConnection(this.createConnectionOptions(connectionConfig));
+        this.connectionStatusPromise = createConnection(createConnectionOptions(connectionConfig));
       }
       this.connection = await this.connectionStatusPromise;
     } catch (err) {
@@ -48,16 +48,7 @@ export class ConnectionManager {
     }
     const connection = this.connection as Connection;
     return connection.createQueryRunner();
-  }
-
-  private createConnectionOptions(dbConfig: IDbConfig): ConnectionOptions {
-    const { enableSslAuth, sslPaths, ...connectionOptions } = dbConfig;
-    if (enableSslAuth) {
-      connectionOptions.password = undefined;
-      connectionOptions.ssl = { key: readFileSync(sslPaths.key), cert: readFileSync(sslPaths.cert), ca: readFileSync(sslPaths.ca) };
-    }
-    return connectionOptions;
-  }
+  } 
 
   private getRepository<T>(repository: ObjectType<T>): T {
     if (!this.isConnected()) {
@@ -69,4 +60,13 @@ export class ConnectionManager {
       return connection.getCustomRepository(repository);
     }
   }
+}
+
+export const createConnectionOptions = (dbConfig: IDbConfig):DataSourceOptions =>  {
+  const { enableSslAuth, sslPaths, ...connectionOptions } = dbConfig;
+  if (enableSslAuth) {
+    connectionOptions.password = undefined;
+    connectionOptions.ssl = { key: readFileSync(sslPaths.key), cert: readFileSync(sslPaths.cert), ca: readFileSync(sslPaths.ca) };
+  }
+  return connectionOptions;
 }

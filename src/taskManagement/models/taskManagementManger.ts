@@ -2,7 +2,7 @@ import { Logger } from '@map-colonies/js-logger';
 import { NotFoundError } from '@map-colonies/error-types';
 import { inject, injectable } from 'tsyringe';
 import { SERVICES } from '../../common/constants';
-import { ConnectionManager } from '../../DAL/connectionManager';
+import { ConnectionManager } from '../../DAL/connectionBuilder';
 import { TaskRepository } from '../../DAL/repositories/taskRepository';
 import { IFindInactiveTasksRequest, IGetTaskResponse, IRetrieveAndStartRequest } from '../../common/dataModels/tasks';
 import { JobRepository } from '../../DAL/repositories/jobRepository';

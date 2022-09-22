@@ -1,5 +1,5 @@
-import { EntityRepository, FindManyOptions, LessThan, Brackets, Between, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
-import { container } from 'tsyringe';
+import { FindManyOptions, LessThan, Brackets, Between, LessThanOrEqual, MoreThanOrEqual, DataSource } from 'typeorm';
+import { inject, singleton } from 'tsyringe';
 import { Logger } from '@map-colonies/js-logger';
 import { ConflictError, NotFoundError } from '@map-colonies/error-types';
 import { DBConstraintError } from '../../common/errors';
@@ -15,18 +15,15 @@ import {
 } from '../../common/dataModels/jobs';
 import { JobModelConvertor } from '../convertors/jobModelConverter';
 import { OperationStatus } from '../../common/dataModels/enums';
+import { IConfig } from '../../common/interfaces';
 import { GeneralRepository } from './generalRepository';
 
-@EntityRepository(JobEntity)
+@singleton()
 export class JobRepository extends GeneralRepository<JobEntity> {
-  private readonly appLogger: Logger; //don't override internal repository logger.
-  private readonly jobConvertor: JobModelConvertor;
 
-  public constructor() {
-    super();
-    //direct injection don't work here due to being initialized by typeOrm
-    this.appLogger = container.resolve(SERVICES.LOGGER);
-    this.jobConvertor = container.resolve(JobModelConvertor);
+  public constructor(db: DataSource, private readonly jobConvertor: JobModelConvertor,
+    @inject(SERVICES.CONFIG) config: IConfig, @inject(SERVICES.LOGGER)private readonly logger: Logger) {
+    super(db.getRepository(JobEntity), config);
   }
 
   public async findJobs(req: IFindJobsRequest): Promise<FindJobsResponse> {
@@ -65,11 +62,11 @@ export class JobRepository extends GeneralRepository<JobEntity> {
   }
 
   public async createJob(req: ICreateJobBody): Promise<ICreateJobResponse> {
-    this.appLogger.info({ resourceId: req.resourceId, version: req.version, type: req.type, msg: 'Start job creation ' });
+    this.logger.info({ resourceId: req.resourceId, version: req.version, type: req.type, msg: 'Start job creation ' });
     try {
       let entity = this.jobConvertor.createModelToEntity(req);
       entity = await this.save(entity);
-      this.appLogger.info({ resourceId: entity.resourceId, version: entity.version, type: entity.type, msg: 'Job was created successfully' });
+      this.logger.info({ resourceId: entity.resourceId, version: entity.version, type: entity.type, msg: 'Job was created successfully' });
       return {
         id: entity.id,
         taskIds: entity.tasks ? entity.tasks.map((task) => task.id) : [],
@@ -80,7 +77,7 @@ export class JobRepository extends GeneralRepository<JobEntity> {
       if (error.code === pgExclusionViolationErrorCode) {
         if (error.message.includes('UQ_uniqueness_on_active_tasks')) {
           const message = 'failed to create job because another active job exists for provided resource, version and identifiers.';
-          this.appLogger.error({
+          this.logger.error({
             resourceId: req.resourceId,
             version: req.version,
             type: req.type,
@@ -91,7 +88,7 @@ export class JobRepository extends GeneralRepository<JobEntity> {
         }
         if (error.message.includes('UQ_uniqness_on_job_and_type')) {
           const message = 'failed to create job, for provided resource:, version and identifiers, because it contains duplicate tasks.';
-          this.appLogger.error({
+          this.logger.error({
             resourceId: req.resourceId,
             version: req.version,
             type: req.type,
@@ -108,48 +105,48 @@ export class JobRepository extends GeneralRepository<JobEntity> {
   public async getJob(id: string, shouldReturnTasks = true): Promise<IGetJobResponse | undefined> {
     let entity;
     if (!shouldReturnTasks) {
-      entity = await this.findOne(id);
+      entity = await this.findOneBy({id});
     } else {
-      entity = await this.findOne(id, { relations: ['tasks'] });
+      entity = await this.findOne({where: {id}, relations: ['tasks'] });
     }
     const model = entity ? this.jobConvertor.entityToModel(entity) : undefined;
     return model;
   }
 
   public async updateJob(req: IUpdateJobRequest): Promise<void> {
-    this.appLogger.info({ jobId: req.jobId, msg: 'start job update' });
+    this.logger.info({ jobId: req.jobId, msg: 'start job update' });
     if (!(await this.exists(req.jobId))) {
       const message = 'job was not found for provided update request';
-      this.appLogger.error({ jobId: req.jobId, msg: message });
+      this.logger.error({ jobId: req.jobId, msg: message });
       throw new NotFoundError(message);
     }
     const entity = this.jobConvertor.updateModelToEntity(req);
     await this.save(entity);
-    this.appLogger.info({ jobId: req.jobId, msg: 'Job was updated successfully' });
+    this.logger.info({ jobId: req.jobId, msg: 'Job was updated successfully' });
   }
 
   public async exists(id: string): Promise<boolean> {
-    const jobCount = await this.count({ id: id });
+    const jobCount = await this.countBy({ id: id });
     return jobCount === 1;
   }
 
   public async deleteJob(id: string): Promise<void> {
     if (!(await this.exists(id))) {
       const message = 'job id was not found for delete request';
-      this.appLogger.error({ id: id, msg: message });
+      this.logger.error({ id: id, msg: message });
       throw new NotFoundError(message);
     }
     try {
       await this.delete(id);
-      this.appLogger.info({ id: id, msg: 'Finish job deletion successfully' });
+      this.logger.info({ id: id, msg: 'Finish job deletion successfully' });
     } catch (err) {
       const pgForeignKeyConstraintViolationErrorCode = '23503';
       const error = err as Error & { code: string };
       if (error.code === pgForeignKeyConstraintViolationErrorCode) {
-        this.appLogger.error({ jobId: id, errorMessage: error.message, errorCode: error.code, msg: 'failed job deletion because it have tasks' });
+        this.logger.error({ jobId: id, errorMessage: error.message, errorCode: error.code, msg: 'failed job deletion because it have tasks' });
         throw new DBConstraintError(`job ${id} have tasks`);
       } else {
-        this.appLogger.error({ jobId: id, errorMessage: error.message, errorCode: error.code, msg: 'failed job deletion' });
+        this.logger.error({ jobId: id, errorMessage: error.message, errorCode: error.code, msg: 'failed job deletion' });
         throw err;
       }
     }

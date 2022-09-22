@@ -1,15 +1,12 @@
-import { Entity, Column, PrimaryColumn, Index, UpdateDateColumn, Generated, CreateDateColumn, OneToMany } from 'typeorm';
+import { Entity, Column, PrimaryColumn, Index, UpdateDateColumn, Generated, CreateDateColumn, OneToMany, Exclusion } from 'typeorm';
 import { OperationStatus } from '../../common/dataModels/enums';
 import { TaskEntity } from './task';
 
 @Entity('Job')
 @Index('jobResourceIndex', ['resourceId', 'version'], { unique: false })
-@Index('jobStatusIndex', ['status'], { unique: false })
-@Index('jobTypeIndex', ['type'], { unique: false })
-@Index('jobCleanedIndex', ['isCleaned'], { unique: false })
-@Index('additionalIdentifiersIndex', ['additionalIdentifiers'], { unique: false })
+@Exclusion('UQ_uniqueness_on_active_tasks','EXCLUDE ("resourceId" with =, "version" with =, "type" with =, "additionalIdentifiers" with =) WHERE (status = \'Pending\' OR status = \'In-Progress\')')
 export class JobEntity {
-  @PrimaryColumn({ type: 'uuid' })
+  @PrimaryColumn({ type: 'uuid', primaryKeyConstraintName: 'PK_job_id' })
   @Generated('uuid')
   public id: string;
 
@@ -19,6 +16,7 @@ export class JobEntity {
   @Column('varchar', { length: 30, nullable: false })
   public version: string;
 
+  @Index('jobTypeIndex')
   @Column('varchar', { length: 255, nullable: false })
   public type: string;
 
@@ -38,6 +36,7 @@ export class JobEntity {
   })
   public updateTime: Date;
 
+  @Index('jobStatusIndex')
   @Column({ type: 'enum', enum: OperationStatus, default: OperationStatus.PENDING, nullable: false })
   public status: OperationStatus;
 
@@ -47,12 +46,15 @@ export class JobEntity {
   @Column('varchar', { default: '', nullable: false })
   public reason: string;
 
+  @Index('jobCleanedIndex')
   @Column('boolean', { default: false, nullable: false })
   public isCleaned: boolean;
 
+  @Index('jobPriorityIndex')
   @Column('int', { default: 1000, nullable: false })
   public priority: number;
 
+  @Index('jobExpirationDateIndex')
   @Column('timestamp with time zone', { nullable: true })
   public expirationDate?: Date;
 
@@ -68,6 +70,7 @@ export class JobEntity {
   @Column('text', { nullable: true })
   public productType: string;
 
+  @Column('additionalIdentifiersIndex')
   @Column('text', { nullable: true })
   public additionalIdentifiers: string | undefined;
 

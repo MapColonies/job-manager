@@ -3,7 +3,7 @@ import { NotFoundError } from '@map-colonies/error-types';
 import { inject, injectable } from 'tsyringe';
 import { SERVICES } from '../../common/constants';
 
-import { ConnectionManager } from '../../DAL/connectionManager';
+import { ConnectionManager } from '../../DAL/connectionBuilder';
 import {
   FindJobsResponse,
   ICreateJobBody,

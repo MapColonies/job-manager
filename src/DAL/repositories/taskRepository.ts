@@ -1,5 +1,5 @@
-import { EntityRepository, In, LessThan, Brackets, UpdateResult } from 'typeorm';
-import { container } from 'tsyringe';
+import { DataSource, In, LessThan, Brackets, UpdateResult, FindOptionsWhere } from 'typeorm';
+import { inject, singleton } from 'tsyringe';
 import { Logger } from '@map-colonies/js-logger';
 import { ConflictError, NotFoundError } from '@map-colonies/error-types';
 import { SERVICES } from '../../common/constants';
@@ -20,39 +20,34 @@ import {
   IUpdateTaskRequest,
 } from '../../common/dataModels/tasks';
 import { OperationStatus } from '../../common/dataModels/enums';
+import { IConfig } from '../../common/interfaces';
 import { GeneralRepository } from './generalRepository';
 
 declare type SqlRawResponse = [unknown[], number];
 
-@EntityRepository(TaskEntity)
+@singleton()
 export class TaskRepository extends GeneralRepository<TaskEntity> {
-  private readonly appLogger: Logger; //don't override internal repository logger.
-  private readonly taskConvertor: TaskModelConvertor;
 
-  public constructor() {
-    super();
-    //direct injection don't work here due to being initialized by typeOrm
-    this.appLogger = container.resolve(SERVICES.LOGGER);
-    this.taskConvertor = container.resolve(TaskModelConvertor);
+  public constructor(db: DataSource, private readonly taskConvertor: TaskModelConvertor,
+    @inject(SERVICES.CONFIG) config: IConfig, @inject(SERVICES.LOGGER)private readonly logger: Logger) {
+    super(db.getRepository(TaskEntity),config);
   }
 
   public async getTasks(req: IAllTasksParams): Promise<GetTasksResponse> {
-    const entities = await this.find(req);
+    const entities = await this.findBy(req);
     const models = entities.map((entity) => this.taskConvertor.entityToModel(entity));
     return models;
   }
 
   public async findTasks(req: IFindTasksRequest): Promise<GetTasksResponse> {
-    const entities = await this.find({
-      where: req,
-    });
+    const entities = await this.findBy(req as FindOptionsWhere<TaskEntity>);
     const models = entities.map((entity) => this.taskConvertor.entityToModel(entity));
     return models;
   }
 
   public async createTask(req: CreateTasksRequest): Promise<CreateTasksResponse> {
     const jobId = Array.isArray(req) ? req[0].jobId : req.jobId;
-    this.appLogger.info({ jobId: jobId, msg: 'Start task(s) creation' });
+    this.logger.info({ jobId: jobId, msg: 'Start task(s) creation' });
     if (Array.isArray(req)) {
       const ids: string[] = [];
       const errors: string[] = [];
@@ -67,51 +62,51 @@ export class TaskRepository extends GeneralRepository<TaskEntity> {
           } else {
             const error = err as Error;
             const message = 'failed create task';
-            this.appLogger.error({ jobId: request.jobId, taskType: request.type, err: error, msg: message });
+            this.logger.error({ jobId: request.jobId, taskType: request.type, err: error, msg: message });
             throw err;
           }
         }
       }
-      this.appLogger.info({ jobId: jobId, ids: ids, errors: errors, msg: 'Finished tasks creation successfully' });
+      this.logger.info({ jobId: jobId, ids: ids, errors: errors, msg: 'Finished tasks creation successfully' });
       return errors.length != 0 ? { ids, errors } : { ids };
     } else {
       const res = await this.createSingleTask(req);
-      this.appLogger.info({ jobId: jobId, id: res.id, msg: 'Finished task creation successfully' });
+      this.logger.info({ jobId: jobId, id: res.id, msg: 'Finished task creation successfully' });
       return res;
     }
   }
 
   public async getTask(req: ISpecificTaskParams): Promise<IGetTaskResponse | undefined> {
-    const entity = await this.findOne({ id: req.taskId, jobId: req.jobId });
+    const entity = await this.findOneBy({ id: req.taskId, jobId: req.jobId });
     const model = entity ? this.taskConvertor.entityToModel(entity) : undefined;
     return model;
   }
 
   public async exists(taskIdentifier: ISpecificTaskParams): Promise<boolean> {
-    const taskCount = await this.count({ id: taskIdentifier.taskId, jobId: taskIdentifier.jobId });
+    const taskCount = await this.countBy({ id: taskIdentifier.taskId, jobId: taskIdentifier.jobId });
     return taskCount === 1;
   }
 
   public async updateTask(req: IUpdateTaskRequest): Promise<void> {
-    this.appLogger.info({ jobId: req.jobId, taskId: req.taskId, msg: 'Start task update successfully' });
+    this.logger.info({ jobId: req.jobId, taskId: req.taskId, msg: 'Start task update successfully' });
     if (!(await this.exists(req))) {
       const message = 'task for update not found with provided jobId and taskId';
-      this.appLogger.error({ jobId: req.jobId, taskId: req.taskId, msg: message });
+      this.logger.error({ jobId: req.jobId, taskId: req.taskId, msg: message });
       throw new NotFoundError(message);
     }
     const entity = this.taskConvertor.updateModelToEntity(req);
     await this.save(entity);
-    this.appLogger.info({ jobId: req.jobId, taskId: req.taskId, msg: 'Finish task update successfully' });
+    this.logger.info({ jobId: req.jobId, taskId: req.taskId, msg: 'Finish task update successfully' });
   }
 
   public async deleteTask(taskIdentifier: ISpecificTaskParams): Promise<void> {
     if (!(await this.exists(taskIdentifier))) {
       const message = 'provided task not found for delete';
-      this.appLogger.error({ id: taskIdentifier.taskId, jobId: taskIdentifier.jobId, msg: message });
+      this.logger.error({ id: taskIdentifier.taskId, jobId: taskIdentifier.jobId, msg: message });
       throw new NotFoundError(message);
     }
     await this.delete({ id: taskIdentifier.taskId, jobId: taskIdentifier.jobId });
-    this.appLogger.info({ id: taskIdentifier.taskId, jobId: taskIdentifier.jobId, msg: 'Finish task deletion successfully' });
+    this.logger.info({ id: taskIdentifier.taskId, jobId: taskIdentifier.jobId, msg: 'Finish task deletion successfully' });
   }
 
   public async retrieveAndUpdate(jobType: string, taskType: string): Promise<IGetTaskResponse | undefined> {
@@ -261,12 +256,12 @@ export class TaskRepository extends GeneralRepository<TaskEntity> {
       const error = err as Error & { code: string };
       if (error.code === pgForeignKeyViolationErrorCode && error.message.includes('FK_task_job_id')) {
         const message = `failed to create task for job: ${req.jobId}, job id was not found.`;
-        this.appLogger.error(message);
+        this.logger.error(message);
         throw new NotFoundError(message);
       }
       if (error.code === pgExclusionViolationErrorCode && error.message.includes('UQ_uniqueness_on_job_and_type')) {
         const message = `failed to create ${req.type as string} task for job ${req.jobId} because it already exists.`;
-        this.appLogger.warn(message);
+        this.logger.warn(message);
         throw new ConflictError(message);
       }
       throw err;
