@@ -3,7 +3,7 @@ import { OperationStatus } from '../../common/dataModels/enums';
 import { JobEntity } from './job';
 
 @Entity('Task')
-@Exclusion('UQ_uniqueness_on_job_and_type','EXCLUDE ("type" with =, "jobId" with =) WHERE ("block_duplication" = true)')
+@Exclusion('UQ_uniqueness_on_job_and_type', 'EXCLUDE ("type" with =, "jobId" with =) WHERE ("block_duplication" = true)')
 export class TaskEntity {
   @PrimaryColumn({ type: 'uuid', primaryKeyConstraintName: 'PK_task_id' })
   @Generated('uuid')
@@ -13,8 +13,8 @@ export class TaskEntity {
   @Column({ name: 'jobId' })
   public jobId: string;
 
-  @ManyToOne(() => JobEntity, (job) => job.tasks, { nullable: false,cascade: false })
-  @JoinColumn({ name: 'jobId', foreignKeyConstraintName:'FK_task_job_id', })
+  @ManyToOne(() => JobEntity, (job) => job.tasks, { nullable: false, cascade: false })
+  @JoinColumn({ name: 'jobId', foreignKeyConstraintName: 'FK_task_job_id' })
   public job: JobEntity;
 
   @Column('varchar', { length: 255 })
@@ -48,7 +48,7 @@ export class TaskEntity {
   @Column('integer', { nullable: false, default: 0 })
   public attempts: number;
 
-  @Index('taskResettableIndex', {where:'"resettable" = FALSE'})
+  @Index('taskResettableIndex', { where: '"resettable" = FALSE' })
   @Column('boolean', { nullable: false, default: true })
   public resettable: boolean;
 

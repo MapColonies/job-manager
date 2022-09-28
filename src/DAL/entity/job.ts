@@ -4,7 +4,10 @@ import { TaskEntity } from './task';
 
 @Entity('Job')
 @Index('jobResourceIndex', ['resourceId', 'version'], { unique: false })
-@Exclusion('UQ_uniqueness_on_active_tasks','EXCLUDE ("resourceId" with =, "version" with =, "type" with =, "additionalIdentifiers" with =) WHERE (status = \'Pending\' OR status = \'In-Progress\')')
+@Exclusion(
+  'UQ_uniqueness_on_active_tasks',
+  'EXCLUDE ("resourceId" with =, "version" with =, "type" with =, "additionalIdentifiers" with =) WHERE (status = \'Pending\' OR status = \'In-Progress\')'
+)
 export class JobEntity {
   @PrimaryColumn({ type: 'uuid', primaryKeyConstraintName: 'PK_job_id' })
   @Generated('uuid')
@@ -50,7 +53,7 @@ export class JobEntity {
   @Column('boolean', { default: false, nullable: false })
   public isCleaned: boolean;
 
-  @Index('jobPriorityIndex')
+  @Index('jobPriorityIndex', {})
   @Column('int', { default: 1000, nullable: false })
   public priority: number;
 

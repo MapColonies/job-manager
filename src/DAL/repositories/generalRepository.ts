@@ -1,23 +1,23 @@
 import { ObjectLiteral, Repository } from 'typeorm';
 import { IConfig, IDbConfig } from '../../common/interfaces';
 
-export abstract class GeneralRepository<T extends ObjectLiteral>  {
+export abstract class GeneralRepository<T extends ObjectLiteral> {
   protected readonly dbConfig: IDbConfig;
 
   protected metadata = this.repository.metadata;
   protected manager = this.repository.manager;
   protected queryRunner = this.repository.queryRunner;
-  
-  protected constructor(private readonly repository : Repository<T>, protected readonly config: IConfig) {
+
+  protected constructor(private readonly repository: Repository<T>, protected readonly config: IConfig) {
     this.dbConfig = this.config.get('typeOrm');
   }
-  
+
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   protected async query(query: string, parameters?: any[] | undefined): Promise<any> {
     await this.repository.query(`SET search_path TO "${this.dbConfig.schema as string}", public`);
     return this.repository.query(query, parameters);
   }
-  
+
   /* eslint-disable @typescript-eslint/member-ordering */
   protected createQueryBuilder = this.repository.createQueryBuilder.bind(this.repository);
   protected count = this.repository.count.bind(this.repository);
@@ -47,5 +47,4 @@ export abstract class GeneralRepository<T extends ObjectLiteral>  {
   protected softRemove = this.repository.softRemove.bind(this.repository);
   protected update = this.repository.update.bind(this.repository);
   protected upsert = this.repository.upsert.bind(this.repository);
-
 }
