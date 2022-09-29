@@ -26,7 +26,7 @@ declare type SqlRawResponse = [unknown[], number];
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const getJobRepository = (db: DataSource, config: IConfig, logger: Logger, taskConvertor: TaskModelConvertor) => {
-  const schemaConf = config.get<IDbConfig>('typeorm').schema;
+  const schemaConf = config.get<IDbConfig>('typeOrm').schema;
   const schema = schemaConf == undefined || schemaConf == '' ? '' : `"${schemaConf}".`;
   return db.getRepository(TaskEntity).extend({
     async getTasks(req: IAllTasksParams): Promise<GetTasksResponse> {
@@ -210,7 +210,7 @@ const getJobRepository = (db: DataSource, config: IConfig, logger: Logger, taskC
         .where(
           `"jobId" IN (
         SELECT id
-        FROM "${this.dbConfig.schema as string}"."Job" as jb
+        FROM ${schema}"Job" as jb
         WHERE jb.status = :status)`,
           { status: OperationStatus.EXPIRED }
         )

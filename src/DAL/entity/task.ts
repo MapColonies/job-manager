@@ -3,7 +3,7 @@ import { OperationStatus } from '../../common/dataModels/enums';
 import { JobEntity } from './job';
 
 @Entity('Task')
-@Exclusion('UQ_uniqueness_on_job_and_type', 'EXCLUDE ("type" with =, "jobId" with =) WHERE ("block_duplication" = true)')
+@Exclusion('UQ_uniqueness_on_job_and_type', '("type" with =, "jobId" with =) WHERE ("block_duplication" = true)')
 export class TaskEntity {
   @PrimaryColumn({ type: 'uuid', primaryKeyConstraintName: 'PK_task_id' })
   @Generated('uuid')

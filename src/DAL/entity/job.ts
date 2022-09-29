@@ -6,7 +6,7 @@ import { TaskEntity } from './task';
 @Index('jobResourceIndex', ['resourceId', 'version'], { unique: false })
 @Exclusion(
   'UQ_uniqueness_on_active_tasks',
-  'EXCLUDE ("resourceId" with =, "version" with =, "type" with =, "additionalIdentifiers" with =) WHERE (status = \'Pending\' OR status = \'In-Progress\')'
+  `("resourceId" with =, "version" with =, "type" with =, "additionalIdentifiers" with =) WHERE (status = 'Pending' OR status = 'In-Progress')`
 )
 export class JobEntity {
   @PrimaryColumn({ type: 'uuid', primaryKeyConstraintName: 'PK_job_id' })

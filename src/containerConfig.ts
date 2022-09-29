@@ -13,7 +13,7 @@ import { taskManagerRouterFactory, TASK_MANAGER_ROUTER_SYMBOL } from './taskMana
 import { initDataSource } from './DAL/connectionBuilder';
 import { IDbConfig } from './common/interfaces';
 import { jobRepositoryFactory, JOB_CUSTOM_REPOSITORY_SYMBOL } from './DAL/repositories/jobRepository';
-import { taskRepositoryFactory } from './DAL/repositories/taskRepository';
+import { taskRepositoryFactory, TASK_CUSTOM_REPOSITORY_SYMBOL } from './DAL/repositories/taskRepository';
 
 export interface RegisterOptions {
   override?: InjectionObject<unknown>[];
@@ -52,7 +52,7 @@ export const registerExternalValues = async (options?: RegisterOptions): Promise
     },
     { token: DataSource, provider: { useValue: db } },
     { token: JOB_CUSTOM_REPOSITORY_SYMBOL, provider: { useFactory: jobRepositoryFactory } },
-    { token: TASK_MANAGER_ROUTER_SYMBOL, provider: { useFactory: taskRepositoryFactory } },
+    { token: TASK_CUSTOM_REPOSITORY_SYMBOL, provider: { useFactory: taskRepositoryFactory } },
   ];
 
   return registerDependencies(dependencies, options?.override, options?.useChild);

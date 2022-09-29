@@ -1,13 +1,17 @@
-import { singleton } from 'tsyringe';
+import { inject, singleton } from 'tsyringe';
 import { DataSource } from 'typeorm';
 import { BadRequestError } from '@map-colonies/error-types';
 import { OperationStatus } from '../../common/dataModels/enums';
-import { JobRepository } from './jobRepository';
-import { TaskRepository } from './taskRepository';
+import { JobRepository, JOB_CUSTOM_REPOSITORY_SYMBOL } from './jobRepository';
+import { TaskRepository, TASK_CUSTOM_REPOSITORY_SYMBOL } from './taskRepository';
 
 @singleton()
 export class TransactionActions {
-  public constructor(private readonly db: DataSource, private readonly jobRepo: JobRepository, private readonly taskRepo: TaskRepository) {}
+  public constructor(
+    private readonly db: DataSource,
+    @inject(JOB_CUSTOM_REPOSITORY_SYMBOL) private readonly jobRepo: JobRepository,
+    @inject(TASK_CUSTOM_REPOSITORY_SYMBOL) private readonly taskRepo: TaskRepository
+  ) {}
 
   public async resetJob(jobId: string, expirationDate?: Date): Promise<void> {
     await this.db.transaction(async (manager) => {

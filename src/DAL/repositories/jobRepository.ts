@@ -1,4 +1,4 @@
-import { FindManyOptions, LessThan, Brackets, Between, LessThanOrEqual, MoreThanOrEqual, DataSource, Repository } from 'typeorm';
+import { FindManyOptions, LessThan, Brackets, Between, LessThanOrEqual, MoreThanOrEqual, DataSource } from 'typeorm';
 import { FactoryFunction } from 'tsyringe';
 import { Logger } from '@map-colonies/js-logger';
 import { ConflictError, NotFoundError } from '@map-colonies/error-types';
@@ -19,7 +19,7 @@ import { SERVICES } from '../../common/constants';
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const getJobRepository = (db: DataSource, config: IConfig, logger: Logger, jobConvertor: JobModelConvertor) => {
-  const schemaConf = config.get<IDbConfig>('typeorm').schema;
+  const schemaConf = config.get<IDbConfig>('typeOrm').schema;
   const schema = schemaConf == undefined || schemaConf == '' ? '' : `"${schemaConf}".`;
   return db.getRepository(JobEntity).extend({
     async findJobs(req: IFindJobsRequest): Promise<FindJobsResponse> {
