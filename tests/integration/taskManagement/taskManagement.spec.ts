@@ -28,6 +28,86 @@ function convertTaskResponseToEntity(response: IGetTaskResponse): TaskEntity {
   return cleanResponse as TaskEntity;
 }
 
+function createJobDataForGetJob(): unknown {
+  const taskModel = {
+    jobId: '170dd8c0-8bad-498b-bb26-671dcf19aa3c',
+    id: 'taskId',
+    description: '1',
+    parameters: {
+      a: 2,
+    },
+    reason: '3',
+    percentage: 4,
+    type: '5',
+    status: OperationStatus.IN_PROGRESS,
+    created: new Date(Date.UTC(2000, 1, 2)).toISOString(),
+    updated: new Date(Date.UTC(2000, 1, 2)).toISOString(),
+    attempts: 0,
+    resettable: true,
+  };
+  const jobModel = {
+    id: '170dd8c0-8bad-498b-bb26-671dcf19aa3c',
+    resourceId: '11',
+    version: '12',
+    description: '13',
+    parameters: {
+      d: 14,
+    },
+    status: OperationStatus.PENDING,
+    reason: '15',
+    type: '16',
+    percentage: 17,
+    tasks: [taskModel],
+    created: new Date(Date.UTC(2000, 1, 2)).toISOString(),
+    updated: new Date(Date.UTC(2000, 1, 2)).toISOString(),
+    isCleaned: false,
+    taskCount: 0,
+    completedTasks: 0,
+    failedTasks: 0,
+    expiredTasks: 0,
+    pendingTasks: 0,
+    inProgressTasks: 0,
+    abortedTasks: 0,
+    priority: 1000,
+    expirationDate: new Date(Date.UTC(2000, 1, 2)).toISOString(),
+    internalId: '170dd8c0-8bad-498b-bb26-671dcf19aa3c',
+    producerName: 'producerName',
+    productName: 'productName',
+    productType: 'productType',
+    additionalIdentifiers: '',
+  };
+
+  return jobModel;
+}
+
+function jobModelToEntity(jobModel: unknown): JobEntity {
+  const model = jobModel as {
+    created: string;
+    updated: string;
+    tasks: {
+      created: string;
+      updated: string;
+    }[];
+  };
+  const cleanedTasks: unknown[] = [];
+  model.tasks.forEach((task) => {
+    const cleanTask = { ...task, creationTime: new Date(task.created), updateTime: new Date(task.updated) } as { created?: string; updated?: string };
+    delete cleanTask.created;
+    delete cleanTask.updated;
+    cleanedTasks.push(cleanTask);
+  });
+  const cleanedModel = { ...model, tasks: cleanedTasks } as { created?: string; updated?: string };
+  delete cleanedModel.created;
+  delete cleanedModel.updated;
+  const jobEntity = {
+    ...(cleanedModel as unknown as JobEntity),
+    creationTime: new Date(model.created),
+    updateTime: new Date(model.updated),
+    tasks: cleanedTasks as TaskEntity[],
+  };
+
+  return jobEntity;
+}
 describe('tasks', function () {
   let requestSender: TaskManagementRequestSender;
   beforeEach(function () {
@@ -261,7 +341,7 @@ describe('tasks', function () {
     describe('Happy Path', () => {
       it('update job and pending tasks to "Aborted" status', async () => {
         jobRepositoryMocks.countMock.mockResolvedValue(1);
-
+        jobRepositoryMocks.findOneMock.mockResolvedValue(jobModelToEntity(createJobDataForGetJob()));
         const response = await requestSender.abortJobAndTasks(jobId);
 
         expect(response.status).toBe(httpStatusCodes.OK);
@@ -274,6 +354,20 @@ describe('tasks', function () {
         );
         expect(response).toSatisfyApiSpec();
         expect(response.body).toEqual({ code: ResponseCodes.JOB_ABORTED });
+      });
+    });
+
+    describe('Bad Path', () => {
+      it('return 400 when job status not Pending/In-progress', async () => {
+        jobRepositoryMocks.countMock.mockResolvedValue(1);
+        const jobModelEntity = createJobDataForGetJob();
+        jobRepositoryMocks.findOneMock.mockResolvedValue(jobModelToEntity({ ...(jobModelEntity as JobEntity), status: OperationStatus.COMPLETED }));
+        const response = await requestSender.abortJobAndTasks(jobId);
+
+        expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
+        expect(jobRepositoryMocks.saveMock).toHaveBeenCalledTimes(0);
+        expect(taskRepositoryMocks.updateMock).toHaveBeenCalledTimes(0);
+        expect(response).toSatisfyApiSpec();
       });
     });
 
