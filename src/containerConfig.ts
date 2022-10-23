@@ -4,18 +4,23 @@ import { trace } from '@opentelemetry/api';
 import { DependencyContainer } from 'tsyringe/dist/typings/types';
 import jsLogger, { LoggerOptions } from '@map-colonies/js-logger';
 import { Metrics } from '@map-colonies/telemetry';
+import { DataSource } from 'typeorm';
 import { SERVICES, SERVICE_NAME } from './common/constants';
 import { tracing } from './common/tracing';
 import { InjectionObject, registerDependencies } from './common/dependencyRegistration';
 import { jobRouterFactory, JOB_ROUTER_SYMBOL } from './jobs/routes/jobRouter';
 import { taskManagerRouterFactory, TASK_MANAGER_ROUTER_SYMBOL } from './taskManagement/routes/taskManagerRouter';
+import { initDataSource } from './DAL/connectionBuilder';
+import { IDbConfig } from './common/interfaces';
+import { jobRepositoryFactory, JOB_CUSTOM_REPOSITORY_SYMBOL } from './DAL/repositories/jobRepository';
+import { taskRepositoryFactory, TASK_CUSTOM_REPOSITORY_SYMBOL } from './DAL/repositories/taskRepository';
 
 export interface RegisterOptions {
   override?: InjectionObject<unknown>[];
   useChild?: boolean;
 }
 
-export const registerExternalValues = (options?: RegisterOptions): DependencyContainer => {
+export const registerExternalValues = async (options?: RegisterOptions): Promise<DependencyContainer> => {
   const loggerConfig = config.get<LoggerOptions>('telemetry.logger');
   // @ts-expect-error the signature is wrong
   const logger = jsLogger({ ...loggerConfig, prettyPrint: loggerConfig.prettyPrint, hooks: { logMethod } });
@@ -25,6 +30,8 @@ export const registerExternalValues = (options?: RegisterOptions): DependencyCon
 
   tracing.start();
   const tracer = trace.getTracer(SERVICE_NAME);
+
+  const db = await initDataSource(config.get<IDbConfig>('typeOrm'));
 
   const dependencies: InjectionObject<unknown>[] = [
     { token: SERVICES.CONFIG, provider: { useValue: config } },
@@ -43,6 +50,9 @@ export const registerExternalValues = (options?: RegisterOptions): DependencyCon
         },
       },
     },
+    { token: DataSource, provider: { useValue: db } },
+    { token: JOB_CUSTOM_REPOSITORY_SYMBOL, provider: { useFactory: jobRepositoryFactory } },
+    { token: TASK_CUSTOM_REPOSITORY_SYMBOL, provider: { useFactory: taskRepositoryFactory } },
   ];
 
   return registerDependencies(dependencies, options?.override, options?.useChild);

@@ -2,9 +2,7 @@ import { Logger } from '@map-colonies/js-logger';
 import { NotFoundError } from '@map-colonies/error-types';
 import { inject, injectable } from 'tsyringe';
 import { SERVICES } from '../../common/constants';
-
-import { ConnectionManager } from '../../DAL/connectionManager';
-import { TaskRepository } from '../../DAL/repositories/taskRepository';
+import { TaskRepository, TASK_CUSTOM_REPOSITORY_SYMBOL } from '../../DAL/repositories/taskRepository';
 import {
   CreateTasksRequest,
   CreateTasksResponse,
@@ -21,30 +19,25 @@ import { JobManager } from './jobManager';
 
 @injectable()
 export class TaskManager {
-  private repository?: TaskRepository;
-
   public constructor(
     @inject(SERVICES.LOGGER) private readonly logger: Logger,
-    private readonly connectionManager: ConnectionManager,
-    private readonly jobManager: JobManager
+    private readonly jobManager: JobManager,
+    @inject(TASK_CUSTOM_REPOSITORY_SYMBOL) private readonly repository: TaskRepository
   ) {}
 
   public async getAllTasks(req: IAllTasksParams): Promise<GetTasksResponse> {
-    const repo = await this.getRepository();
-    const res = await repo.getTasks(req);
+    const res = await this.repository.getTasks(req);
     return res;
   }
 
   public async createTask(req: CreateTasksRequest): Promise<CreateTasksResponse> {
     this.logger.debug(req, 'Create-task request parameters');
-    const repo = await this.getRepository();
-    const res = await repo.createTask(req);
+    const res = await this.repository.createTask(req);
     return res;
   }
 
   public async getTask(req: ISpecificTaskParams): Promise<IGetTaskResponse> {
-    const repo = await this.getRepository();
-    const res = await repo.getTask(req);
+    const res = await this.repository.getTask(req);
     if (res === undefined) {
       throw new NotFoundError('Task not found');
     }
@@ -52,8 +45,7 @@ export class TaskManager {
   }
 
   public async findTasks(req: IFindTasksRequest): Promise<GetTasksResponse> {
-    const repo = await this.getRepository();
-    const res = await repo.findTasks(req);
+    const res = await this.repository.findTasks(req);
     if (res.length === 0) {
       throw new NotFoundError('Tasks not found');
     }
@@ -62,25 +54,22 @@ export class TaskManager {
 
   public async updateTask(req: IUpdateTaskRequest): Promise<void> {
     this.logger.debug(req, 'Update-Task request parameters');
-    const repo = await this.getRepository();
-    await repo.updateTask(req);
+    await this.repository.updateTask(req);
   }
 
   public async deleteTask(req: ISpecificTaskParams): Promise<void> {
     this.logger.info(`deleting task ${req.taskId} from job ${req.jobId}`);
-    const repo = await this.getRepository();
-    const res = await repo.deleteTask(req);
+    const res = await this.repository.deleteTask(req);
     return res;
   }
 
   public async getTaskStatus(req: IAllTasksParams): Promise<IGetTasksStatus> {
     const { version: resourceVersion, resourceId } = await this.jobManager.getJob(req, { shouldReturnTasks: false });
-    const repo = await this.getRepository();
 
     this.logger.info(`Getting tasks statuses for jobId ${req.jobId}`);
-    const completedTasksCount = await repo.getTasksCountByStatus(OperationStatus.COMPLETED, req.jobId);
-    const failedTasksCount = await repo.getTasksCountByStatus(OperationStatus.FAILED, req.jobId);
-    const allTasksCompleted = await repo.checkIfAllCompleted(req.jobId);
+    const completedTasksCount = await this.repository.getTasksCountByStatus(OperationStatus.COMPLETED, req.jobId);
+    const failedTasksCount = await this.repository.getTasksCountByStatus(OperationStatus.FAILED, req.jobId);
+    const allTasksCompleted = await this.repository.checkIfAllCompleted(req.jobId);
 
     const tasksStatus: IGetTasksStatus = {
       allTasksCompleted,
@@ -91,15 +80,5 @@ export class TaskManager {
     };
 
     return tasksStatus;
-  }
-
-  private async getRepository(): Promise<TaskRepository> {
-    if (!this.repository) {
-      if (!this.connectionManager.isConnected()) {
-        await this.connectionManager.init();
-      }
-      this.repository = this.connectionManager.getTaskRepository();
-    }
-    return this.repository;
   }
 }

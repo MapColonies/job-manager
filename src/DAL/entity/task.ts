@@ -1,10 +1,11 @@
-import { Entity, Column, PrimaryColumn, UpdateDateColumn, Generated, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, PrimaryColumn, UpdateDateColumn, Generated, CreateDateColumn, ManyToOne, JoinColumn, Exclusion, Index } from 'typeorm';
 import { OperationStatus } from '../../common/dataModels/enums';
 import { JobEntity } from './job';
 
 @Entity('Task')
+@Exclusion('UQ_uniqueness_on_job_and_type', '("type" with =, "jobId" with =) WHERE ("block_duplication" = true)')
 export class TaskEntity {
-  @PrimaryColumn({ type: 'uuid' })
+  @PrimaryColumn({ type: 'uuid', primaryKeyConstraintName: 'PK_task_id' })
   @Generated('uuid')
   public id: string;
 
@@ -12,8 +13,8 @@ export class TaskEntity {
   @Column({ name: 'jobId' })
   public jobId: string;
 
-  @ManyToOne(() => JobEntity, (job) => job.tasks, { nullable: false })
-  @JoinColumn({ name: 'jobId' })
+  @ManyToOne(() => JobEntity, (job) => job.tasks, { nullable: false, cascade: false })
+  @JoinColumn({ name: 'jobId', foreignKeyConstraintName: 'FK_task_job_id' })
   public job: JobEntity;
 
   @Column('varchar', { length: 255 })
@@ -41,12 +42,13 @@ export class TaskEntity {
   @Column('smallint', { nullable: true })
   public percentage: number;
 
-  @Column('varchar', { default: '', nullable: false })
+  @Column('text', { default: '', nullable: false })
   public reason: string;
 
   @Column('integer', { nullable: false, default: 0 })
   public attempts: number;
 
+  @Index('taskResettableIndex', { where: '"resettable" = FALSE' })
   @Column('boolean', { nullable: false, default: true })
   public resettable: boolean;
 
