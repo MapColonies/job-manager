@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.1](https://github.com/MapColonies/job-manager/compare/v1.1.0...v1.1.1) (2022-10-23)
+
+
+### Bug Fixes
+
+* restrict abort operation on pending and in-progress ([#10](https://github.com/MapColonies/job-manager/issues/10)) ([0715175](https://github.com/MapColonies/job-manager/commit/0715175ee04d41ca81b8eb9ccb1e6a9bd874fbfc))
+
 ## [1.1.0](https://github.com/MapColonies/job-manager/compare/v1.0.6...v1.1.0) (2022-09-22)
 
 
