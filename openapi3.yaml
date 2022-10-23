@@ -491,6 +491,12 @@ paths:
                 $ref: '#/components/schemas/defaultOkMessage'
               example:
                 code: JOB_ABORTED_SUCCESSFULLY
+        '400':
+          description: Illegal abort request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMessage'
         '404':
           description: job not found
           content:
