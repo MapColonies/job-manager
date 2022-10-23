@@ -63,7 +63,6 @@ export class ServerBuilder {
     };
 
     this.serverInstance.use(httpLogger({ logger: this.logger, customLogLevel }));
-    // this.serverInstance.use(httpLogger({ logger: this.logger }));
 
     this.serverInstance.use(this.queryDecoder.getUrlParamDecoderMiddleware());
 
