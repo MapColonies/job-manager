@@ -54,12 +54,12 @@ export class TaskManagementManager {
     const jobRepo = await this.getJobRepository();
     const jobEntity = await jobRepo.getJob(req.jobId, false);
     if (!jobEntity) {
-      const message = 'job was not found for provided update request';
+      const message = 'Job abort request failed, job was not found for provided update request';
       this.logger.error({ jobId: req.jobId, msg: message });
       throw new NotFoundError(message);
     }
     if ((jobEntity.status as OperationStatus) !== OperationStatus.PENDING && (jobEntity.status as OperationStatus) !== OperationStatus.IN_PROGRESS) {
-      const message = 'job status should be one of: "Pending" or "In-progress"';
+      const message = 'Job abort request failed, job status should be one of: "Pending" or "In-progress"';
       this.logger.error({ jobStatus: jobEntity.status, msg: message });
       throw new BadRequestError(message);
     }
