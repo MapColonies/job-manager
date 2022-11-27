@@ -47,6 +47,9 @@ export class JobEntity {
   @Column('varchar', { default: '', nullable: false })
   public reason: string;
 
+  @Column('text', { default: '', nullable: false })
+  public domain: string;
+
   @Column('boolean', { default: false, nullable: false })
   public isCleaned: boolean;
 

@@ -18,6 +18,7 @@ paths:
         - $ref: '#/components/parameters/tillDate'
         - $ref: '#/components/parameters/productType'
         - $ref: '#/components/parameters/internalId'
+        - $ref: '#/components/parameters/domain'
       summary: find jobs by criteria
       tags:
         - jobs
@@ -537,6 +538,15 @@ components:
       required: false
       schema:
         type: string
+    domain:
+      in: query
+      name: domain
+      description: |
+        Domain of job.
+        If this parameter is used, the 'domain' parameter must be present.
+      required: false
+      schema:
+        type: string
     isCleaned:
       in: query
       name: isCleaned
@@ -709,6 +719,7 @@ components:
         - version
         - description
         - type
+        - domain
       description: job Response model
       properties:
         id:
@@ -770,6 +781,8 @@ components:
           type: string
           maxLength: 255
         additionalIdentifiers:
+          type: string
+        domain:
           type: string
         tasks:
           $ref: '#/components/schemas/tasksResponse'
@@ -850,6 +863,8 @@ components:
         productName:
           type: string
         productType:
+          type: string
+        domain:
           type: string
         additionalIdentifiers:
           type: string

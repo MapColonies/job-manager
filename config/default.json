@@ -7,8 +7,8 @@
   },
   "telemetry": {
     "logger": {
-      "level": "info",
-      "prettyPrint": false
+      "level": "debug",
+      "prettyPrint": true
     }
   },
   "server": {
@@ -29,8 +29,8 @@
     "type": "postgres",
     "host": "",
     "port": 5432,
-    "username": "",
-    "password": "",
+    "username": "postgres",
+    "password": "postgres",
     "enableSslAuth": false,
     "sslPaths": {
       "ca": "",

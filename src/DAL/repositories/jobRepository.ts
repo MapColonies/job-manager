@@ -38,6 +38,7 @@ export class JobRepository extends GeneralRepository<JobEntity> {
       type: req.type,
       productType: req.productType,
       internalId: req.internalId,
+      domain: req.domain,
     };
 
     if (req.fromDate != undefined && req.tillDate != undefined) {

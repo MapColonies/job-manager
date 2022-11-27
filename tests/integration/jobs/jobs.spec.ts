@@ -42,6 +42,7 @@ function createJobDataForFind(): unknown {
     resourceId: '11',
     version: '12',
     description: '13',
+    domain: '',
     parameters: {
       d: 14,
     },
@@ -94,6 +95,7 @@ function createJobDataForGetJob(): unknown {
     resourceId: '11',
     version: '12',
     description: '13',
+    domain: '',
     parameters: {
       d: 14,
     },
@@ -219,6 +221,7 @@ describe('job', function () {
         const jobEntity = {
           ...createJobModel,
           id: 'jobId',
+          domain: '',
           tasks: [
             { ...createTaskModel1, jobId: 'jobId', id: 'taskId1', blockDuplication: false },
             { ...createTaskModel2, jobId: 'jobId', id: 'taskId2', blockDuplication: false },
@@ -229,7 +232,6 @@ describe('job', function () {
         jobSaveMock.mockResolvedValue(jobEntity);
 
         const response = await requestSender.createResource(createJobReq);
-        expect(response).toSatisfyApiSpec();
 
         expect(response.status).toBe(httpStatusCodes.CREATED);
         expect(jobSaveMock).toHaveBeenCalledTimes(1);
@@ -237,6 +239,7 @@ describe('job', function () {
 
         const body = response.body as unknown;
         expect(body).toEqual(createJobRes);
+        expect(response).toSatisfyApiSpec();
       });
 
       it('should create job without tasks and return status code 201 and the created job', async function () {
@@ -251,6 +254,7 @@ describe('job', function () {
           reason: '15',
           type: '16',
           percentage: 17,
+          domain: '',
         };
         const createJobRes = {
           id: 'jobId',
@@ -262,7 +266,6 @@ describe('job', function () {
         jobSaveMock.mockResolvedValue(jobEntity);
 
         const response = await requestSender.createResource(createJobModel);
-        expect(response).toSatisfyApiSpec();
 
         expect(response.status).toBe(httpStatusCodes.CREATED);
         expect(jobSaveMock).toHaveBeenCalledTimes(1);
@@ -270,8 +273,10 @@ describe('job', function () {
 
         const body = response.body as unknown;
         expect(body).toEqual(createJobRes);
+        expect(response).toSatisfyApiSpec();
       });
     });
+
     describe('findJob', () => {
       it('should get all jobs and return 200 with tasks', async function () {
         const jobModel = createJobDataForFind();
@@ -280,7 +285,6 @@ describe('job', function () {
         jobsFindMock.mockResolvedValue([jobEntity]);
 
         const response = await requestSender.getResources();
-        expect(response).toSatisfyApiSpec();
 
         expect(response.status).toBe(httpStatusCodes.OK);
         expect(jobsFindMock).toHaveBeenCalledTimes(1);
@@ -288,6 +292,7 @@ describe('job', function () {
 
         const jobs = response.body as unknown;
         expect(jobs).toEqual([jobModel]);
+        expect(response).toSatisfyApiSpec();
       });
 
       it('should get the job by internal id and return 200 with tasks', async function () {
@@ -298,7 +303,6 @@ describe('job', function () {
         jobsFindMock.mockResolvedValue([jobEntity]);
 
         const response = await requestSender.getResources({ ...parmas });
-        expect(response).toSatisfyApiSpec();
 
         expect(response.status).toBe(httpStatusCodes.OK);
         expect(jobsFindMock).toHaveBeenCalledTimes(1);
@@ -306,6 +310,7 @@ describe('job', function () {
 
         const jobs = response.body as unknown;
         expect(jobs).toEqual([jobModel]);
+        expect(response).toSatisfyApiSpec();
       });
 
       it('should limit job by fromDate', async function () {
@@ -318,7 +323,6 @@ describe('job', function () {
 
         const response = await requestSender.getResources({ fromDate: '2000-01-01T00:00:00Z' });
 
-        expect(response).toSatisfyApiSpec();
         expect(response.status).toBe(httpStatusCodes.OK);
         expect(jobsFindMock).toHaveBeenCalledTimes(1);
         expect(jobsFindMock).toHaveBeenCalledWith({
@@ -332,6 +336,7 @@ describe('job', function () {
 
         const jobs = response.body as unknown;
         expect(jobs).toEqual([jobModel]);
+        expect(response).toSatisfyApiSpec();
       });
 
       it('should limit job by tillDate', async function () {
@@ -344,7 +349,6 @@ describe('job', function () {
 
         const response = await requestSender.getResources({ tillDate: '2000-01-01T00:00:00Z' });
 
-        expect(response).toSatisfyApiSpec();
         expect(response.status).toBe(httpStatusCodes.OK);
         expect(jobsFindMock).toHaveBeenCalledTimes(1);
         expect(jobsFindMock).toHaveBeenCalledWith({
@@ -358,6 +362,7 @@ describe('job', function () {
 
         const jobs = response.body as unknown;
         expect(jobs).toEqual([jobModel]);
+        expect(response).toSatisfyApiSpec();
       });
 
       it('should limit job by fromDate and url encoded tillDate', async function () {
@@ -382,7 +387,6 @@ describe('job', function () {
 
         const jobs = response.body as unknown;
         expect(jobs).toEqual([jobModel]);
-
         expect(response).toSatisfyApiSpec();
       });
 
@@ -399,14 +403,14 @@ describe('job', function () {
         jobsFindMock.mockResolvedValue([] as JobEntity[]);
 
         const response = await requestSender.getResources(filter);
-        expect(response).toSatisfyApiSpec();
         expect(response.body).toEqual([]);
-
         expect(response.status).toBe(httpStatusCodes.OK);
         expect(jobsFindMock).toHaveBeenCalledTimes(1);
         expect(jobsFindMock).toHaveBeenCalledWith({ relations: ['tasks'], where: filter });
+        expect(response).toSatisfyApiSpec();
       });
     });
+
     describe('getJob', () => {
       it('should get specific job and return 200', async function () {
         const jobModel = createJobDataForGetJob();
@@ -425,7 +429,6 @@ describe('job', function () {
 
         const job = response.body as unknown;
         expect(job).toEqual(jobModel);
-
         expect(response).toSatisfyApiSpec();
       });
 
@@ -437,7 +440,6 @@ describe('job', function () {
         jobsFinOneMock.mockResolvedValue(jobEntity);
 
         const response = await requestSender.getResource('170dd8c0-8bad-498b-bb26-671dcf19aa3c', false);
-        expect(response).toSatisfyApiSpec();
 
         expect(response.status).toBe(httpStatusCodes.OK);
         expect(jobsFinOneMock).toHaveBeenCalledTimes(1);
@@ -447,6 +449,7 @@ describe('job', function () {
 
         delete (jobModel as JobEntity).tasks;
         expect(job).toEqual(jobModel);
+        expect(response).toSatisfyApiSpec();
       });
 
       it('should update job status and return 200', async function () {
@@ -459,7 +462,6 @@ describe('job', function () {
         const response = await requestSender.updateResource('170dd8c0-8bad-498b-bb26-671dcf19aa3c', {
           status: 'In-Progress',
         });
-        expect(response).toSatisfyApiSpec();
 
         expect(response.status).toBe(httpStatusCodes.OK);
         expect(response.body).toEqual({ code: ResponseCodes.JOB_UPDATED });
@@ -468,6 +470,7 @@ describe('job', function () {
           id: '170dd8c0-8bad-498b-bb26-671dcf19aa3c',
           status: 'In-Progress',
         });
+        expect(response).toSatisfyApiSpec();
       });
 
       it('should delete job without tasks and return 200', async function () {
@@ -477,25 +480,25 @@ describe('job', function () {
         jobCountMock.mockResolvedValue(1);
 
         const response = await requestSender.deleteResource('170dd8c0-8bad-498b-bb26-671dcf19aa3c');
-        expect(response).toSatisfyApiSpec();
         expect(response.body).toEqual({ code: ResponseCodes.JOB_DELETED });
 
         expect(response.status).toBe(httpStatusCodes.OK);
         expect(jobDeleteMock).toHaveBeenCalledTimes(1);
         expect(jobDeleteMock).toHaveBeenCalledWith('170dd8c0-8bad-498b-bb26-671dcf19aa3c');
+        expect(response).toSatisfyApiSpec();
       });
     });
+
     describe('resettable', () => {
       it('returns 200 and true when job is resettable', async () => {
         jobRepositoryMocks.queryMock.mockResolvedValue([{ unResettableTasks: '0', failedTasks: '1' }]);
         const id = 'dabf6137-8160-4b62-9110-2d1c1195398b';
 
         const res = await requestSender.resettable(id);
-        expect(res).toSatisfyApiSpec();
-
         expect(res.status).toBe(httpStatusCodes.OK);
         expect(res.body).toEqual({ jobId: id, isResettable: true });
         expect(jobRepositoryMocks.queryMock).toHaveBeenCalledTimes(1);
+        expect(res).toSatisfyApiSpec();
       });
 
       it('returns 200 and false when job has un-resettable task', async () => {
@@ -503,11 +506,10 @@ describe('job', function () {
         const id = 'dabf6137-8160-4b62-9110-2d1c1195398b';
 
         const res = await requestSender.resettable(id);
-        expect(res).toSatisfyApiSpec();
-
         expect(res.status).toBe(httpStatusCodes.OK);
         expect(res.body).toEqual({ jobId: id, isResettable: false });
         expect(jobRepositoryMocks.queryMock).toHaveBeenCalledTimes(1);
+        expect(res).toSatisfyApiSpec();
       });
 
       it('returns 200 and false when job has no failed tasks', async () => {
@@ -515,11 +517,10 @@ describe('job', function () {
         const id = 'dabf6137-8160-4b62-9110-2d1c1195398b';
 
         const res = await requestSender.resettable(id);
-        expect(res).toSatisfyApiSpec();
-
         expect(res.status).toBe(httpStatusCodes.OK);
         expect(res.body).toEqual({ jobId: id, isResettable: false });
         expect(jobRepositoryMocks.queryMock).toHaveBeenCalledTimes(1);
+        expect(res).toSatisfyApiSpec();
       });
 
       it('returns 200 and false when no matching job is returned', async () => {
@@ -527,13 +528,14 @@ describe('job', function () {
         const id = 'dabf6137-8160-4b62-9110-2d1c1195398b';
 
         const res = await requestSender.resettable(id);
-        expect(res).toSatisfyApiSpec();
 
         expect(res.status).toBe(httpStatusCodes.OK);
         expect(res.body).toEqual({ jobId: id, isResettable: false });
         expect(jobRepositoryMocks.queryMock).toHaveBeenCalledTimes(1);
+        expect(res).toSatisfyApiSpec();
       });
     });
+
     describe('reset', () => {
       it('returns 200 and reset job when job is resettable', async () => {
         jobRepositoryMocks.queryMock.mockResolvedValue([{ unResettableTasks: '0', failedTasks: '3' }]);
@@ -544,7 +546,6 @@ describe('job', function () {
           newExpirationDate: undefined,
         };
         const res = await requestSender.reset(id, body);
-        expect(res).toSatisfyApiSpec();
 
         expect(res.status).toBe(httpStatusCodes.OK);
         expect(res.body).toEqual({ code: ResponseCodes.JOB_RESET });
@@ -559,9 +560,11 @@ describe('job', function () {
         expect(jobRepositoryMocks.saveMock).toHaveBeenCalledTimes(1);
         expect(jobRepositoryMocks.countMock).toHaveBeenCalledTimes(1);
         expect(taskRepositoryMocks.queryBuilder.execute).toHaveBeenCalledTimes(1);
+        expect(res).toSatisfyApiSpec();
       });
     });
   });
+
   describe('Bad Path', function () {
     it('should return status code 400 on PUT request with invalid body', async function () {
       const jobCountMock = jobRepositoryMocks.countMock;
@@ -595,7 +598,6 @@ describe('job', function () {
           newExpirationDate: undefined,
         };
         const res = await requestSender.reset(id, body);
-        expect(res).toSatisfyApiSpec();
 
         expect(res.status).toBe(httpStatusCodes.BAD_REQUEST);
         expect(queryRunnerMocks.connect).toHaveBeenCalledTimes(1);
@@ -607,9 +609,11 @@ describe('job', function () {
         expect(jobRepositoryMocks.queryMock).toHaveBeenCalledTimes(1);
         expect(jobRepositoryMocks.queryBuilder.execute).toHaveBeenCalledTimes(0);
         expect(taskRepositoryMocks.queryBuilder.execute).toHaveBeenCalledTimes(0);
+        expect(res).toSatisfyApiSpec();
       });
     });
   });
+
   describe('Sad Path', function () {
     it('should return status code 404 on GET request for non existing job', async function () {
       const jobsFindOneMock = jobRepositoryMocks.findOneMock;
@@ -690,7 +694,6 @@ describe('job', function () {
           newExpirationDate: undefined,
         };
         const res = await requestSender.reset(id, body);
-        expect(res).toSatisfyApiSpec();
 
         expect(res.status).toBe(httpStatusCodes.INTERNAL_SERVER_ERROR);
         expect(queryRunnerMocks.connect).toHaveBeenCalledTimes(1);
@@ -702,6 +705,7 @@ describe('job', function () {
         expect(jobRepositoryMocks.queryMock).toHaveBeenCalledTimes(1);
         expect(jobRepositoryMocks.saveMock).toHaveBeenCalledTimes(1);
         expect(taskRepositoryMocks.queryBuilder.execute).toHaveBeenCalledTimes(1);
+        expect(res).toSatisfyApiSpec();
       });
     });
   });
