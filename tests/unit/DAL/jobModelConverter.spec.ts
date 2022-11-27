@@ -24,7 +24,7 @@ describe('JobModelConverter', () => {
   });
 
   describe('createModelToEntity', () => {
-    it('converted entity has only all relevant filed', function () {
+    it('converted entity has only all relevant fields', function () {
       const createTaskModel1 = {
         description: '1',
         parameters: {
@@ -135,6 +135,7 @@ describe('JobModelConverter', () => {
       } as unknown as TaskEntity;
       const jobEntity = {
         id: '1',
+        domain: 'RASTER',
         creationTime: new Date(2000, 1, 2),
         description: '2',
         isCleaned: false,
@@ -200,6 +201,7 @@ describe('JobModelConverter', () => {
         created: new Date(2000, 1, 2),
         description: '2',
         isCleaned: false,
+        domain: 'RASTER',
         parameters: {
           a: '3',
         },

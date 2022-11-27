@@ -21,6 +21,7 @@ export interface IFindJobsRequest {
   fromDate?: string;
   tillDate?: string;
   internalId?: string;
+  domain?: string;
 }
 
 export interface ICreateJobBody {
@@ -40,6 +41,7 @@ export interface ICreateJobBody {
   productType?: string;
   expirationDate?: Date;
   additionalIdentifiers?: string;
+  domain?: string;
 }
 
 export interface IUpdateJobBody {
@@ -95,6 +97,7 @@ export interface IGetJobResponse {
   abortedTasks: number;
   additionalIdentifiers?: string;
   expirationDate?: Date;
+  domain: string;
 }
 
 export interface ICreateJobResponse {
