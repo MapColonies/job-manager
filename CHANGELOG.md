@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.0.0](https://github.com/MapColonies/job-manager/compare/v1.1.1...v2.0.0) (2022-11-27)
+
+
+### ⚠ BREAKING CHANGES
+
+* add 'domain' identifier field to schema and API (MAPCO-2709) (#13)
+
+### Features
+
+* add 'domain' identifier field to schema and API (MAPCO-2709) ([#13](https://github.com/MapColonies/job-manager/issues/13)) ([0c5cf30](https://github.com/MapColonies/job-manager/commit/0c5cf30430c8ef366666499f473b5668c3f4df5e))
+
 ### [1.1.1](https://github.com/MapColonies/job-manager/compare/v1.1.0...v1.1.1) (2022-10-23)
 
 
