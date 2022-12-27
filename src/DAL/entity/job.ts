@@ -1,5 +1,6 @@
 import { Entity, Column, PrimaryColumn, Index, UpdateDateColumn, Generated, CreateDateColumn, OneToMany } from 'typeorm';
 import { OperationStatus } from '../../common/dataModels/enums';
+import { IAvailableActions } from '../../common/dataModels/jobs';
 import { TaskEntity } from './task';
 
 @Entity('Job')
@@ -94,6 +95,9 @@ export class JobEntity {
 
   @Column('int', { nullable: false, default: 0 })
   public abortedTasks: number;
+  
+  @Column('jsonb', { nullable: false })
+  public availableActions: IAvailableActions;
 
   @OneToMany(() => TaskEntity, (task) => task.job, {
     cascade: true,

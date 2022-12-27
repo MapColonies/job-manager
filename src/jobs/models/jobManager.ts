@@ -42,8 +42,9 @@ export class JobManager {
   }
 
   public async getJob(req: IJobsParams, query: IJobsQuery): Promise<IGetJobResponse> {
+    console.log(query)
     const repo = await this.getRepository();
-    const res = await repo.getJob(req.jobId, query.shouldReturnTasks);
+    const res = await repo.getJob(req.jobId, query);
     if (res === undefined) {
       throw new NotFoundError('Job not found');
     }

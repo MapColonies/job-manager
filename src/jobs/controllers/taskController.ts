@@ -22,13 +22,14 @@ import {
 } from '../../common/dataModels/tasks';
 import { DefaultResponse } from '../../common/interfaces';
 import { TaskManager } from '../models/taskManager';
+import { IJobsQuery } from '../../common/dataModels/jobs';
 
 type CreateResourceHandler = RequestHandler<IAllTasksParams, CreateTasksResponse, CreateTasksBody>;
 type GetResourcesHandler = RequestHandler<IAllTasksParams, GetTasksResponse>;
 type GetResourceHandler = RequestHandler<ISpecificTaskParams, IGetTaskResponse>;
 type DeleteResourceHandler = RequestHandler<ISpecificTaskParams, DefaultResponse>;
 type UpdateResourceHandler = RequestHandler<ISpecificTaskParams, DefaultResponse, IUpdateTaskBody>;
-type GetResourcesStatusHandler = RequestHandler<IAllTasksParams, IGetTasksStatus>;
+type GetResourcesStatusHandler = RequestHandler<IAllTasksParams, IGetTasksStatus, undefined, IJobsQuery>;
 type FindResourceHandler = RequestHandler<undefined, GetTasksResponse | ErrorResponse, IFindTasksRequest>;
 
 @injectable()
@@ -110,7 +111,7 @@ export class TaskController {
 
   public getResourcesStatus: GetResourcesStatusHandler = async (req, res, next) => {
     try {
-      const status = await this.manager.getTaskStatus(req.params);
+      const status = await this.manager.getTaskStatus(req.params, req.query);
       return res.status(httpStatus.OK).json(status);
     } catch (err) {
       return next(err);
