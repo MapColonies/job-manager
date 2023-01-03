@@ -95,9 +95,6 @@ export class JobEntity {
 
   @Column('int', { nullable: false, default: 0 })
   public abortedTasks: number;
-  
-  @Column('jsonb', { nullable: false })
-  public availableActions: IAvailableActions;
 
   @OneToMany(() => TaskEntity, (task) => task.job, {
     cascade: true,

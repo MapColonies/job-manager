@@ -15,9 +15,11 @@ import {
   IJobsQuery,
   IIsResettableResponse,
   IResetJobRequest,
+  IAvailableActions,
 } from '../../common/dataModels/jobs';
 import { JobRepository } from '../../DAL/repositories/jobRepository';
 import { TransactionActions } from '../../DAL/repositories/transactionActions';
+import { OperationStatus } from '../../common/dataModels/enums';
 
 @injectable()
 export class JobManager {
@@ -31,6 +33,15 @@ export class JobManager {
   public async findJobs(req: IFindJobsRequest): Promise<FindJobsResponse> {
     const repo = await this.getRepository();
     const res = await repo.findJobs(req);
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    if (req.availableActions === true) {
+      res.map(async (job) => {
+        const availableActions = await this.getAvailableActions(job);
+        job = { ...job, availableActions };
+        console.log(`job: ${JSON.stringify(job)}`);
+      });
+    }
+
     return res;
   }
 
@@ -42,9 +53,10 @@ export class JobManager {
   }
 
   public async getJob(req: IJobsParams, query: IJobsQuery): Promise<IGetJobResponse> {
-    console.log(query)
+    console.log(query);
     const repo = await this.getRepository();
     const res = await repo.getJob(req.jobId, query);
+
     if (res === undefined) {
       throw new NotFoundError('Job not found');
     }
@@ -76,6 +88,16 @@ export class JobManager {
     const newExpirationDate = req.newExpirationDate;
     this.logger.info(`reset job ${req.jobId}, newExpirationDate ${(newExpirationDate ?? 'undefiend') as string}`);
     await this.transactionManager.resetJob(jobId, newExpirationDate);
+  }
+
+  public async getAvailableActions(job: IGetJobResponse): Promise<IAvailableActions> {
+    const availableActions: IAvailableActions = {
+      isResumable: (await this.isResettable({ jobId: job.id })).isResettable,
+      canPrioritize: job.status !== OperationStatus.COMPLETED,
+      isAbortable: job.status === OperationStatus.PENDING || job.status === OperationStatus.IN_PROGRESS,
+    };
+
+    return availableActions;
   }
 
   private async getRepository(): Promise<JobRepository> {
