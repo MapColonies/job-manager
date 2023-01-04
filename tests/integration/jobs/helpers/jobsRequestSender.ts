@@ -1,6 +1,6 @@
 import * as supertest from 'supertest';
 
-export interface SearchTasksParams {
+export interface SearchJobsParams {
   resourceId?: string;
   version?: string;
   isCleaned?: boolean;
@@ -16,13 +16,12 @@ export interface SearchTasksParams {
 export class JobsRequestSender {
   public constructor(private readonly app: Express.Application) {}
 
-  public async getResources(params: SearchTasksParams = {}): Promise<supertest.Response> {
-    console.log('Params: ', params)
+  public async getResources(params: SearchJobsParams = {}): Promise<supertest.Response> {
     return supertest.agent(this.app).get('/jobs').query(params).set('Content-Type', 'application/json');
   }
 
-  public async getResource(id: string, shouldReturnTasks = true): Promise<supertest.Response> {
-    return supertest.agent(this.app).get(`/jobs/${id}`).query({ shouldReturnTasks }).set('Content-Type', 'application/json');
+  public async getResource(id: string, shouldReturnTasks = true, availableActions = false): Promise<supertest.Response> {
+    return supertest.agent(this.app).get(`/jobs/${id}`).query({ shouldReturnTasks, availableActions }).set('Content-Type', 'application/json');
   }
 
   public async updateResource(id: string, body: Record<string, unknown>): Promise<supertest.Response> {

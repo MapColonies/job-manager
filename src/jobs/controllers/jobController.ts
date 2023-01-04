@@ -51,7 +51,6 @@ export class JobController {
 
   public findResource: FindResourceHandler = async (req, res, next) => {
     try {
-      console.log('QUERIERS: ', req.query)
       const jobsRes = await this.manager.findJobs(req.query);
       return res.status(httpStatus.OK).json(jobsRes);
     } catch (err) {

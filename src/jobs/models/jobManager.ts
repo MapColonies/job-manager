@@ -35,11 +35,7 @@ export class JobManager {
     const repo = await this.getRepository();
     let res = await repo.findJobs(req);
 
-    res.forEach((element) => {
-      console.log('record: ', element);
-    });
     if (req.availableActions === true) {
-      console.log('length', res.length)
       if (res.length !== 0){
         res = await Promise.all(
           res.map(async (job) => ({
@@ -49,10 +45,6 @@ export class JobManager {
         );
       }
     }
-
-    res.forEach((element) => {
-      console.log('record2: ', element);
-    });
     return res;
   }
 
@@ -95,7 +87,6 @@ export class JobManager {
     const jobId = req.jobId;
     const repo = await this.getRepository();
     const isResettable = await repo.isJobResettable(jobId);
-    console.log('isResettable', isResettable)
     return { jobId, isResettable };
   }
 
