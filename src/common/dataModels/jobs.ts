@@ -8,7 +8,7 @@ export interface IJobsParams {
 
 export interface IJobsQuery {
   shouldReturnTasks: boolean;
-  availableActions: boolean;
+  availableActions?: boolean;
 }
 
 export interface IFindJobsRequest {
@@ -114,7 +114,6 @@ export interface IIsResettableResponse {
 }
 
 export interface IAvailableActions {
-  canPrioritize: boolean;
   isAbortable: boolean;
   isResumable: boolean;
 }

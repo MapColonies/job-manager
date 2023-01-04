@@ -74,6 +74,7 @@ paths:
     parameters:
       - $ref: '#/components/parameters/jobId'
       - $ref: '#/components/parameters/shouldReturnTasks'
+      - $ref: '#/components/parameters/availableActions'
     get:
       operationId: getJob
       summary: Get job by id
@@ -804,12 +805,9 @@ components:
         $ref: '#/components/schemas/availableActionsResponse'
     availableActionsResponse:
       required:
-        - canPrioritize
         - isAbortable
         - isResumable
       properties:
-        canPrioritize:
-          type: boolean
         isAbortable:
           type: boolean
         isResumable:

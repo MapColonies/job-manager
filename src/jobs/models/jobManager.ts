@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { Logger } from '@map-colonies/js-logger';
 import { NotFoundError } from '@map-colonies/error-types';
 import { inject, injectable } from 'tsyringe';
@@ -32,16 +33,26 @@ export class JobManager {
 
   public async findJobs(req: IFindJobsRequest): Promise<FindJobsResponse> {
     const repo = await this.getRepository();
-    const res = await repo.findJobs(req);
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    let res = await repo.findJobs(req);
+
+    res.forEach((element) => {
+      console.log('record: ', element);
+    });
     if (req.availableActions === true) {
-      res.map(async (job) => {
-        const availableActions = await this.getAvailableActions(job);
-        job = { ...job, availableActions };
-        console.log(`job: ${JSON.stringify(job)}`);
-      });
+      console.log('length', res.length)
+      if (res.length !== 0){
+        res = await Promise.all(
+          res.map(async (job) => ({
+            ...job,
+            availableActions: await this.getAvailableActions(job),
+          }))
+        );
+      }
     }
 
+    res.forEach((element) => {
+      console.log('record2: ', element);
+    });
     return res;
   }
 
@@ -53,12 +64,16 @@ export class JobManager {
   }
 
   public async getJob(req: IJobsParams, query: IJobsQuery): Promise<IGetJobResponse> {
-    console.log(query);
     const repo = await this.getRepository();
-    const res = await repo.getJob(req.jobId, query);
+    let res = await repo.getJob(req.jobId, query);
 
     if (res === undefined) {
       throw new NotFoundError('Job not found');
+    }
+
+    if (query.availableActions === true) {
+      const availableActions = await this.getAvailableActions(res);
+      res = { ...res, availableActions };
     }
     return res;
   }
@@ -80,6 +95,7 @@ export class JobManager {
     const jobId = req.jobId;
     const repo = await this.getRepository();
     const isResettable = await repo.isJobResettable(jobId);
+    console.log('isResettable', isResettable)
     return { jobId, isResettable };
   }
 
@@ -90,10 +106,9 @@ export class JobManager {
     await this.transactionManager.resetJob(jobId, newExpirationDate);
   }
 
-  public async getAvailableActions(job: IGetJobResponse): Promise<IAvailableActions> {
+  private async getAvailableActions(job: IGetJobResponse): Promise<IAvailableActions> {
     const availableActions: IAvailableActions = {
       isResumable: (await this.isResettable({ jobId: job.id })).isResettable,
-      canPrioritize: job.status !== OperationStatus.COMPLETED,
       isAbortable: job.status === OperationStatus.PENDING || job.status === OperationStatus.IN_PROGRESS,
     };
 

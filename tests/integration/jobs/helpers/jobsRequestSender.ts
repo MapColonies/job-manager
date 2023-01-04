@@ -7,6 +7,7 @@ export interface SearchTasksParams {
   status?: string;
   type?: string;
   shouldReturnTasks?: boolean;
+  availableActions?: boolean;
   fromDate?: string;
   tillDate?: string;
   internalId?: string;
@@ -16,6 +17,7 @@ export class JobsRequestSender {
   public constructor(private readonly app: Express.Application) {}
 
   public async getResources(params: SearchTasksParams = {}): Promise<supertest.Response> {
+    console.log('Params: ', params)
     return supertest.agent(this.app).get('/jobs').query(params).set('Content-Type', 'application/json');
   }
 
