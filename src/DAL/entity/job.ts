@@ -1,6 +1,5 @@
 import { Entity, Column, PrimaryColumn, Index, UpdateDateColumn, Generated, CreateDateColumn, OneToMany } from 'typeorm';
 import { OperationStatus } from '../../common/dataModels/enums';
-import { IAvailableActions } from '../../common/dataModels/jobs';
 import { TaskEntity } from './task';
 
 @Entity('Job')

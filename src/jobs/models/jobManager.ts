@@ -36,7 +36,7 @@ export class JobManager {
     let res = await repo.findJobs(req);
 
     if (req.availableActions === true) {
-      if (res.length !== 0){
+      if (res.length !== 0) {
         res = await Promise.all(
           res.map(async (job) => ({
             ...job,

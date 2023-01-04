@@ -52,7 +52,7 @@ export class TaskManagementManager {
 
   public async abortJobAndTasks(req: IJobsParams, queryParams: IJobsQuery): Promise<void> {
     const jobRepo = await this.getJobRepository();
-    const jobEntity = await jobRepo.getJob(req.jobId, {...queryParams, shouldReturnTasks: false});
+    const jobEntity = await jobRepo.getJob(req.jobId, { ...queryParams, shouldReturnTasks: false });
     if (!jobEntity) {
       const message = 'Job abort request failed, job was not found for provided update request';
       this.logger.error({ jobId: req.jobId, msg: message });

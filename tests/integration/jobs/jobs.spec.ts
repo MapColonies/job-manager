@@ -17,9 +17,8 @@ import { TaskRepository } from '../../../src/DAL/repositories/taskRepository';
 import { OperationStatus } from '../../../src/common/dataModels/enums';
 import { TaskEntity } from '../../../src/DAL/entity/task';
 import { ResponseCodes } from '../../../src/common/constants';
-import { JobsRequestSender, SearchJobsParams } from './helpers/jobsRequestSender';
 import { JobManager } from '../../../src/jobs/models/jobManager';
-import { find } from 'lodash';
+import { JobsRequestSender, SearchJobsParams } from './helpers/jobsRequestSender';
 
 let jobRepositoryMocks: RepositoryMocks;
 let taskRepositoryMocks: RepositoryMocks;

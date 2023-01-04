@@ -74,8 +74,8 @@ export class TaskManager {
     return res;
   }
 
-  public async getTaskStatus(req: IAllTasksParams, queryParams: IJobsQuery ): Promise<IGetTasksStatus> {
-    const { version: resourceVersion, resourceId } = await this.jobManager.getJob(req, {...queryParams, shouldReturnTasks: false});
+  public async getTaskStatus(req: IAllTasksParams, queryParams: IJobsQuery): Promise<IGetTasksStatus> {
+    const { version: resourceVersion, resourceId } = await this.jobManager.getJob(req, { ...queryParams, shouldReturnTasks: false });
     const repo = await this.getRepository();
 
     this.logger.info(`Getting tasks statuses for jobId ${req.jobId}`);

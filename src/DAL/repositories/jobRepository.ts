@@ -60,7 +60,7 @@ export class JobRepository extends GeneralRepository<JobEntity> {
     if (req.shouldReturnTasks !== false) {
       options.relations = ['tasks'];
     }
-    
+
     const entities = await this.find(options);
     const models = entities.map((entity) => this.jobConvertor.entityToModel(entity));
     return models;
@@ -107,7 +107,7 @@ export class JobRepository extends GeneralRepository<JobEntity> {
     }
   }
 
-  public async getJob(id: string, query: IJobsQuery ): Promise<IGetJobResponse | undefined> {
+  public async getJob(id: string, query: IJobsQuery): Promise<IGetJobResponse | undefined> {
     let entity;
     if (!query.shouldReturnTasks) {
       entity = await this.findOne(id);
