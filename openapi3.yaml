@@ -578,7 +578,7 @@ components:
       in: query
       name: shouldReturnAvailableActions
       description: |
-        Whether the job should return its available actions. default=false
+        Whether the job should return its available actions. default=false (performance impact)
       required: false
       schema:
         type: boolean
