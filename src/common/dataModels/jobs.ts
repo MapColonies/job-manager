@@ -7,7 +7,7 @@ export interface IJobsParams {
 }
 
 export interface IJobsQuery {
-  shouldReturnTasks: boolean;
+  shouldReturnTasks?: boolean;
   shouldReturnAvailableActions?: boolean;
 }
 
