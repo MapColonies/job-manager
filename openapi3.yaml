@@ -73,9 +73,10 @@ paths:
   /jobs/{jobId}:
     parameters:
       - $ref: '#/components/parameters/jobId'
-      - $ref: '#/components/parameters/shouldReturnTasks'
-      - $ref: '#/components/parameters/shouldReturnAvailableActions'
     get:
+      parameters:
+        - $ref: '#/components/parameters/shouldReturnTasks'
+        - $ref: '#/components/parameters/shouldReturnAvailableActions'
       operationId: getJob
       summary: Get job by id
       tags:
