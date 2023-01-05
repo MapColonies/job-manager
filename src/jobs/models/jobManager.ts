@@ -102,7 +102,6 @@ export class JobManager {
       isResumable: isResettable,
       isAbortable: job.status === OperationStatus.PENDING || job.status === OperationStatus.IN_PROGRESS,
     };
-
     return availableActions;
   }
 
