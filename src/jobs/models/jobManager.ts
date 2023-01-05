@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { Logger } from '@map-colonies/js-logger';
 import { NotFoundError } from '@map-colonies/error-types';
 import { inject, injectable } from 'tsyringe';
@@ -98,8 +97,9 @@ export class JobManager {
   }
 
   private async getAvailableActions(job: IGetJobResponse): Promise<IAvailableActions> {
+    const isResettable = (await this.isResettable({ jobId: job.id })).isResettable;
     const availableActions: IAvailableActions = {
-      isResumable: (await this.isResettable({ jobId: job.id })).isResettable,
+      isResumable: isResettable,
       isAbortable: job.status === OperationStatus.PENDING || job.status === OperationStatus.IN_PROGRESS,
     };
 
