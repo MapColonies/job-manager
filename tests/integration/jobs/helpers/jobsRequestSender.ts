@@ -7,7 +7,7 @@ export interface SearchJobsParams {
   status?: string;
   type?: string;
   shouldReturnTasks?: boolean;
-  availableActions?: boolean;
+  shouldReturnAvailableActions?: boolean;
   fromDate?: string;
   tillDate?: string;
   internalId?: string;
@@ -20,8 +20,12 @@ export class JobsRequestSender {
     return supertest.agent(this.app).get('/jobs').query(params).set('Content-Type', 'application/json');
   }
 
-  public async getResource(id: string, shouldReturnTasks = true, availableActions = false): Promise<supertest.Response> {
-    return supertest.agent(this.app).get(`/jobs/${id}`).query({ shouldReturnTasks, availableActions }).set('Content-Type', 'application/json');
+  public async getResource(id: string, shouldReturnTasks = true, shouldReturnAvailableActions = false): Promise<supertest.Response> {
+    return supertest
+      .agent(this.app)
+      .get(`/jobs/${id}`)
+      .query({ shouldReturnTasks, shouldReturnAvailableActions })
+      .set('Content-Type', 'application/json');
   }
 
   public async updateResource(id: string, body: Record<string, unknown>): Promise<supertest.Response> {

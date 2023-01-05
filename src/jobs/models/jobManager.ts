@@ -35,7 +35,7 @@ export class JobManager {
     const repo = await this.getRepository();
     let res = await repo.findJobs(req);
 
-    if (req.availableActions === true) {
+    if (req.shouldReturnAvailableActions === true) {
       if (res.length !== 0) {
         res = await Promise.all(
           res.map(async (job) => ({
@@ -63,7 +63,7 @@ export class JobManager {
       throw new NotFoundError('Job not found');
     }
 
-    if (query.availableActions === true) {
+    if (query.shouldReturnAvailableActions === true) {
       const availableActions = await this.getAvailableActions(res);
       res = { ...res, availableActions };
     }

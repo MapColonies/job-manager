@@ -19,7 +19,7 @@ paths:
         - $ref: '#/components/parameters/productType'
         - $ref: '#/components/parameters/internalId'
         - $ref: '#/components/parameters/domain'
-        - $ref: '#/components/parameters/availableActions'
+        - $ref: '#/components/parameters/shouldReturnAvailableActions'
       summary: find jobs by criteria
       tags:
         - jobs
@@ -74,7 +74,7 @@ paths:
     parameters:
       - $ref: '#/components/parameters/jobId'
       - $ref: '#/components/parameters/shouldReturnTasks'
-      - $ref: '#/components/parameters/availableActions'
+      - $ref: '#/components/parameters/shouldReturnAvailableActions'
     get:
       operationId: getJob
       summary: Get job by id
@@ -574,9 +574,9 @@ components:
       schema:
         type: boolean
         default: true
-    availableActions:
+    shouldReturnAvailableActions:
       in: query
-      name: availableActions
+      name: shouldReturnAvailableActions
       description: |
         Whether the job should return its available actions. default=false
       required: false

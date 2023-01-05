@@ -317,14 +317,14 @@ describe('job', function () {
           isResumable: false,
         };
 
-        const response = await requestSender.getResources({ availableActions: true });
+        const response = await requestSender.getResources({ shouldReturnAvailableActions: true });
 
         expect(response.status).toBe(httpStatusCodes.OK);
         expect(jobsFindMock).toHaveBeenCalledTimes(1);
 
         const jobs = response.body as FindJobsResponse;
         expect(jobs).toEqual([jobModel]);
-        expect(findJobsSpy).toHaveBeenCalledWith({ shouldReturnTasks: true, availableActions: true });
+        expect(findJobsSpy).toHaveBeenCalledWith({ shouldReturnTasks: true, shouldReturnAvailableActions: true });
         expect(Object.keys(jobs[0])).toContain('availableActions');
         expect(jobs[0].availableActions).toEqual(expectedAvailableActions);
         expect(response).toSatisfyApiSpec();
@@ -339,7 +339,7 @@ describe('job', function () {
         const findJobsSpy = jest.spyOn(JobManager.prototype, 'findJobs');
         jobsFindMock.mockResolvedValue([jobEntity]);
 
-        const response = await requestSender.getResources({ availableActions: true });
+        const response = await requestSender.getResources({ shouldReturnAvailableActions: true });
 
         expect(response.status).toBe(httpStatusCodes.OK);
         expect(jobsFindMock).toHaveBeenCalledTimes(1);
@@ -348,7 +348,7 @@ describe('job', function () {
         delete (jobModel as IGetJobResponse).availableActions;
         delete jobs[0].availableActions;
         expect(jobs).toEqual([jobModel]);
-        expect(findJobsSpy).toHaveBeenCalledWith({ shouldReturnTasks: true, availableActions: true });
+        expect(findJobsSpy).toHaveBeenCalledWith({ shouldReturnTasks: true, shouldReturnAvailableActions: true });
         expect(Object.keys(jobs[0])).not.toContain('availableActions');
         expect(response).toSatisfyApiSpec();
         findJobsSpy.mockRestore();
@@ -536,7 +536,7 @@ describe('job', function () {
         expect(job).toEqual(jobModel);
         expect(getJobSpy).toHaveBeenCalledWith(
           { jobId: '170dd8c0-8bad-498b-bb26-671dcf19aa3c' },
-          { shouldReturnTasks: false, availableActions: true }
+          { shouldReturnTasks: false, shouldReturnAvailableActions: true }
         );
         expect(Object.keys(job)).toContain('availableActions');
         expect(job.availableActions).toEqual(expectedAvailableActions);
@@ -567,7 +567,7 @@ describe('job', function () {
         expect(job).toEqual(jobModel);
         expect(getJobSpy).toHaveBeenCalledWith(
           { jobId: '170dd8c0-8bad-498b-bb26-671dcf19aa3c' },
-          { shouldReturnTasks: false, availableActions: false }
+          { shouldReturnTasks: false, shouldReturnAvailableActions: false }
         );
         expect(Object.keys(job)).not.toContain('availableActions');
         expect(response).toSatisfyApiSpec();

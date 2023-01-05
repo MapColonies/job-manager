@@ -8,7 +8,7 @@ export interface IJobsParams {
 
 export interface IJobsQuery {
   shouldReturnTasks: boolean;
-  availableActions?: boolean;
+  shouldReturnAvailableActions?: boolean;
 }
 
 export interface IFindJobsRequest {
@@ -18,7 +18,7 @@ export interface IFindJobsRequest {
   status?: OperationStatus;
   type?: string;
   shouldReturnTasks?: boolean;
-  availableActions?: boolean;
+  shouldReturnAvailableActions?: boolean;
   productType?: string;
   fromDate?: string;
   tillDate?: string;
