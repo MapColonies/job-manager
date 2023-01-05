@@ -10,13 +10,13 @@ import { ResponseCodes, SERVICES } from '../../common/constants';
 import { IFindInactiveTasksRequest, IGetTaskResponse, IRetrieveAndStartRequest } from '../../common/dataModels/tasks';
 import { DefaultResponse } from '../../common/interfaces';
 import { TaskManagementManager } from '../models/taskManagementManger';
-import { IJobsParams } from '../../common/dataModels/jobs';
+import { IJobsParams, IJobsQuery } from '../../common/dataModels/jobs';
 
 type RetrieveAndStartHandler = RequestHandler<IRetrieveAndStartRequest, IGetTaskResponse | ErrorResponse>;
 type ReleaseInactiveTasksHandler = RequestHandler<undefined, string[], string[]>;
 type FindInactiveTasksHandler = RequestHandler<undefined, string[], IFindInactiveTasksRequest>;
 type UpdateExpiredStatusHandler = RequestHandler<undefined, DefaultResponse>;
-type AbortHandler = RequestHandler<IJobsParams, DefaultResponse>;
+type AbortHandler = RequestHandler<IJobsParams, DefaultResponse, undefined, IJobsQuery>;
 
 @injectable()
 export class TaskManagementController {
@@ -72,7 +72,7 @@ export class TaskManagementController {
 
   public abort: AbortHandler = async (req, res, next) => {
     try {
-      await this.manager.abortJobAndTasks(req.params);
+      await this.manager.abortJobAndTasks(req.params, req.query);
       return res.status(httpStatus.OK).json({ code: ResponseCodes.JOB_ABORTED });
     } catch (err) {
       return next(err);

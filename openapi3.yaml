@@ -19,6 +19,7 @@ paths:
         - $ref: '#/components/parameters/productType'
         - $ref: '#/components/parameters/internalId'
         - $ref: '#/components/parameters/domain'
+        - $ref: '#/components/parameters/shouldReturnAvailableActions'
       summary: find jobs by criteria
       tags:
         - jobs
@@ -72,8 +73,10 @@ paths:
   /jobs/{jobId}:
     parameters:
       - $ref: '#/components/parameters/jobId'
-      - $ref: '#/components/parameters/shouldReturnTasks'
     get:
+      parameters:
+        - $ref: '#/components/parameters/shouldReturnTasks'
+        - $ref: '#/components/parameters/shouldReturnAvailableActions'
       operationId: getJob
       summary: Get job by id
       tags:
@@ -572,6 +575,15 @@ components:
       schema:
         type: boolean
         default: true
+    shouldReturnAvailableActions:
+      in: query
+      name: shouldReturnAvailableActions
+      description: |
+        Whether the job should return its available actions. default=false (performance impact)
+      required: false
+      schema:
+        type: boolean
+        default: false
     type:
       in: query
       name: type
@@ -786,6 +798,21 @@ components:
           type: string
         tasks:
           $ref: '#/components/schemas/tasksResponse'
+        availableActions:
+          $ref: '#/components/schemas/availableActions'
+    availableActions:
+      type: object
+      items:
+        $ref: '#/components/schemas/availableActionsResponse'
+    availableActionsResponse:
+      required:
+        - isAbortable
+        - isResumable
+      properties:
+        isAbortable:
+          type: boolean
+        isResumable:
+          type: boolean
     tasksResponse:
       type: array
       items:

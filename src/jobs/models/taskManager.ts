@@ -2,7 +2,6 @@ import { Logger } from '@map-colonies/js-logger';
 import { NotFoundError } from '@map-colonies/error-types';
 import { inject, injectable } from 'tsyringe';
 import { SERVICES } from '../../common/constants';
-
 import { ConnectionManager } from '../../DAL/connectionManager';
 import { TaskRepository } from '../../DAL/repositories/taskRepository';
 import {

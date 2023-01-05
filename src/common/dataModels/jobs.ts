@@ -7,7 +7,8 @@ export interface IJobsParams {
 }
 
 export interface IJobsQuery {
-  shouldReturnTasks: boolean;
+  shouldReturnTasks?: boolean;
+  shouldReturnAvailableActions?: boolean;
 }
 
 export interface IFindJobsRequest {
@@ -17,6 +18,7 @@ export interface IFindJobsRequest {
   status?: OperationStatus;
   type?: string;
   shouldReturnTasks?: boolean;
+  shouldReturnAvailableActions?: boolean;
   productType?: string;
   fromDate?: string;
   tillDate?: string;
@@ -98,6 +100,7 @@ export interface IGetJobResponse {
   additionalIdentifiers?: string;
   expirationDate?: Date;
   domain: string;
+  availableActions?: IAvailableActions;
 }
 
 export interface ICreateJobResponse {
@@ -108,4 +111,9 @@ export interface ICreateJobResponse {
 export interface IIsResettableResponse {
   jobId: string;
   isResettable: boolean;
+}
+
+export interface IAvailableActions {
+  isAbortable: boolean;
+  isResumable: boolean;
 }

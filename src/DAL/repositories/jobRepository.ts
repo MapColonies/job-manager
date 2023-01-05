@@ -12,6 +12,7 @@ import {
   IGetJobResponse,
   IFindJobsRequest,
   IUpdateJobRequest,
+  IJobsQuery,
 } from '../../common/dataModels/jobs';
 import { JobModelConvertor } from '../convertors/jobModelConverter';
 import { OperationStatus } from '../../common/dataModels/enums';
@@ -106,13 +107,14 @@ export class JobRepository extends GeneralRepository<JobEntity> {
     }
   }
 
-  public async getJob(id: string, shouldReturnTasks = true): Promise<IGetJobResponse | undefined> {
+  public async getJob(id: string, query: IJobsQuery): Promise<IGetJobResponse | undefined> {
     let entity;
-    if (!shouldReturnTasks) {
+    if (!query.shouldReturnTasks) {
       entity = await this.findOne(id);
     } else {
       entity = await this.findOne(id, { relations: ['tasks'] });
     }
+
     const model = entity ? this.jobConvertor.entityToModel(entity) : undefined;
     return model;
   }

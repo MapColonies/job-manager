@@ -12,11 +12,13 @@ import {
   moreThanOrEqualMock,
 } from '../../mocks/DBMock';
 import { getApp } from '../../../src/app';
+import { FindJobsResponse, IAvailableActions, IGetJobResponse } from '../../../src/common/dataModels/jobs';
 import { TaskRepository } from '../../../src/DAL/repositories/taskRepository';
 import { OperationStatus } from '../../../src/common/dataModels/enums';
 import { TaskEntity } from '../../../src/DAL/entity/task';
 import { ResponseCodes } from '../../../src/common/constants';
-import { JobsRequestSender, SearchTasksParams } from './helpers/jobsRequestSender';
+import { JobManager } from '../../../src/jobs/models/jobManager';
+import { JobsRequestSender, SearchJobsParams } from './helpers/jobsRequestSender';
 
 let jobRepositoryMocks: RepositoryMocks;
 let taskRepositoryMocks: RepositoryMocks;
@@ -68,6 +70,10 @@ function createJobDataForFind(): unknown {
     productName: 'productName',
     productType: 'productType',
     additionalIdentifiers: '',
+    availableActions: {
+      isAbortable: true,
+      isResumable: false,
+    },
   };
 
   return jobModel;
@@ -121,6 +127,10 @@ function createJobDataForGetJob(): unknown {
     productName: 'productName',
     productType: 'productType',
     additionalIdentifiers: '',
+    availableActions: {
+      isAbortable: true,
+      isResumable: false,
+    },
   };
 
   return jobModel;
@@ -295,11 +305,60 @@ describe('job', function () {
         expect(response).toSatisfyApiSpec();
       });
 
+      it('should get all jobs and return 200 with tasks & available actions', async function () {
+        const jobModel = createJobDataForFind();
+        const jobEntity = jobModelToEntity(jobModel);
+        const jobsFindMock = jobRepositoryMocks.findMock;
+        jobRepositoryMocks.queryMock.mockResolvedValue([{ unResettableTasks: '1', failedTasks: '3' }]);
+        const findJobsSpy = jest.spyOn(JobManager.prototype, 'findJobs');
+        jobsFindMock.mockResolvedValue([jobEntity]);
+        const expectedAvailableActions: IAvailableActions = {
+          isAbortable: true,
+          isResumable: false,
+        };
+
+        const response = await requestSender.getResources({ shouldReturnAvailableActions: true });
+
+        expect(response.status).toBe(httpStatusCodes.OK);
+        expect(jobsFindMock).toHaveBeenCalledTimes(1);
+
+        const jobs = response.body as FindJobsResponse;
+        expect(jobs).toEqual([jobModel]);
+        expect(findJobsSpy).toHaveBeenCalledWith({ shouldReturnTasks: true, shouldReturnAvailableActions: true });
+        expect(Object.keys(jobs[0])).toContain('availableActions');
+        expect(jobs[0].availableActions).toEqual(expectedAvailableActions);
+        expect(response).toSatisfyApiSpec();
+        findJobsSpy.mockRestore();
+      });
+
+      it('should get all jobs and return 200 without available actions', async function () {
+        const jobModel = createJobDataForFind();
+        const jobEntity = jobModelToEntity(jobModel);
+        const jobsFindMock = jobRepositoryMocks.findMock;
+        jobRepositoryMocks.queryMock.mockResolvedValue([{ unResettableTasks: '1', failedTasks: '3' }]);
+        const findJobsSpy = jest.spyOn(JobManager.prototype, 'findJobs');
+        jobsFindMock.mockResolvedValue([jobEntity]);
+
+        const response = await requestSender.getResources({ shouldReturnAvailableActions: true });
+
+        expect(response.status).toBe(httpStatusCodes.OK);
+        expect(jobsFindMock).toHaveBeenCalledTimes(1);
+
+        const jobs = response.body as FindJobsResponse;
+        delete (jobModel as IGetJobResponse).availableActions;
+        delete jobs[0].availableActions;
+        expect(jobs).toEqual([jobModel]);
+        expect(findJobsSpy).toHaveBeenCalledWith({ shouldReturnTasks: true, shouldReturnAvailableActions: true });
+        expect(Object.keys(jobs[0])).not.toContain('availableActions');
+        expect(response).toSatisfyApiSpec();
+        findJobsSpy.mockRestore();
+      });
+
       it('should get the job by internal id and return 200 with tasks', async function () {
         const jobModel = createJobDataForFind();
         const jobEntity = jobModelToEntity(jobModel);
         const jobsFindMock = jobRepositoryMocks.findMock;
-        const parmas: SearchTasksParams = { internalId: '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d' };
+        const parmas: SearchJobsParams = { internalId: '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d' };
         jobsFindMock.mockResolvedValue([jobEntity]);
 
         const response = await requestSender.getResources({ ...parmas });
@@ -450,6 +509,69 @@ describe('job', function () {
         delete (jobModel as JobEntity).tasks;
         expect(job).toEqual(jobModel);
         expect(response).toSatisfyApiSpec();
+      });
+
+      it('should get specific job and return 200 with the available actions', async function () {
+        const jobModel = createJobDataForGetJob();
+        const jobEntity = jobModelToEntity(jobModel);
+        const jobsFindOneMock = jobRepositoryMocks.findOneMock;
+        jobRepositoryMocks.queryMock.mockResolvedValue([{ unResettableTasks: '1', failedTasks: '3' }]);
+        const getJobSpy = jest.spyOn(JobManager.prototype, 'getJob');
+        delete jobEntity.tasks;
+        jobsFindOneMock.mockResolvedValue(jobEntity);
+        const expectedAvailableActions: IAvailableActions = {
+          isAbortable: true,
+          isResumable: false,
+        };
+
+        const response = await requestSender.getResource('170dd8c0-8bad-498b-bb26-671dcf19aa3c', false, true);
+
+        expect(response.status).toBe(httpStatusCodes.OK);
+        expect(jobsFindOneMock).toHaveBeenCalledTimes(1);
+        expect(jobsFindOneMock).toHaveBeenCalledWith('170dd8c0-8bad-498b-bb26-671dcf19aa3c');
+
+        const job = response.body as IGetJobResponse;
+
+        delete (jobModel as JobEntity).tasks;
+        expect(job).toEqual(jobModel);
+        expect(getJobSpy).toHaveBeenCalledWith(
+          { jobId: '170dd8c0-8bad-498b-bb26-671dcf19aa3c' },
+          { shouldReturnTasks: false, shouldReturnAvailableActions: true }
+        );
+        expect(Object.keys(job)).toContain('availableActions');
+        expect(job.availableActions).toEqual(expectedAvailableActions);
+        expect(response).toSatisfyApiSpec();
+        getJobSpy.mockRestore();
+      });
+
+      it('should get specific job and return 200 without the available actions', async function () {
+        const jobModel = createJobDataForGetJob();
+        const jobEntity = jobModelToEntity(jobModel);
+        const jobsFindOneMock = jobRepositoryMocks.findOneMock;
+        jobRepositoryMocks.queryMock.mockResolvedValue([{ unResettableTasks: '1', failedTasks: '3' }]);
+        const getJobSpy = jest.spyOn(JobManager.prototype, 'getJob');
+        delete jobEntity.tasks;
+        jobsFindOneMock.mockResolvedValue(jobEntity);
+
+        const response = await requestSender.getResource('170dd8c0-8bad-498b-bb26-671dcf19aa3c', false, false);
+
+        expect(response.status).toBe(httpStatusCodes.OK);
+        expect(jobsFindOneMock).toHaveBeenCalledTimes(1);
+        expect(jobsFindOneMock).toHaveBeenCalledWith('170dd8c0-8bad-498b-bb26-671dcf19aa3c');
+
+        const job = response.body as IGetJobResponse;
+
+        delete (jobModel as JobEntity).tasks;
+        delete (jobModel as IGetJobResponse).availableActions;
+        delete job.availableActions;
+        expect(job).toEqual(jobModel);
+        expect(getJobSpy).toHaveBeenCalledWith(
+          { jobId: '170dd8c0-8bad-498b-bb26-671dcf19aa3c' },
+          { shouldReturnTasks: false, shouldReturnAvailableActions: false }
+        );
+        expect(Object.keys(job)).not.toContain('availableActions');
+        expect(response).toSatisfyApiSpec();
+        getJobSpy.mockRestore();
       });
 
       it('should update job status and return 200', async function () {

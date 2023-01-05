@@ -15,9 +15,11 @@ import {
   IJobsQuery,
   IIsResettableResponse,
   IResetJobRequest,
+  IAvailableActions,
 } from '../../common/dataModels/jobs';
 import { JobRepository } from '../../DAL/repositories/jobRepository';
 import { TransactionActions } from '../../DAL/repositories/transactionActions';
+import { OperationStatus } from '../../common/dataModels/enums';
 
 @injectable()
 export class JobManager {
@@ -30,7 +32,18 @@ export class JobManager {
 
   public async findJobs(req: IFindJobsRequest): Promise<FindJobsResponse> {
     const repo = await this.getRepository();
-    const res = await repo.findJobs(req);
+    let res = await repo.findJobs(req);
+
+    if (req.shouldReturnAvailableActions === true) {
+      if (res.length !== 0) {
+        res = await Promise.all(
+          res.map(async (job) => ({
+            ...job,
+            availableActions: await this.getAvailableActions(job),
+          }))
+        );
+      }
+    }
     return res;
   }
 
@@ -43,9 +56,15 @@ export class JobManager {
 
   public async getJob(req: IJobsParams, query: IJobsQuery): Promise<IGetJobResponse> {
     const repo = await this.getRepository();
-    const res = await repo.getJob(req.jobId, query.shouldReturnTasks);
+    let res = await repo.getJob(req.jobId, query);
+
     if (res === undefined) {
       throw new NotFoundError('Job not found');
+    }
+
+    if (query.shouldReturnAvailableActions === true) {
+      const availableActions = await this.getAvailableActions(res);
+      res = { ...res, availableActions };
     }
     return res;
   }
@@ -75,6 +94,15 @@ export class JobManager {
     const newExpirationDate = req.newExpirationDate;
     this.logger.info(`reset job ${req.jobId}, newExpirationDate ${(newExpirationDate ?? 'undefiend') as string}`);
     await this.transactionManager.resetJob(jobId, newExpirationDate);
+  }
+
+  private async getAvailableActions(job: IGetJobResponse): Promise<IAvailableActions> {
+    const isResettable = (await this.isResettable({ jobId: job.id })).isResettable;
+    const availableActions: IAvailableActions = {
+      isResumable: isResettable,
+      isAbortable: job.status === OperationStatus.PENDING || job.status === OperationStatus.IN_PROGRESS,
+    };
+    return availableActions;
   }
 
   private async getRepository(): Promise<JobRepository> {
