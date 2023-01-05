@@ -2,10 +2,8 @@ import { Logger } from '@map-colonies/js-logger';
 import { NotFoundError } from '@map-colonies/error-types';
 import { inject, injectable } from 'tsyringe';
 import { SERVICES } from '../../common/constants';
-
 import { ConnectionManager } from '../../DAL/connectionManager';
 import { TaskRepository } from '../../DAL/repositories/taskRepository';
-import { IJobsQuery } from '../../common/dataModels/jobs';
 import {
   CreateTasksRequest,
   CreateTasksResponse,
@@ -74,8 +72,8 @@ export class TaskManager {
     return res;
   }
 
-  public async getTaskStatus(req: IAllTasksParams, queryParams: IJobsQuery): Promise<IGetTasksStatus> {
-    const { version: resourceVersion, resourceId } = await this.jobManager.getJob(req, { ...queryParams, shouldReturnTasks: false });
+  public async getTaskStatus(req: IAllTasksParams): Promise<IGetTasksStatus> {
+    const { version: resourceVersion, resourceId } = await this.jobManager.getJob(req, { shouldReturnTasks: false });
     const repo = await this.getRepository();
 
     this.logger.info(`Getting tasks statuses for jobId ${req.jobId}`);
