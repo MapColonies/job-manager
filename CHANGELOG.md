@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.1.0](https://github.com/MapColonies/job-manager/compare/v2.0.0...v2.1.0) (2023-01-08)
+
+
+### Features
+
+* available actions support (MAPCO-2734) ([#15](https://github.com/MapColonies/job-manager/issues/15)) ([e9dc177](https://github.com/MapColonies/job-manager/commit/e9dc17759d9a08ec8b1361b5937995f29ef555d5))
+
 ## [2.0.0](https://github.com/MapColonies/job-manager/compare/v1.1.1...v2.0.0) (2022-11-27)
 
 

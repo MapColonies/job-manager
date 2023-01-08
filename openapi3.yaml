@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: Job Service
   description: Job Service
-  version: 2.0.0
+  version: 2.1.0
 paths:
   /jobs:
     get:
@@ -578,8 +578,9 @@ components:
     shouldReturnAvailableActions:
       in: query
       name: shouldReturnAvailableActions
-      description: |
-        Whether the job should return its available actions. default=false (performance impact)
+      description: >
+        Whether the job should return its available actions. default=false
+        (performance impact)
       required: false
       schema:
         type: boolean
