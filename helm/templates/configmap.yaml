@@ -11,9 +11,9 @@ data:
   REQUEST_PAYLOAD_LIMIT: {{ .Values.env.requestPayloadLimit | quote }}
   RESPONSE_COMPRESSION_ENABLED: {{ .Values.env.responseCompressionEnabled | quote }}
   LOG_PRETTY_PRINT_ENABLED: {{ .Values.env.logPrettyPrintEnabled | quote }}
-  DB_HOST: {{ .Values.rasterCommon.db.host | quote }}
-  DB_PORT: {{ .Values.rasterCommon.db.port | quote}}
-  DB_NAME: {{ .Values.env.db.nameOverride | default .Values.rasterCommon.db.name | quote }}
+  DB_HOST: {{ .Values.sharedData.db.host | quote }}
+  DB_PORT: {{ .Values.sharedData.db.port | quote}}
+  DB_NAME: {{ .Values.env.db.nameOverride | default .Values.sharedData.db.name | quote }}
   DB_SCHEMA: {{ .Values.env.db.schema | quote }}
   DB_LOGGING: {{ .Values.env.db.logging | quote }}
   {{ if .Values.env.tracing.enabled }}
