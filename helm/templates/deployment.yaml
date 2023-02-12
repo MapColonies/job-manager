@@ -8,7 +8,7 @@
 {{- if .Values.enabled -}}
 
 {{ $sslSecretName := ternary .Values.authentication.ssl.externalSecretName (printf "%s%s" .Release.Name "-open-ssl") .Values.authentication.ssl.useExternal }}
-{{ $postgresSecretName := ternary .Values.rasterCommon.db.secrets.externalSecretName (printf "%s%s" .Release.Name "-postgres-secret") .Values.rasterCommon.db.secrets.useExternal }}
+{{ $postgresSecretName := ternary .Values.sharedData.db.secrets.externalSecretName (printf "%s%s" .Release.Name "-postgres-secret") .Values.sharedData.db.secrets.useExternal }}
 
 {{- if .Values.authentication.ssl.enabled }}
 {{- if and .Values.authentication.ssl.useExternal (not .Values.authentication.ssl.externalSecretName) }}
@@ -56,11 +56,11 @@ spec:
           image: {{ $cloudProviderDockerRegistryUrl }}{{ .repository }}:{{ $imageTag }}
           {{- end }}
           env:
-          {{- if .Values.rasterCommon.ca.secretName }}
+          {{- if .Values.sharedData.ca.secretName }}
             - name: REQUESTS_CA_BUNDLE
-              value: {{ printf "%s/%s" .Values.rasterCommon.ca.path .Values.rasterCommon.ca.key | quote }}
+              value: {{ printf "%s/%s" .Values.sharedData.ca.path .Values.sharedData.ca.key | quote }}
             - name: NODE_EXTRA_CA_CERTS
-              value: {{ printf "%s/%s" .Values.rasterCommon.ca.path .Values.rasterCommon.ca.key | quote }}
+              value: {{ printf "%s/%s" .Values.sharedData.ca.path .Values.sharedData.ca.key | quote }}
           {{- end }}
             - name: SERVER_PORT
               value: {{ .Values.env.targetPort | quote }}
@@ -75,7 +75,7 @@ spec:
                   name: {{ $postgresSecretName }}
                   key: password
             - name: DB_SSL_ENABLE
-              value: {{ quote .Values.rasterCommon.db.sslEnabled }}
+              value: {{ quote .Values.sharedData.db.sslEnabled }}
             - name: DB_SSL_CA
               value: "/opt/certs/ca/ca.pem"
             - name: DB_SSL_KEY
@@ -95,17 +95,17 @@ spec:
               path: /liveness
               port: {{ .Values.env.targetPort }}
           volumeMounts:
-             {{- if .Values.rasterCommon.ca.secretName }}
+             {{- if .Values.sharedData.ca.secretName }}
             - name: root-ca
-              mountPath: {{ printf "%s/%s" .Values.rasterCommon.ca.path .Values.rasterCommon.ca.key | quote }}
-              subPath: {{ quote .Values.rasterCommon.ca.key }}
+              mountPath: {{ printf "%s/%s" .Values.sharedData.ca.path .Values.sharedData.ca.key | quote }}
+              subPath: {{ quote .Values.sharedData.ca.key }}
             {{- end }}
             {{- if .Values.authentication.ssl.enabled }}
             - name: open-ssl
               mountPath: "/etc/ssl/openssl.cnf"
               subPath: "openssl.cnf"
             {{- end }}
-           {{- if .Values.rasterCommon.db.sslEnabled }}
+           {{- if .Values.sharedData.db.sslEnabled }}
             - name: ca-file
               mountPath: "/opt/certs/ca/ca.pem"
               subPath: ca.pem
@@ -121,17 +121,17 @@ spec:
             {{- toYaml .Values.resources.value | nindent 12 }}
           {{- end }}
       volumes:
-        {{- if .Values.rasterCommon.ca.secretName }}
+        {{- if .Values.sharedData.ca.secretName }}
         - name: root-ca
           secret:
-            secretName: {{ .Values.rasterCommon.ca.secretName }}
+            secretName: {{ .Values.sharedData.ca.secretName }}
         {{- end }}
         {{- if .Values.authentication.ssl.enabled }}
         - name: open-ssl
           secret:
             secretName: {{ $sslSecretName }}
         {{- end }}
-      {{- if .Values.rasterCommon.db.sslEnabled }}
+      {{- if .Values.sharedData.db.sslEnabled }}
         - name: ca-file
           secret:
             secretName: {{ $postgresSecretName }}
