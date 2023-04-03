@@ -170,7 +170,6 @@ export class TaskRepository extends GeneralRepository<TaskEntity> {
     const hasTypes = req.types != undefined && req.types.length > 0;
     const hasIgnoredTypes = req.ignoreTypes != undefined && req.ignoreTypes.length > 0;
     if (hasTypes || hasIgnoredTypes) {
-      // query = query.innerJoin('tk.jobId', 'jb');
       query = query.innerJoin(JobEntity, 'jb', 'jb.id = tk.jobId');
       if (hasTypes) {
         const types = req.types as ITaskType[];
