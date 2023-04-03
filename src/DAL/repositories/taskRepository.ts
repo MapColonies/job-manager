@@ -20,6 +20,7 @@ import {
   IUpdateTaskRequest,
 } from '../../common/dataModels/tasks';
 import { OperationStatus } from '../../common/dataModels/enums';
+import { JobEntity } from '../entity/job';
 import { GeneralRepository } from './generalRepository';
 
 declare type SqlRawResponse = [unknown[], number];
@@ -158,34 +159,38 @@ export class TaskRepository extends GeneralRepository<TaskEntity> {
     //find timed out "In-Progress" tasks (of given types if requested)
     const secToMsConversionRate = 1000;
     const olderThen = new Date(Date.now() - req.inactiveTimeSec * secToMsConversionRate);
+
     let query = this.createQueryBuilder('tk')
       .select('tk.id AS id')
       .where({
         status: OperationStatus.IN_PROGRESS,
         updateTime: LessThan(olderThen),
       });
+
     const hasTypes = req.types != undefined && req.types.length > 0;
     const hasIgnoredTypes = req.ignoreTypes != undefined && req.ignoreTypes.length > 0;
     if (hasTypes || hasIgnoredTypes) {
-      query = query.innerJoin('tk.jobId', 'jb');
+      // query = query.innerJoin('tk.jobId', 'jb');
+      query = query.innerJoin(JobEntity, 'jb', 'jb.id = tk.jobId');
       if (hasTypes) {
         const types = req.types as ITaskType[];
         query = query.andWhere(
           new Brackets((qb) => {
-            qb.where('tk.type =  :taskType AND jb.type = :jobType', types[0]);
+            qb.where(`${this.buildTaskJobAndStr(types[0])}`);
             for (let i = 1; i < types.length; i++) {
-              qb.orWhere('tk.type =  :taskType AND jb.type = :jobType', types[i]);
+              qb.orWhere(`${this.buildTaskJobAndStr(types[i])}`);
             }
           })
         );
       }
+
       if (hasIgnoredTypes) {
         const ignoredTypes = req.ignoreTypes as ITaskType[];
         query = query.andWhere(
           new Brackets((qb) => {
-            qb.where('NOT (tk.type =  :taskType AND jb.type = :jobType)', ignoredTypes[0]);
+            qb.where(`NOT ${this.buildTaskJobAndStr(ignoredTypes[0])}`, ignoredTypes[0]);
             for (let i = 1; i < ignoredTypes.length; i++) {
-              qb.andWhere('NOT (tk.type =  :taskType AND jb.type = :jobType)', ignoredTypes[i]);
+              qb.andWhere(`NOT ${this.buildTaskJobAndStr(ignoredTypes[i])}`);
             }
           })
         );
@@ -246,6 +251,10 @@ export class TaskRepository extends GeneralRepository<TaskEntity> {
 
   public async abortJobTasks(jobId: string): Promise<UpdateResult> {
     return this.update({ jobId, status: OperationStatus.PENDING }, { status: OperationStatus.ABORTED });
+  }
+
+  private buildTaskJobAndStr(taskType: ITaskType): string {
+    return `(tk.type =  '${taskType.taskType}' AND jb.type = '${taskType.jobType}')`;
   }
 
   private async createSingleTask(req: ICreateTaskRequest): Promise<ICreateTaskResponse> {
