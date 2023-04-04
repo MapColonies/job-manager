@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.1.1](https://github.com/MapColonies/job-manager/compare/v2.1.0...v2.1.1) (2023-04-04)
+
+
+### Bug Fixes
+
+* provide types and ignoreTypes array for inactive API (MAPCO-3022) ([#20](https://github.com/MapColonies/job-manager/issues/20)) ([319c529](https://github.com/MapColonies/job-manager/commit/319c5291dfcf1739e053331baf4ac3e10a3f5ad5))
+
 ## [2.1.0](https://github.com/MapColonies/job-manager/compare/v2.0.0...v2.1.0) (2023-01-08)
 
 
