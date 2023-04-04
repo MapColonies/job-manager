@@ -109,10 +109,10 @@ export class JobRepository extends GeneralRepository<JobEntity> {
 
   public async getJob(id: string, query: IJobsQuery): Promise<IGetJobResponse | undefined> {
     let entity;
-    if (!query.shouldReturnTasks) {
-      entity = await this.findOne(id);
-    } else {
+    if (query.shouldReturnTasks === true) {
       entity = await this.findOne(id, { relations: ['tasks'] });
+    } else {
+      entity = await this.findOne(id);
     }
 
     const model = entity ? this.jobConvertor.entityToModel(entity) : undefined;
