@@ -1,8 +1,6 @@
 import { ErrorResponse } from '@map-colonies/error-express-handler';
 import { Logger } from '@map-colonies/js-logger';
-import { Meter } from '@map-colonies/telemetry';
 import { NotFoundError } from '@map-colonies/error-types';
-import { BoundCounter } from '@opentelemetry/api-metrics';
 import { RequestHandler } from 'express';
 import httpStatus from 'http-status-codes';
 import { injectable, inject } from 'tsyringe';
@@ -33,15 +31,7 @@ type FindResourceHandler = RequestHandler<undefined, GetTasksResponse | ErrorRes
 
 @injectable()
 export class TaskController {
-  private readonly createdResourceCounter: BoundCounter;
-
-  public constructor(
-    @inject(SERVICES.LOGGER) private readonly logger: Logger,
-    @inject(TaskManager) private readonly manager: TaskManager,
-    @inject(SERVICES.METER) private readonly meter: Meter
-  ) {
-    this.createdResourceCounter = meter.createCounter('created_resource');
-  }
+  public constructor(@inject(SERVICES.LOGGER) private readonly logger: Logger, @inject(TaskManager) private readonly manager: TaskManager) {}
   public createResource: CreateResourceHandler = async (req, res, next) => {
     try {
       let tasksReq: CreateTasksRequest;

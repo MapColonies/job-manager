@@ -1,7 +1,5 @@
 import { Logger } from '@map-colonies/js-logger';
-import { Meter } from '@map-colonies/telemetry';
 import { NotFoundError } from '@map-colonies/error-types';
-import { BoundCounter } from '@opentelemetry/api-metrics';
 import { RequestHandler } from 'express';
 import { ErrorResponse } from '@map-colonies/error-express-handler';
 import httpStatus from 'http-status-codes';
@@ -20,15 +18,10 @@ type AbortHandler = RequestHandler<IJobsParams, DefaultResponse, undefined, IJob
 
 @injectable()
 export class TaskManagementController {
-  private readonly createdResourceCounter: BoundCounter;
-
   public constructor(
     @inject(SERVICES.LOGGER) private readonly logger: Logger,
-    @inject(TaskManagementManager) private readonly manager: TaskManagementManager,
-    @inject(SERVICES.METER) private readonly meter: Meter
-  ) {
-    this.createdResourceCounter = meter.createCounter('created_resource');
-  }
+    @inject(TaskManagementManager) private readonly manager: TaskManagementManager
+  ) {}
 
   public startPending: RetrieveAndStartHandler = async (req, res, next) => {
     try {

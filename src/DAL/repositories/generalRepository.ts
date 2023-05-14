@@ -1,9 +1,9 @@
 import { container } from 'tsyringe';
-import { Repository } from 'typeorm';
+import { ObjectLiteral, Repository } from 'typeorm';
 import { SERVICES } from '../../common/constants';
 import { IConfig, IDbConfig } from '../../common/interfaces';
 
-export class GeneralRepository<T> extends Repository<T> {
+export class GeneralRepository<T extends ObjectLiteral> extends Repository<T> {
   protected readonly dbConfig: IDbConfig;
   private readonly config: IConfig;
 
