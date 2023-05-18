@@ -2,5 +2,5 @@ apiVersion: v2
 name: job-manager
 description: A Helm chart for job-manager service
 type: application
-version: 2.1.2
-appVersion: 2.1.2
+version: 2.1.3
+appVersion: 2.1.3
