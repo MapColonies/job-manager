@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: Job Service
   description: Job Service
-  version: 2.1.3
+  version: 2.1.4
 paths:
   /jobs:
     get:
