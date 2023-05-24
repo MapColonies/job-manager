@@ -1038,8 +1038,6 @@ components:
           type: integer
         resettable:
           type: boolean
-      required:
-        - status
       additionalProperties: false
     findInactiveTasksRequest:
       type: object
