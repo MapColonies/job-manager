@@ -22,28 +22,28 @@ export interface ICreateTaskBody {
 
 export type CreateTasksBody = ICreateTaskBody | ICreateTaskBody[];
 
-export interface ICreateTaskRequest extends IAllTasksParams, ICreateTaskBody {}
+export interface ICreateTaskRequest extends IAllTasksParams, ICreateTaskBody { }
 
 export type CreateTasksRequest = ICreateTaskRequest | ICreateTaskRequest[];
 
 export interface IUpdateTaskBody {
   description?: string;
   parameters?: Record<string, unknown>;
-  status: OperationStatus;
+  status?: OperationStatus;
   percentage?: number;
   reason?: string;
   attempts?: number;
   resettable?: boolean;
 }
 
-export interface IUpdateTaskRequest extends ISpecificTaskParams, IUpdateTaskBody {}
+export interface IUpdateTaskRequest extends ISpecificTaskParams, IUpdateTaskBody { }
 
 export interface ITaskType {
   jobType: string;
   taskType: string;
 }
 
-export interface IRetrieveAndStartRequest extends ITaskType {}
+export interface IRetrieveAndStartRequest extends ITaskType { }
 
 export interface IFindInactiveTasksRequest {
   inactiveTimeSec: number;
