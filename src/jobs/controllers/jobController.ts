@@ -1,6 +1,4 @@
 import { Logger } from '@map-colonies/js-logger';
-import { Meter } from '@map-colonies/telemetry';
-import { BoundCounter } from '@opentelemetry/api-metrics';
 import { RequestHandler } from 'express';
 import httpStatus from 'http-status-codes';
 import { injectable, inject } from 'tsyringe';
@@ -31,15 +29,7 @@ type ResetJobHandler = RequestHandler<IJobsParams, DefaultResponse, IResetJobReq
 
 @injectable()
 export class JobController {
-  private readonly createdResourceCounter: BoundCounter;
-
-  public constructor(
-    @inject(SERVICES.LOGGER) private readonly logger: Logger,
-    @inject(JobManager) private readonly manager: JobManager,
-    @inject(SERVICES.METER) private readonly meter: Meter
-  ) {
-    this.createdResourceCounter = meter.createCounter('created_resource');
-  }
+  public constructor(@inject(SERVICES.LOGGER) private readonly logger: Logger, @inject(JobManager) private readonly manager: JobManager) {}
   public createResource: CreateResourceHandler = async (req, res, next) => {
     try {
       const job = await this.manager.createJob(req.body);
