@@ -60,7 +60,7 @@ export interface IGetTaskResponse {
   created: Date;
   updated: Date;
   type: string;
-  status: OperationStatus;
+  status?: OperationStatus;
   percentage?: number;
   reason?: string;
   attempts: number;
