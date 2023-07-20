@@ -71,7 +71,7 @@ function createJobDataForFind(): unknown {
     productType: 'productType',
     additionalIdentifiers: '',
     availableActions: {
-      isAbortable: true,
+      isAbortable: false,
       isResumable: false,
     },
   };
@@ -128,7 +128,7 @@ function createJobDataForGetJob(): unknown {
     productType: 'productType',
     additionalIdentifiers: '',
     availableActions: {
-      isAbortable: true,
+      isAbortable: false,
       isResumable: false,
     },
   };
@@ -313,7 +313,7 @@ describe('job', function () {
         const findJobsSpy = jest.spyOn(JobManager.prototype, 'findJobs');
         jobsFindMock.mockResolvedValue([jobEntity]);
         const expectedAvailableActions: IAvailableActions = {
-          isAbortable: true,
+          isAbortable: false,
           isResumable: false,
         };
 
@@ -520,7 +520,7 @@ describe('job', function () {
         delete jobEntity.tasks;
         jobsFindOneMock.mockResolvedValue(jobEntity);
         const expectedAvailableActions: IAvailableActions = {
-          isAbortable: true,
+          isAbortable: false,
           isResumable: false,
         };
 

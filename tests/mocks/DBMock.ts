@@ -58,6 +58,8 @@ interface QueryBuilder {
   returning: jest.Mock;
   updateEntity: jest.Mock;
   execute: jest.Mock;
+  leftJoinAndSelect: jest.Mock;
+  getCount: jest.Mock;
 }
 
 interface RepositoryMocks {
@@ -91,6 +93,8 @@ const registerRepository = <T>(key: ObjectType<T>, instance: T): RepositoryMocks
       returning: jest.fn(),
       updateEntity: jest.fn(),
       execute: jest.fn(),
+      leftJoinAndSelect: jest.fn(),
+      getCount: jest.fn(),
     },
     queryMock: jest.fn(),
     updateMock: jest.fn(),
@@ -113,6 +117,8 @@ const registerRepository = <T>(key: ObjectType<T>, instance: T): RepositoryMocks
   mocks.queryBuilder.set.mockImplementation(() => mocks.queryBuilder);
   mocks.queryBuilder.returning.mockImplementation(() => mocks.queryBuilder);
   mocks.queryBuilder.updateEntity.mockImplementation(() => mocks.queryBuilder);
+  mocks.queryBuilder.leftJoinAndSelect.mockImplementation(() => mocks.queryBuilder);
+  mocks.queryBuilder.getCount.mockImplementation(() => mocks.queryBuilder);
 
   repositories[key.name] = repo;
   return mocks;
