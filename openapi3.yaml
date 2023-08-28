@@ -570,11 +570,11 @@ components:
       in: query
       name: shouldReturnTasks
       description: |
-        Whether the job should return its contained tasks. default=true
+        Whether the job should return its contained tasks. default=false
       required: false
       schema:
         type: boolean
-        default: true
+        default: false
     shouldReturnAvailableActions:
       in: query
       name: shouldReturnAvailableActions

@@ -294,7 +294,7 @@ describe('job', function () {
         const jobsFindMock = jobRepositoryMocks.findMock;
         jobsFindMock.mockResolvedValue([jobEntity]);
 
-        const response = await requestSender.getResources();
+        const response = await requestSender.getResources({ shouldReturnTasks: true });
 
         expect(response.status).toBe(httpStatusCodes.OK);
         expect(jobsFindMock).toHaveBeenCalledTimes(1);
@@ -317,7 +317,7 @@ describe('job', function () {
           isResumable: false,
         };
 
-        const response = await requestSender.getResources({ shouldReturnAvailableActions: true });
+        const response = await requestSender.getResources({ shouldReturnTasks: true, shouldReturnAvailableActions: true });
 
         expect(response.status).toBe(httpStatusCodes.OK);
         expect(jobsFindMock).toHaveBeenCalledTimes(1);
@@ -348,7 +348,7 @@ describe('job', function () {
         delete (jobModel as IGetJobResponse).availableActions;
         delete jobs[0].availableActions;
         expect(jobs).toEqual([jobModel]);
-        expect(findJobsSpy).toHaveBeenCalledWith({ shouldReturnTasks: true, shouldReturnAvailableActions: true });
+        expect(findJobsSpy).toHaveBeenCalledWith({ shouldReturnTasks: false, shouldReturnAvailableActions: true });
         expect(Object.keys(jobs[0])).not.toContain('availableActions');
         expect(response).toSatisfyApiSpec();
         findJobsSpy.mockRestore();
@@ -358,14 +358,14 @@ describe('job', function () {
         const jobModel = createJobDataForFind();
         const jobEntity = jobModelToEntity(jobModel);
         const jobsFindMock = jobRepositoryMocks.findMock;
-        const parmas: SearchJobsParams = { internalId: '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d' };
+        const parmas: SearchJobsParams = { internalId: '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d', shouldReturnTasks: true };
         jobsFindMock.mockResolvedValue([jobEntity]);
 
         const response = await requestSender.getResources({ ...parmas });
 
         expect(response.status).toBe(httpStatusCodes.OK);
         expect(jobsFindMock).toHaveBeenCalledTimes(1);
-        expect(jobsFindMock).toHaveBeenCalledWith({ relations: ['tasks'], where: parmas });
+        expect(jobsFindMock).toHaveBeenCalledWith({ relations: ['tasks'], where: { internalId: '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d' } });
 
         const jobs = response.body as unknown;
         expect(jobs).toEqual([jobModel]);
@@ -386,7 +386,6 @@ describe('job', function () {
         expect(jobsFindMock).toHaveBeenCalledTimes(1);
         expect(jobsFindMock).toHaveBeenCalledWith({
           where: { updateTime: 'moreThanOrEqualMock' },
-          relations: ['tasks'],
         });
         expect(moreThanOrEqualMock).toHaveBeenCalledTimes(1);
         expect(moreThanOrEqualMock).toHaveBeenCalledWith('2000-01-01T00:00:00Z');
@@ -412,7 +411,6 @@ describe('job', function () {
         expect(jobsFindMock).toHaveBeenCalledTimes(1);
         expect(jobsFindMock).toHaveBeenCalledWith({
           where: { updateTime: 'lessThanOrEqualMock' },
-          relations: ['tasks'],
         });
         expect(moreThanOrEqualMock).toHaveBeenCalledTimes(0);
         expect(lessThanOrEqualMock).toHaveBeenCalledTimes(1);
@@ -437,7 +435,6 @@ describe('job', function () {
         expect(jobsFindMock).toHaveBeenCalledTimes(1);
         expect(jobsFindMock).toHaveBeenCalledWith({
           where: { updateTime: 'betweenMock' },
-          relations: ['tasks'],
         });
         expect(moreThanOrEqualMock).toHaveBeenCalledTimes(0);
         expect(lessThanOrEqualMock).toHaveBeenCalledTimes(0);
@@ -465,7 +462,7 @@ describe('job', function () {
         expect(response.body).toEqual([]);
         expect(response.status).toBe(httpStatusCodes.OK);
         expect(jobsFindMock).toHaveBeenCalledTimes(1);
-        expect(jobsFindMock).toHaveBeenCalledWith({ relations: ['tasks'], where: filter });
+        expect(jobsFindMock).toHaveBeenCalledWith({ where: filter });
         expect(response).toSatisfyApiSpec();
       });
     });
@@ -482,9 +479,7 @@ describe('job', function () {
 
         expect(response.status).toBe(httpStatusCodes.OK);
         expect(jobsFinOneMock).toHaveBeenCalledTimes(1);
-        expect(jobsFinOneMock).toHaveBeenCalledWith('170dd8c0-8bad-498b-bb26-671dcf19aa3c', {
-          relations: ['tasks'],
-        });
+        expect(jobsFinOneMock).toHaveBeenCalledWith('170dd8c0-8bad-498b-bb26-671dcf19aa3c');
 
         const job = response.body as unknown;
         expect(job).toEqual(jobModel);
@@ -744,9 +739,7 @@ describe('job', function () {
       const response = await requestSender.getResource('170dd8c0-8bad-498b-bb26-671dcf19aa3c');
 
       expect(jobsFindOneMock).toHaveBeenCalledTimes(1);
-      expect(jobsFindOneMock).toHaveBeenCalledWith('170dd8c0-8bad-498b-bb26-671dcf19aa3c', {
-        relations: ['tasks'],
-      });
+      expect(jobsFindOneMock).toHaveBeenCalledWith('170dd8c0-8bad-498b-bb26-671dcf19aa3c');
       expect(response.status).toBe(httpStatusCodes.NOT_FOUND);
       expect(response).toSatisfyApiSpec();
     });
