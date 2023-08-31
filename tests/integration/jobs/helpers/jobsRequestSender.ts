@@ -20,7 +20,7 @@ export class JobsRequestSender {
     return supertest.agent(this.app).get('/jobs').query(params).set('Content-Type', 'application/json');
   }
 
-  public async getResource(id: string, shouldReturnTasks = true, shouldReturnAvailableActions = false): Promise<supertest.Response> {
+  public async getResource(id: string, shouldReturnTasks = false, shouldReturnAvailableActions = false): Promise<supertest.Response> {
     return supertest
       .agent(this.app)
       .get(`/jobs/${id}`)
