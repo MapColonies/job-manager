@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.3.0](https://github.com/MapColonies/job-manager/compare/v2.2.1...v2.3.0) (2023-08-31)
+
+
+### Features
+
+* change default get job by id and jobs to return withaot tasks ([#28](https://github.com/MapColonies/job-manager/issues/28)) ([5b4668f](https://github.com/MapColonies/job-manager/commit/5b4668f40db4d59eab87e76ac5eb161e17cb307c))
+
 ### [2.2.1](https://github.com/MapColonies/job-manager/compare/v2.2.0...v2.2.1) (2023-05-29)
 
 ## [2.2.0](https://github.com/MapColonies/job-manager/compare/v2.1.4...v2.2.0) (2023-05-29)
