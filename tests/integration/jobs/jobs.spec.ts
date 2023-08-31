@@ -136,6 +136,124 @@ function createJobDataForGetJob(): unknown {
   return jobModel;
 }
 
+function isJobHasPendingTasksMock(tasks: TaskEntity[] | undefined): boolean {
+  if (tasks === undefined) {
+    return false;
+  }
+  return tasks.some((task) => task.status === OperationStatus.PENDING);
+}
+
+function createJobDataForAvailableActionsWithoutAbortableJob(): unknown {
+  const taskModel = {
+    jobId: '170dd8c0-8bad-498b-bb26-671dcf19aa3c',
+    id: 'taskId',
+    description: '1',
+    parameters: {
+      a: 2,
+    },
+    reason: '3',
+    percentage: 4,
+    type: '5',
+    status: OperationStatus.IN_PROGRESS,
+    created: new Date(Date.UTC(2000, 1, 2)).toISOString(),
+    updated: new Date(Date.UTC(2000, 1, 2)).toISOString(),
+    attempts: 0,
+    resettable: true,
+  };
+  const jobModel = {
+    id: '170dd8c0-8bad-498b-bb26-671dcf19aa3c',
+    resourceId: '11',
+    version: '12',
+    description: '13',
+    domain: '',
+    parameters: {
+      d: 14,
+    },
+    status: OperationStatus.PENDING,
+    reason: '15',
+    type: '16',
+    percentage: 17,
+    tasks: [taskModel],
+    created: new Date(Date.UTC(2000, 1, 2)).toISOString(),
+    updated: new Date(Date.UTC(2000, 1, 2)).toISOString(),
+    isCleaned: false,
+    taskCount: 0,
+    completedTasks: 0,
+    failedTasks: 0,
+    expiredTasks: 0,
+    pendingTasks: 0,
+    inProgressTasks: 0,
+    abortedTasks: 0,
+    priority: 1000,
+    expirationDate: new Date(Date.UTC(2000, 1, 2)).toISOString(),
+    internalId: '170dd8c0-8bad-498b-bb26-671dcf19aa3c',
+    producerName: 'producerName',
+    productName: 'productName',
+    productType: 'productType',
+    additionalIdentifiers: '',
+    availableActions: {
+      isAbortable: false,
+      isResumable: false,
+    },
+  };
+  return jobModel;
+}
+
+function createJobDataForAvailableActionsWithAbortableJob(): unknown {
+  const taskModel = {
+    jobId: '170dd8c0-8bad-498b-bb26-671dcf19aa3c',
+    id: 'taskId',
+    description: '1',
+    parameters: {
+      a: 2,
+    },
+    reason: '3',
+    percentage: 4,
+    type: '5',
+    status: OperationStatus.PENDING,
+    created: new Date(Date.UTC(2000, 1, 2)).toISOString(),
+    updated: new Date(Date.UTC(2000, 1, 2)).toISOString(),
+    attempts: 0,
+    resettable: true,
+  };
+  const jobModel = {
+    id: '170dd8c0-8bad-498b-bb26-671dcf19aa3c',
+    resourceId: '11',
+    version: '12',
+    description: '13',
+    domain: '',
+    parameters: {
+      d: 14,
+    },
+    status: OperationStatus.PENDING,
+    reason: '15',
+    type: '16',
+    percentage: 17,
+    tasks: [taskModel],
+    created: new Date(Date.UTC(2000, 1, 2)).toISOString(),
+    updated: new Date(Date.UTC(2000, 1, 2)).toISOString(),
+    isCleaned: false,
+    taskCount: 0,
+    completedTasks: 0,
+    failedTasks: 0,
+    expiredTasks: 0,
+    pendingTasks: 0,
+    inProgressTasks: 0,
+    abortedTasks: 0,
+    priority: 1000,
+    expirationDate: new Date(Date.UTC(2000, 1, 2)).toISOString(),
+    internalId: '170dd8c0-8bad-498b-bb26-671dcf19aa3c',
+    producerName: 'producerName',
+    productName: 'productName',
+    productType: 'productType',
+    additionalIdentifiers: '',
+    availableActions: {
+      isAbortable: true,
+      isResumable: false,
+    },
+  };
+  return jobModel;
+}
 function jobModelToEntity(jobModel: unknown): JobEntity {
   const model = jobModel as {
     created: string;
@@ -309,6 +427,8 @@ describe('job', function () {
         const jobModel = createJobDataForFind();
         const jobEntity = jobModelToEntity(jobModel);
         const jobsFindMock = jobRepositoryMocks.findMock;
+        const isJobHasPendingTasksSpy = jest.spyOn(JobRepository.prototype, 'isJobHasPendingTasks');
+        isJobHasPendingTasksSpy.mockResolvedValue(true);
         jobRepositoryMocks.queryMock.mockResolvedValue([{ unResettableTasks: '1', failedTasks: '3' }]);
         const findJobsSpy = jest.spyOn(JobManager.prototype, 'findJobs');
         jobsFindMock.mockResolvedValue([jobEntity]);
@@ -514,8 +634,82 @@ describe('job', function () {
         const getJobSpy = jest.spyOn(JobManager.prototype, 'getJob');
         delete jobEntity.tasks;
         jobsFindOneMock.mockResolvedValue(jobEntity);
+        const isJobHasPendingTasksSpy = jest.spyOn(JobRepository.prototype, 'isJobHasPendingTasks');
+        isJobHasPendingTasksSpy.mockResolvedValue(true);
         const expectedAvailableActions: IAvailableActions = {
           isAbortable: true,
+          isResumable: false,
+        };
+
+        const response = await requestSender.getResource('170dd8c0-8bad-498b-bb26-671dcf19aa3c', false, true);
+
+        expect(response.status).toBe(httpStatusCodes.OK);
+        expect(jobsFindOneMock).toHaveBeenCalledTimes(1);
+        expect(jobsFindOneMock).toHaveBeenCalledWith('170dd8c0-8bad-498b-bb26-671dcf19aa3c');
+
+        const job = response.body as IGetJobResponse;
+
+        delete (jobModel as JobEntity).tasks;
+        expect(job).toEqual(jobModel);
+        expect(getJobSpy).toHaveBeenCalledWith(
+          { jobId: '170dd8c0-8bad-498b-bb26-671dcf19aa3c' },
+          { shouldReturnTasks: false, shouldReturnAvailableActions: true }
+        );
+        expect(Object.keys(job)).toContain('availableActions');
+        expect(job.availableActions).toEqual(expectedAvailableActions);
+        expect(response).toSatisfyApiSpec();
+        getJobSpy.mockRestore();
+      });
+
+      it('should get specific job and return 200 with the available actions and true for isAbortable', async function () {
+        const jobModel = createJobDataForAvailableActionsWithAbortableJob();
+        const jobEntity = jobModelToEntity(jobModel);
+        const jobsFindOneMock = jobRepositoryMocks.findOneMock;
+        jobRepositoryMocks.queryMock.mockResolvedValue([{ unResettableTasks: '1', failedTasks: '3' }]);
+        const getJobSpy = jest.spyOn(JobManager.prototype, 'getJob');
+        const isJobHasPendingTasksSpy = jest.spyOn(JobRepository.prototype, 'isJobHasPendingTasks');
+        const condition = isJobHasPendingTasksMock(jobEntity.tasks);
+        isJobHasPendingTasksSpy.mockResolvedValue(condition);
+        delete jobEntity.tasks;
+        jobsFindOneMock.mockResolvedValue(jobEntity);
+        const expectedAvailableActions: IAvailableActions = {
+          isAbortable: true,
+          isResumable: false,
+        };
+
+        const response = await requestSender.getResource('170dd8c0-8bad-498b-bb26-671dcf19aa3c', false, true);
+
+        expect(response.status).toBe(httpStatusCodes.OK);
+        expect(jobsFindOneMock).toHaveBeenCalledTimes(1);
+        expect(jobsFindOneMock).toHaveBeenCalledWith('170dd8c0-8bad-498b-bb26-671dcf19aa3c');
+
+        const job = response.body as IGetJobResponse;
+
+        delete (jobModel as JobEntity).tasks;
+        expect(job).toEqual(jobModel);
+        expect(getJobSpy).toHaveBeenCalledWith(
+          { jobId: '170dd8c0-8bad-498b-bb26-671dcf19aa3c' },
+          { shouldReturnTasks: false, shouldReturnAvailableActions: true }
+        );
+        expect(Object.keys(job)).toContain('availableActions');
+        expect(job.availableActions).toEqual(expectedAvailableActions);
+        expect(response).toSatisfyApiSpec();
+        getJobSpy.mockRestore();
+      });
+
+      it('should get specific job and return 200 with the available actions and false for isAbortable', async function () {
+        const jobModel = createJobDataForAvailableActionsWithoutAbortableJob();
+        const jobEntity = jobModelToEntity(jobModel);
+        const jobsFindOneMock = jobRepositoryMocks.findOneMock;
+        jobRepositoryMocks.queryMock.mockResolvedValue([{ unResettableTasks: '1', failedTasks: '3' }]);
+        const getJobSpy = jest.spyOn(JobManager.prototype, 'getJob');
+        const isJobHasPendingTasksSpy = jest.spyOn(JobRepository.prototype, 'isJobHasPendingTasks');
+        const condition = isJobHasPendingTasksMock(jobEntity.tasks);
+        isJobHasPendingTasksSpy.mockResolvedValue(condition);
+        delete jobEntity.tasks;
+        jobsFindOneMock.mockResolvedValue(jobEntity);
+        const expectedAvailableActions: IAvailableActions = {
+          isAbortable: false,
           isResumable: false,
         };
 

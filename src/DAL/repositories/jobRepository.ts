@@ -188,4 +188,14 @@ export class JobRepository extends GeneralRepository<JobEntity> {
     const res = sqlRes[0];
     return parseInt(res.unResettableTasks) === 0 && parseInt(res.failedTasks) > 0;
   }
+
+  public async isJobHasPendingTasks(jobId: string): Promise<boolean> {
+    const pendingTasksCount = await this.createQueryBuilder('job')
+      .leftJoinAndSelect('job.tasks', 'task')
+      .where('job.id = :jobId', { jobId })
+      .andWhere('task.status = :status', { status: OperationStatus.PENDING })
+      .getCount();
+
+    return pendingTasksCount > 0;
+  }
 }

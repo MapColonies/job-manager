@@ -98,11 +98,19 @@ export class JobManager {
 
   private async getAvailableActions(job: IGetJobResponse): Promise<IAvailableActions> {
     const isResettable = (await this.isResettable({ jobId: job.id })).isResettable;
+    const isAbortable = await this.isAbortable(job);
     const availableActions: IAvailableActions = {
       isResumable: isResettable,
-      isAbortable: job.status === OperationStatus.PENDING || job.status === OperationStatus.IN_PROGRESS,
+      isAbortable: isAbortable,
     };
     return availableActions;
+  }
+
+  private async isAbortable(job: IGetJobResponse): Promise<boolean> {
+    const jobId = job.id;
+    const repo = await this.getRepository();
+    const hasPendingTasks = await repo.isJobHasPendingTasks(jobId);
+    return hasPendingTasks && (job.status === OperationStatus.PENDING || job.status === OperationStatus.IN_PROGRESS);
   }
 
   private async getRepository(): Promise<JobRepository> {
