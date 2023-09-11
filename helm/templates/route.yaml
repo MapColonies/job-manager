@@ -1,12 +1,11 @@
 {{- $releaseName := .Release.Name -}}
 {{- $chartName := include "job-manager.name" . -}}
 {{- $cloudProviderFlavor := include "job-manager.cloudProviderFlavor" . -}}
-{{- $serviceName := include "service.fullname" . -}}
 {{- if and (and (.Values.enabled) (eq $cloudProviderFlavor "openshift")) (.Values.route.enabled) -}}
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
-  name: {{ $releaseName }}-route
+  name: {{ $releaseName }}-{{ $chartName }}-route
   annotations:
     haproxy.router.openshift.io/rewrite-target: /
     {{- if .Values.route.timeout.enabled }}
@@ -16,7 +15,7 @@ spec:
   path:  {{ .Values.route.path | default "/" }}
   to:
     kind: Service
-    name: {{ $serviceName }}
+    name: {{ $releaseName }}-{{ $chartName }}
   tls:
     termination: edge
 {{- end -}}

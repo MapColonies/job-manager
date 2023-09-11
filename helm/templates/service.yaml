@@ -1,12 +1,11 @@
 {{- $releaseName := .Release.Name -}}
 {{- $chartName := include "job-manager.name" . -}}
 {{- $cloudProviderFlavor := include "job-manager.cloudProviderFlavor" . -}}
-{{- $serviceName := include "service.fullname" . -}}
 {{- if .Values.enabled -}}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ $serviceName }}
+  name: {{ $releaseName }}-{{ $chartName }}
   labels:
     app: {{ $chartName }}
     component: {{ $chartName }}
