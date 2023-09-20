@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.3.2](https://github.com/MapColonies/job-manager/compare/v2.3.1...v2.3.2) (2023-09-20)
+
+
+### Bug Fixes
+
+* applied the reverted commit changes ([793616d](https://github.com/MapColonies/job-manager/commit/793616de6dfcce94349c82951b89764dce77c3b5))
+* removed chart name from template names (MAPCO-3109) ([#30](https://github.com/MapColonies/job-manager/issues/30)) ([789ef06](https://github.com/MapColonies/job-manager/commit/789ef069449332b7cfe61e55c33f4440f54fb652))
+* reverted to previous commit ([08d7cac](https://github.com/MapColonies/job-manager/commit/08d7cac5e9c76e43faea49768c4ed6656c70e9ef))
+
 ### [2.3.1](https://github.com/MapColonies/job-manager/compare/v2.3.0...v2.3.1) (2023-08-31)
 
 ## [2.3.0](https://github.com/MapColonies/job-manager/compare/v2.2.1...v2.3.0) (2023-08-31)
