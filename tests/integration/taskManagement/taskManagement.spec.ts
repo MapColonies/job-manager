@@ -1,6 +1,7 @@
 import httpStatusCodes from 'http-status-codes';
 import { getContainerConfig, resetContainer } from '../testContainerConfig';
 import { getApp } from '../../../src/app';
+import { createUuid } from '../../mocks/values';
 import { TaskRepository } from '../../../src/DAL/repositories/taskRepository';
 import { JobRepository } from '../../../src/DAL/repositories/jobRepository';
 import { registerRepository, initTypeOrmMocks, RepositoryMocks } from '../../mocks/DBMock';
@@ -8,6 +9,7 @@ import { OperationStatus } from '../../../src/common/dataModels/enums';
 import { TaskEntity } from '../../../src/DAL/entity/task';
 import { IGetTaskResponse } from '../../../src/common/dataModels/tasks';
 import { ResponseCodes } from '../../../src/common/constants';
+import { IJobAndTaskStatus } from '../../../src/common/interfaces';
 import { JobEntity } from '../../../src/DAL/entity/job';
 import { TaskManagementRequestSender } from './helpers/taskManagementRequestSender';
 
@@ -277,21 +279,69 @@ describe('tasks', function () {
 
   describe('release inactive tasks', () => {
     describe('Happy Path', () => {
-      it('should release inactive tasks', async function () {
-        const req = ['6716ddc8-40fb-41b2-bf1d-5c433fe4728f', '2f2ca364-6ce7-4154-a07a-af9ba3970ddf'];
-        taskRepositoryMocks.queryBuilder.execute.mockResolvedValue({
-          raw: [
-            {
-              id: '6716ddc8-40fb-41b2-bf1d-5c433fe4728f',
-            },
-          ],
-        });
+      it(`should release inactive tasks to 'Pending' when job is 'In-Progress' or 'Pending'`, async function () {
+        const reqIDs = [createUuid(), createUuid()];
+        const jobAndTaskEntities: IJobAndTaskStatus[] = [
+          {
+            taskId: reqIDs[0],
+            taskStatus: OperationStatus.IN_PROGRESS,
+            jobId: createUuid(),
+            jobStatus: OperationStatus.IN_PROGRESS,
+          },
+          {
+            taskId: reqIDs[1],
+            taskStatus: OperationStatus.IN_PROGRESS,
+            jobId: createUuid(),
+            jobStatus: OperationStatus.PENDING,
+          },
+        ];
+        taskRepositoryMocks.queryMock.mockResolvedValue(jobAndTaskEntities);
+        for (const id of reqIDs) {
+          taskRepositoryMocks.queryBuilder.execute.mockResolvedValueOnce({ raw: [{ id }] });
+        }
 
-        const response = await requestSender.releaseInactive(req);
+        const response = await requestSender.releaseInactive(reqIDs);
 
         expect(response.status).toBe(httpStatusCodes.OK);
-        expect(response.body).toEqual(['6716ddc8-40fb-41b2-bf1d-5c433fe4728f']);
-        expect(taskRepositoryMocks.queryBuilder.execute).toHaveBeenCalledTimes(1);
+        expect(response.body).toEqual(reqIDs);
+        expect(taskRepositoryMocks.queryBuilder.set).toHaveBeenCalledWith(expect.objectContaining({ status: OperationStatus.PENDING }));
+        expect(taskRepositoryMocks.queryBuilder.execute).toHaveBeenCalledTimes(reqIDs.length);
+        expect(response).toSatisfyApiSpec();
+      });
+
+      it(`should release inactive tasks to 'Aborted' when job is neither 'In-Progress' nor 'Pending'`, async function () {
+        const reqIDs = [createUuid(), createUuid(), createUuid()];
+        const jobAndTaskEntities: IJobAndTaskStatus[] = [
+          {
+            taskId: reqIDs[0],
+            taskStatus: OperationStatus.IN_PROGRESS,
+            jobId: createUuid(),
+            jobStatus: OperationStatus.ABORTED,
+          },
+          {
+            taskId: reqIDs[1],
+            taskStatus: OperationStatus.IN_PROGRESS,
+            jobId: createUuid(),
+            jobStatus: OperationStatus.FAILED,
+          },
+          {
+            taskId: reqIDs[2],
+            taskStatus: OperationStatus.IN_PROGRESS,
+            jobId: createUuid(),
+            jobStatus: OperationStatus.EXPIRED,
+          },
+        ];
+        taskRepositoryMocks.queryMock.mockResolvedValue(jobAndTaskEntities);
+        for (const id of reqIDs) {
+          taskRepositoryMocks.queryBuilder.execute.mockResolvedValueOnce({ raw: [{ id }] });
+        }
+
+        const response = await requestSender.releaseInactive(reqIDs);
+
+        expect(response.status).toBe(httpStatusCodes.OK);
+        expect(response.body).toEqual(reqIDs);
+        expect(taskRepositoryMocks.queryBuilder.set).toHaveBeenCalledWith(expect.objectContaining({ status: OperationStatus.ABORTED }));
+        expect(taskRepositoryMocks.queryBuilder.execute).toHaveBeenCalledTimes(reqIDs.length);
         expect(response).toSatisfyApiSpec();
       });
     });
