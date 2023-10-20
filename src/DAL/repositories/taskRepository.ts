@@ -1,4 +1,4 @@
-import { EntityRepository, In, LessThan, Brackets, UpdateResult } from 'typeorm';
+import { EntityRepository, LessThan, Brackets, UpdateResult } from 'typeorm';
 import { container } from 'tsyringe';
 import { Logger } from '@map-colonies/js-logger';
 import { ConflictError, NotFoundError } from '@map-colonies/error-types';
@@ -21,6 +21,7 @@ import {
 } from '../../common/dataModels/tasks';
 import { OperationStatus } from '../../common/dataModels/enums';
 import { JobEntity } from '../entity/job';
+import { IJobAndTaskStatus } from '../../common/interfaces';
 import { GeneralRepository } from './generalRepository';
 
 declare type SqlRawResponse = [unknown[], number];
@@ -141,17 +142,38 @@ export class TaskRepository extends GeneralRepository<TaskEntity> {
   }
 
   public async releaseInactiveTask(taskIds: string[]): Promise<string[]> {
-    const res = await this.createQueryBuilder()
-      .update()
-      .set({ status: OperationStatus.PENDING, attempts: () => 'attempts + 1' })
-      .where({ id: In(taskIds), status: OperationStatus.IN_PROGRESS })
-      .returning('id')
-      .updateEntity(true)
-      .execute();
-    const raw = res.raw as { id: string }[];
-    const updatedIds = raw.map((value) => {
-      return (value as TaskEntity).id;
-    });
+    const getJobStatusQuery = `
+      SELECT task.id as "taskId", "jobId", task.status as "taskStatus", job.status as "jobStatus"
+      FROM "Job" job, "Task" task
+      where task.id IN ('${taskIds.join("','")}') and task."jobId" = job.id
+    `;
+    const jobAndTaskEntities = (await this.query(getJobStatusQuery)) as IJobAndTaskStatus[];
+    const updatedIds: string[] = [];
+
+    for (const entity of jobAndTaskEntities) {
+      if (entity.taskStatus !== OperationStatus.IN_PROGRESS) {
+        this.appLogger.warn({
+          msg: 'Task-Liberator releasing task that is not in In-Progress status! Skipping...',
+          taskId: entity.taskId,
+          status: entity.taskStatus,
+        });
+        continue;
+      }
+      if (entity.jobStatus === OperationStatus.PENDING || entity.jobStatus === OperationStatus.IN_PROGRESS) {
+        entity.taskStatus = OperationStatus.PENDING;
+      } else {
+        entity.taskStatus = OperationStatus.ABORTED;
+      }
+      const res = await this.createQueryBuilder()
+        .update()
+        .set({ status: entity.taskStatus, attempts: () => 'attempts + 1' })
+        .where({ id: entity.taskId })
+        .returning('id')
+        .updateEntity(true)
+        .execute();
+      updatedIds.push((res.raw as { id: string }[])[0].id);
+    }
+
     return updatedIds;
   }
 
