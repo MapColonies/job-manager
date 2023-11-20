@@ -24,6 +24,7 @@ export interface IFindJobsRequest {
   tillDate?: string;
   internalId?: string;
   domain?: string;
+  parameters?: Record<string, unknown>;
 }
 
 export interface ICreateJobBody {

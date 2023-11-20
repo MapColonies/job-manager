@@ -1,10 +1,11 @@
-import { EntityRepository, FindManyOptions, LessThan, Brackets, Between, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
+import { EntityRepository, FindManyOptions, LessThan, Brackets, Between, LessThanOrEqual, MoreThanOrEqual, Raw } from 'typeorm';
 import { container } from 'tsyringe';
 import { Logger } from '@map-colonies/js-logger';
 import { ConflictError, NotFoundError } from '@map-colonies/error-types';
 import { DBConstraintError } from '../../common/errors';
 import { SERVICES } from '../../common/constants';
 import { JobEntity } from '../entity/job';
+import { paramsQueryBuilder } from '../../common/utils';
 import {
   FindJobsResponse,
   ICreateJobBody,
@@ -61,8 +62,29 @@ export class JobRepository extends GeneralRepository<JobEntity> {
       options.relations = ['tasks'];
     }
 
-    const entities = await this.find(options);
+    // if (req.parameters){
+    //   options.where = {parameters: {"exportVersion": "ROI"}};
+    // }
+    console.log("OPTIONS,", options);
+    // (parameters->>'id')::int = 561486153;
+    //WORKSSSSS
+    //const query = {where: {parameters: Raw(() => `(parameters->>'id') = :id AND (parameters->>'crs') = :crs`, {id: '561486153', crs: "EPSG:4326"})}}
+    //const entities = await this.createQueryBuilder().select("job").from(JobEntity, "job").where("job.id = :id", { id: '035706ae-3e3e-4c9e-81d6-915f72938bfd' }).getMany();
+    //const entities = await this.createQueryBuilder().select("job").from(JobEntity, "job").where("job.id = :id", { id: '035706ae-3e3e-4c9e-81d6-915f72938bfd' }).andWhere(query).getMany();
+    //const entities = await this.find(query);
+    //WORKSSSSS
+    //const query = await this.createQueryBuilder().select("job").from(JobEntity, "job").where("job.id = :id", { id: '035706ae-3e3e-4c9e-81d6-915f72938bfd' }).getMany();
+    paramsQueryBuilder(req.parameters as Record<string, unknown>);
+    const entities = await this.createQueryBuilder().select("job").from(JobEntity, "job").where({parameters: Raw(() =>  `(job.parameters->>'id') = :id AND (job.parameters->>'crs') = :crs AND`, {id: '561486153', crs: "EPSG:4326"})}).getMany();
+
+    //const entities = query;
+    //const entities = await this.find(options);
+    //const entities = await this.find({where: {parameters: Raw(() => `(parameters->>'${Object.keys(req.parameters as Record<string, unknown>)[0]}') = :${Object.keys(req.parameters as Record<string, unknown>)[0]} AND (parameters->>'crs') = :crs`, req.parameters as Record<string, unknown>)}});
+    
+    //const entities = await this.query(qb2);
+    //const entities = await this.find({where: {id: Raw((alias) => `${alias} = '1660daa0-eb67-479a-8213-9dfe0b3ba355'`)}});
     const models = entities.map((entity) => this.jobConvertor.entityToModel(entity));
+
     return models;
   }
 

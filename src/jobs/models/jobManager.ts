@@ -31,7 +31,9 @@ export class JobManager {
   ) {}
 
   public async findJobs(req: IFindJobsRequest): Promise<FindJobsResponse> {
+    console.log("req: ", req)
     const repo = await this.getRepository();
+
     let res = await repo.findJobs(req);
 
     if (req.shouldReturnAvailableActions === true) {

@@ -14,6 +14,7 @@ paths:
         - $ref: '#/components/parameters/status'
         - $ref: '#/components/parameters/type'
         - $ref: '#/components/parameters/shouldReturnTasks'
+        - $ref: '#/components/parameters/parameters'
         - $ref: '#/components/parameters/fromDate'
         - $ref: '#/components/parameters/tillDate'
         - $ref: '#/components/parameters/productType'
@@ -550,6 +551,18 @@ components:
       required: false
       schema:
         type: string
+    parameters:
+      in: query
+      name: parameters
+      description: |
+        Job's parameters
+        Query jsonb parameters
+      required: false
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: true
     isCleaned:
       in: query
       name: isCleaned
