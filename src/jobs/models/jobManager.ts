@@ -50,7 +50,7 @@ export class JobManager {
 
   public async getJobsByJobsParameters(req: JobParameters): Promise<FindJobsResponse> {
     const repo = await this.getRepository();
-    const res = await repo.getJobByJobParameters(req)
+    const res = await repo.getJobByJobParameters(req);
     return res;
   }
 

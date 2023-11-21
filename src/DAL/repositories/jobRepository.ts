@@ -72,7 +72,11 @@ export class JobRepository extends GeneralRepository<JobEntity> {
   public async getJobByJobParameters(parameters: JobParameters): Promise<FindJobsResponse> {
     this.appLogger.info({ parameters }, 'Getting jobs by jobs parameters');
     try {
-      const entities = await this.createQueryBuilder().select("job").from(JobEntity, "job").where({ parameters: Raw(() => paramsQueryBuilder(parameters), parameters) }).getMany();
+      const entities = await this.createQueryBuilder()
+        .select('job')
+        .from(JobEntity, 'job')
+        .where({ parameters: Raw(() => paramsQueryBuilder(parameters), parameters) })
+        .getMany();
 
       const models = entities.map((entity) => this.jobConvertor.entityToModel(entity));
       return models;
