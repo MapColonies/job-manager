@@ -14,7 +14,6 @@ paths:
         - $ref: '#/components/parameters/status'
         - $ref: '#/components/parameters/type'
         - $ref: '#/components/parameters/shouldReturnTasks'
-        - $ref: '#/components/parameters/parameters'
         - $ref: '#/components/parameters/fromDate'
         - $ref: '#/components/parameters/tillDate'
         - $ref: '#/components/parameters/productType'
