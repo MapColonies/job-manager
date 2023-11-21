@@ -1,9 +1,9 @@
-export const paramsQueryBuilder = (params: Record<string, unknown>): void => {
-    console.log("params", params);
+export const paramsQueryBuilder = (params: Record<string, unknown>): string => {
     const queryStringArray: string[] = [];
-    const keys = Object.keys(params);
-    let fullQuery: string;
-    keys.forEach(key => {
+    const paramKeys = Object.keys(params);
+    let fullQuery = '';
+
+    paramKeys.forEach(key => {
         const query = `(job.parameters->>'${key}') = :${key}`;
         queryStringArray.push(query);
     });
@@ -12,8 +12,4 @@ export const paramsQueryBuilder = (params: Record<string, unknown>): void => {
         fullQuery = queryStringArray.join(" AND ")
     }
     return fullQuery;
-
-
-
-
 }

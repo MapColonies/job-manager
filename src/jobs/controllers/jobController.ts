@@ -18,9 +18,11 @@ import {
 } from '../../common/dataModels/jobs';
 import { DefaultResponse } from '../../common/interfaces';
 import { JobManager } from '../models/jobManager';
+import { JobParameters } from '../../DAL/repositories/jobRepository';
 
 type CreateResourceHandler = RequestHandler<undefined, ICreateJobResponse, ICreateJobBody>;
 type FindResourceHandler = RequestHandler<undefined, FindJobsResponse, undefined, IFindJobsRequest>;
+type GetJobsByJobsParametersHandler = RequestHandler<undefined, FindJobsResponse, undefined, JobParameters>;
 type GetResourceHandler = RequestHandler<IJobsParams, IGetJobResponse, undefined, IJobsQuery>;
 type DeleteResourceHandler = RequestHandler<IJobsParams, DefaultResponse>;
 type UpdateResourceHandler = RequestHandler<IJobsParams, DefaultResponse, IUpdateJobBody>;
@@ -42,6 +44,15 @@ export class JobController {
   public findResource: FindResourceHandler = async (req, res, next) => {
     try {
       const jobsRes = await this.manager.findJobs(req.query);
+      return res.status(httpStatus.OK).json(jobsRes);
+    } catch (err) {
+      return next(err);
+    }
+  };
+
+  public getJobByJobsParameters: GetJobsByJobsParametersHandler = async (req, res, next) => {
+    try {
+      const jobsRes = await this.manager.getJobsByJobsParameters(req.query);
       return res.status(httpStatus.OK).json(jobsRes);
     } catch (err) {
       return next(err);
