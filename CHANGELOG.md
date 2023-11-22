@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.4.0](https://github.com/MapColonies/job-manager/compare/v2.3.2...v2.4.0) (2023-11-22)
+
+
+### Features
+
+* added get job by job parameters support ([#32](https://github.com/MapColonies/job-manager/issues/32)) ([94ef0a3](https://github.com/MapColonies/job-manager/commit/94ef0a3b8624e94a40acadf41ed6c40b0f27f3e1))
+
 ### [2.3.2](https://github.com/MapColonies/job-manager/compare/v2.3.1...v2.3.2) (2023-09-20)
 
 
