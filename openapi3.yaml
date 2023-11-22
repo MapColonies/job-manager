@@ -157,7 +157,7 @@ paths:
       operationId: getJobByJobsParameters
       parameters:
         - $ref: '#/components/parameters/parameters'
-      summary: find jobs by job job's parameters, temporary only 1 level nested object is supported.
+      summary: find jobs by job's parameters, temporary only 1 level nested object is supported.
       tags:
         - jobs
       responses:
