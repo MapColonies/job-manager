@@ -1,6 +1,6 @@
 import httpStatusCodes from 'http-status-codes';
 import { getContainerConfig, resetContainer } from '../testContainerConfig';
-import { JobRepository } from '../../../src/DAL/repositories/jobRepository';
+import { JobParameters, JobRepository } from '../../../src/DAL/repositories/jobRepository';
 import { JobEntity } from '../../../src/DAL/entity/job';
 import {
   registerRepository,
@@ -10,6 +10,7 @@ import {
   betweenMock,
   lessThanOrEqualMock,
   moreThanOrEqualMock,
+  rawMock,
 } from '../../mocks/DBMock';
 import { getApp } from '../../../src/app';
 import { FindJobsResponse, IAvailableActions, IGetJobResponse } from '../../../src/common/dataModels/jobs';
@@ -47,6 +48,7 @@ function createJobDataForFind(): unknown {
     domain: '',
     parameters: {
       d: 14,
+      id: 561486153,
     },
     status: OperationStatus.PENDING,
     reason: '15',
@@ -797,6 +799,36 @@ describe('job', function () {
         expect(jobDeleteMock).toHaveBeenCalledTimes(1);
         expect(jobDeleteMock).toHaveBeenCalledWith('170dd8c0-8bad-498b-bb26-671dcf19aa3c');
         expect(response).toSatisfyApiSpec();
+      });
+
+      describe('getJobByJobParameters', () => {
+        it('should get all jobs with the matched id parameter and return 200', async function () {
+          const jobModel = createJobDataForFind();
+          const jobEntity = jobModelToEntity(jobModel);
+          rawMock.mockReturnValue({});
+          const select = jobRepositoryMocks.queryBuilder.select;
+          const from = jobRepositoryMocks.queryBuilder.from;
+          const where = jobRepositoryMocks.queryBuilder.where;
+          const getMany = jobRepositoryMocks.queryBuilder.getMany;
+          getMany.mockResolvedValue([jobEntity]);
+
+          const req: JobParameters = {
+            id: 561486153,
+          };
+
+          const response = await requestSender.getJobByJobParameters(req);
+
+          expect(response.status).toBe(httpStatusCodes.OK);
+          expect(select).toHaveBeenCalledTimes(1);
+          expect(from).toHaveBeenCalledTimes(1);
+          expect(where).toHaveBeenCalledTimes(1);
+          expect(rawMock).toHaveBeenCalledTimes(1);
+          expect(getMany).toHaveBeenCalledTimes(1);
+
+          const jobs = response.body as unknown;
+          expect(jobs).toEqual([jobModel]);
+          expect(response).toSatisfyApiSpec();
+        });
       });
     });
 

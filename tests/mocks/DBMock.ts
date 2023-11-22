@@ -8,6 +8,7 @@ const inMock = jest.fn();
 const lessThanMock = jest.fn();
 const bracketsMock = jest.fn();
 const createQueryRunnerMock = jest.fn();
+const rawMock = jest.fn();
 const betweenMock = jest.fn();
 const lessThanOrEqualMock = jest.fn();
 const moreThanOrEqualMock = jest.fn();
@@ -49,6 +50,8 @@ const initQueryRunnerMocks = (): void => {
 };
 
 interface QueryBuilder {
+  select: jest.Mock;
+  from: jest.Mock;
   where: jest.Mock;
   andWhere: jest.Mock;
   orderBy: jest.Mock;
@@ -84,6 +87,8 @@ const registerRepository = <T>(key: ObjectType<T>, instance: T): RepositoryMocks
     countMock: jest.fn(),
     queryBuilderMock: jest.fn(),
     queryBuilder: {
+      select: jest.fn(),
+      from: jest.fn(),
       where: jest.fn(),
       andWhere: jest.fn(),
       orderBy: jest.fn(),
@@ -110,6 +115,8 @@ const registerRepository = <T>(key: ObjectType<T>, instance: T): RepositoryMocks
 
   // Set query builder mocks
   mocks.queryBuilderMock.mockImplementation(() => mocks.queryBuilder);
+  mocks.queryBuilder.select.mockImplementation(() => mocks.queryBuilder);
+  mocks.queryBuilder.from.mockImplementation(() => mocks.queryBuilder);
   mocks.queryBuilder.where.mockImplementation(() => mocks.queryBuilder);
   mocks.queryBuilder.andWhere.mockImplementation(() => mocks.queryBuilder);
   mocks.queryBuilder.orderBy.mockImplementation(() => mocks.queryBuilder);
@@ -143,6 +150,8 @@ export {
   lessThanOrEqualMock,
   moreThanOrEqualMock as MoreThanOrEqual,
   moreThanOrEqualMock,
+  rawMock as Raw,
+  rawMock,
   betweenMock as Between,
   betweenMock,
   bracketsMock as Brackets,

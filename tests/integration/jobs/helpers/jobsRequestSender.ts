@@ -1,4 +1,5 @@
 import * as supertest from 'supertest';
+import { JobParameters } from '../../../../src/DAL/repositories/jobRepository';
 
 export interface SearchJobsParams {
   resourceId?: string;
@@ -26,6 +27,10 @@ export class JobsRequestSender {
       .get(`/jobs/${id}`)
       .query({ shouldReturnTasks, shouldReturnAvailableActions })
       .set('Content-Type', 'application/json');
+  }
+
+  public async getJobByJobParameters(req: JobParameters): Promise<supertest.Response> {
+    return supertest.agent(this.app).get(`/jobs/parameters`).query(req).set('Content-Type', 'application/json');
   }
 
   public async updateResource(id: string, body: Record<string, unknown>): Promise<supertest.Response> {

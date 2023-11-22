@@ -152,6 +152,23 @@ paths:
                 $ref: '#/components/schemas/errorMessage'
       tags:
         - jobs
+  /jobs/parameters:
+    get:
+      operationId: getJobByJobsParameters
+      parameters:
+        - $ref: '#/components/parameters/parameters'
+      summary: find jobs by job's parameters, temporary only 1 level nested object is supported.
+      tags:
+        - jobs
+      responses:
+        '200':
+          description: Array of jobs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/jobResponse'
   /jobs/{jobId}/resettable:
     parameters:
       - $ref: '#/components/parameters/jobId'
@@ -550,6 +567,15 @@ components:
       required: false
       schema:
         type: string
+    parameters:
+      in: query
+      name: parameters
+      description: |
+        Job's parameters
+        Query jsonb parameters
+      schema:
+        type: object
+        additionalProperties: true
     isCleaned:
       in: query
       name: isCleaned

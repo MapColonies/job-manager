@@ -17,7 +17,7 @@ import {
   IResetJobRequest,
   IAvailableActions,
 } from '../../common/dataModels/jobs';
-import { JobRepository } from '../../DAL/repositories/jobRepository';
+import { JobParameters, JobRepository } from '../../DAL/repositories/jobRepository';
 import { TransactionActions } from '../../DAL/repositories/transactionActions';
 import { OperationStatus } from '../../common/dataModels/enums';
 
@@ -32,6 +32,7 @@ export class JobManager {
 
   public async findJobs(req: IFindJobsRequest): Promise<FindJobsResponse> {
     const repo = await this.getRepository();
+
     let res = await repo.findJobs(req);
 
     if (req.shouldReturnAvailableActions === true) {
@@ -44,6 +45,12 @@ export class JobManager {
         );
       }
     }
+    return res;
+  }
+
+  public async getJobsByJobsParameters(req: JobParameters): Promise<FindJobsResponse> {
+    const repo = await this.getRepository();
+    const res = await repo.getJobByJobParameters(req);
     return res;
   }
 

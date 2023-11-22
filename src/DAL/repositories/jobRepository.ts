@@ -1,10 +1,11 @@
-import { EntityRepository, FindManyOptions, LessThan, Brackets, Between, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
+import { EntityRepository, FindManyOptions, LessThan, Brackets, Between, LessThanOrEqual, MoreThanOrEqual, Raw } from 'typeorm';
 import { container } from 'tsyringe';
 import { Logger } from '@map-colonies/js-logger';
 import { ConflictError, NotFoundError } from '@map-colonies/error-types';
 import { DBConstraintError } from '../../common/errors';
 import { SERVICES } from '../../common/constants';
 import { JobEntity } from '../entity/job';
+import { paramsQueryBuilder } from '../../common/utils';
 import {
   FindJobsResponse,
   ICreateJobBody,
@@ -17,6 +18,8 @@ import {
 import { JobModelConvertor } from '../convertors/jobModelConverter';
 import { OperationStatus } from '../../common/dataModels/enums';
 import { GeneralRepository } from './generalRepository';
+
+export type JobParameters = Record<string, unknown>;
 
 @EntityRepository(JobEntity)
 export class JobRepository extends GeneralRepository<JobEntity> {
@@ -64,6 +67,23 @@ export class JobRepository extends GeneralRepository<JobEntity> {
     const entities = await this.find(options);
     const models = entities.map((entity) => this.jobConvertor.entityToModel(entity));
     return models;
+  }
+
+  public async getJobByJobParameters(parameters: JobParameters): Promise<FindJobsResponse> {
+    this.appLogger.info({ parameters }, 'Getting jobs by jobs parameters');
+    try {
+      const entities = await this.createQueryBuilder()
+        .select('job')
+        .from(JobEntity, 'job')
+        .where({ parameters: Raw(() => paramsQueryBuilder(parameters), parameters) })
+        .getMany();
+
+      const models = entities.map((entity) => this.jobConvertor.entityToModel(entity));
+      return models;
+    } catch (error) {
+      this.appLogger.error({ parameters, msg: `Failed to get jobs by jobs parameters, error: ${(error as Error).message}` });
+      throw error;
+    }
   }
 
   public async createJob(req: ICreateJobBody): Promise<ICreateJobResponse> {

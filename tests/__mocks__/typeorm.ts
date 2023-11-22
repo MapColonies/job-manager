@@ -1,5 +1,5 @@
 //mocks
-export { createConnection, Generated, In, LessThan, Brackets, LessThanOrEqual, MoreThanOrEqual, Between } from '../mocks/DBMock';
+export { createConnection, Generated, In, LessThan, Brackets, LessThanOrEqual, MoreThanOrEqual, Between, Raw } from '../mocks/DBMock';
 //types
 export { Repository, QueryRunner } from 'typeorm';
 //decorators
