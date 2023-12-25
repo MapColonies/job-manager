@@ -48,6 +48,7 @@
       "entitiesDir": "src/DAL/entity",
       "migrationsDir": "src/DAL/migration",
       "subscribersDir": "src/DAL/subscriber"
-    }
+    },
+    "PGAPPNAME": "COMMON_JOB_MANAGER"
   }
 }

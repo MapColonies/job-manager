@@ -75,6 +75,7 @@ env:
     schema: "public"
     logging: false
     rejectUnauthorized: true
+    pgAppName: "COMMON_JOB_MANAGER"
   
 resources:
   enabled: true
