@@ -61,7 +61,6 @@
       "ca": "DB_SSL_CA",
       "key": "DB_SSL_KEY",
       "cert": "DB_SSL_CERT"
-    },
-    "PGAPPNAME": "PG_APP_NAME"
+    }
   }
 }
