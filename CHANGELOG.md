@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.4.1](https://github.com/MapColonies/job-manager/compare/v2.4.0...v2.4.1) (2023-12-31)
+
 ## [2.4.0](https://github.com/MapColonies/job-manager/compare/v2.3.2...v2.4.0) (2023-11-22)
 
 
