@@ -1,4 +1,4 @@
-import { EntityRepository, In, LessThan, Brackets, UpdateResult } from 'typeorm';
+import { EntityRepository, LessThan, Brackets, UpdateResult, In } from 'typeorm';
 import { container } from 'tsyringe';
 import { Logger } from '@map-colonies/js-logger';
 import { ConflictError, NotFoundError } from '@map-colonies/error-types';
@@ -21,6 +21,7 @@ import {
 } from '../../common/dataModels/tasks';
 import { OperationStatus } from '../../common/dataModels/enums';
 import { JobEntity } from '../entity/job';
+import { IJobAndTaskStatus } from '../../common/interfaces';
 import { GeneralRepository } from './generalRepository';
 
 declare type SqlRawResponse = [unknown[], number];
@@ -141,17 +142,41 @@ export class TaskRepository extends GeneralRepository<TaskEntity> {
   }
 
   public async releaseInactiveTask(taskIds: string[]): Promise<string[]> {
-    const res = await this.createQueryBuilder()
-      .update()
-      .set({ status: OperationStatus.PENDING, attempts: () => 'attempts + 1' })
-      .where({ id: In(taskIds), status: OperationStatus.IN_PROGRESS })
-      .returning('id')
-      .updateEntity(true)
-      .execute();
-    const raw = res.raw as { id: string }[];
-    const updatedIds = raw.map((value) => {
-      return (value as TaskEntity).id;
-    });
+    const getJobStatusQuery = `
+      SELECT task.id as "taskId", "jobId", task.status as "taskStatus", job.status as "jobStatus"
+      FROM "Job" job, "Task" task
+      where task.id IN ('${taskIds.join("','")}') and task."jobId" = job.id
+    `;
+    const jobAndTaskEntities = (await this.query(getJobStatusQuery)) as IJobAndTaskStatus[];
+    const updatedIds: string[] = [];
+
+    const pendingEntities = jobAndTaskEntities.filter(
+      (entity) =>
+        entity.taskStatus === OperationStatus.IN_PROGRESS &&
+        (entity.jobStatus === OperationStatus.PENDING || entity.jobStatus === OperationStatus.IN_PROGRESS)
+    );
+
+    const abortedEntities = jobAndTaskEntities.filter(
+      (entity) =>
+        entity.taskStatus === OperationStatus.IN_PROGRESS &&
+        entity.jobStatus !== OperationStatus.PENDING &&
+        entity.jobStatus !== OperationStatus.IN_PROGRESS
+    );
+
+    // Execute update query for Pending status
+    if (pendingEntities.length > 0) {
+      const pendingTaskIds = pendingEntities.map((entity) => entity.taskId);
+      await this.updateTaskStatus(pendingTaskIds, OperationStatus.PENDING);
+      updatedIds.push(...pendingTaskIds);
+    }
+
+    // Execute update query for Aborted status
+    if (abortedEntities.length > 0) {
+      const abortedTaskIds = abortedEntities.map((entity) => entity.taskId);
+      await this.updateTaskStatus(abortedTaskIds, OperationStatus.ABORTED);
+      updatedIds.push(...abortedTaskIds);
+    }
+
     return updatedIds;
   }
 
@@ -279,5 +304,15 @@ export class TaskRepository extends GeneralRepository<TaskEntity> {
       }
       throw err;
     }
+  }
+
+  private async updateTaskStatus(taskIds: string[], newStatus: OperationStatus): Promise<void> {
+    await this.createQueryBuilder()
+      .update()
+      .set({ status: newStatus, attempts: () => 'attempts + 1' })
+      .where({ id: In(taskIds) })
+      .returning('id')
+      .updateEntity(true)
+      .execute();
   }
 }

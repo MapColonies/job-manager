@@ -1,5 +1,6 @@
 import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions';
 import { ResponseCodes } from './constants';
+import { OperationStatus } from './dataModels/enums';
 
 export interface IConfig {
   get: <T>(setting: string) => T;
@@ -24,4 +25,11 @@ export interface IHttpResponse<T> {
 
 export interface DefaultResponse {
   code: ResponseCodes;
+}
+
+export interface IJobAndTaskStatus {
+  taskId: string;
+  jobId: string;
+  taskStatus: OperationStatus;
+  jobStatus: OperationStatus;
 }
