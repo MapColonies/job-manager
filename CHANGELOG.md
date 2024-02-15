@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.4.2](https://github.com/MapColonies/job-manager/compare/v2.4.1...v2.4.2) (2024-02-15)
+
+
+### Bug Fixes
+
+* release-tasks-according-to-job-status (MAPCO-3951) ([#31](https://github.com/MapColonies/job-manager/issues/31)) ([a7d42a4](https://github.com/MapColonies/job-manager/commit/a7d42a48e3a8d1657e7120ad7b24299847eb826e))
+* reverted job paramters index ([#34](https://github.com/MapColonies/job-manager/issues/34)) ([fb0050d](https://github.com/MapColonies/job-manager/commit/fb0050dd83e8ff04dc67549c1dcfbd3bbebcf832))
+
 ### [2.4.1](https://github.com/MapColonies/job-manager/compare/v2.4.0...v2.4.1) (2023-12-31)
 
 ## [2.4.0](https://github.com/MapColonies/job-manager/compare/v2.3.2...v2.4.0) (2023-11-22)
