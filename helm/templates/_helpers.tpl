@@ -129,3 +129,14 @@ Returns the tracing url from global if exists or from the chart's values
     {{- .Values.env.metrics.url -}}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Returns the full ingress host.
+*/}}
+{{- define "ingress.host" -}}
+{{- if .Values.ingress.host }}
+    {{- .Values.ingress.host -}}
+{{- else -}}
+{{- printf "%s-%s.%s" .Release.Name .Chart.Name .Values.global.ingress.domain | indent 1 }}
+{{- end -}}
+{{- end -}}
