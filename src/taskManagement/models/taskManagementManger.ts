@@ -1,5 +1,7 @@
 import { Logger } from '@map-colonies/js-logger';
 import { NotFoundError, BadRequestError } from '@map-colonies/error-types';
+import { Tracer } from '@opentelemetry/api';
+import { withSpanAsyncV4 } from '@map-colonies/telemetry';
 import { inject, injectable } from 'tsyringe';
 import { SERVICES } from '../../common/constants';
 import { ConnectionManager } from '../../DAL/connectionManager';
@@ -14,8 +16,13 @@ export class TaskManagementManager {
   private jobRepository?: JobRepository;
   private taskRepository?: TaskRepository;
 
-  public constructor(@inject(SERVICES.LOGGER) private readonly logger: Logger, private readonly connectionManager: ConnectionManager) {}
+  public constructor(
+    @inject(SERVICES.LOGGER) private readonly logger: Logger,
+    @inject(SERVICES.TRACER) public readonly tracer: Tracer,
+    private readonly connectionManager: ConnectionManager
+  ) {}
 
+  @withSpanAsyncV4
   public async retrieveAndStart(req: IRetrieveAndStartRequest): Promise<IGetTaskResponse> {
     const repo = await this.getTaskRepository();
     this.logger.debug(`try to start task by retrieving and updating to "In-Progress" for job type: ${req.jobType}, task type: ${req.taskType}`);
@@ -28,6 +35,7 @@ export class TaskManagementManager {
     return res;
   }
 
+  @withSpanAsyncV4
   public async releaseInactive(tasks: string[]): Promise<string[]> {
     const repo = await this.getTaskRepository();
     this.logger.info(`trying to release dead tasks: ${tasks.join(',')}`);
@@ -36,6 +44,7 @@ export class TaskManagementManager {
     return releasedTasks;
   }
 
+  @withSpanAsyncV4
   public async getInactiveTasks(req: IFindInactiveTasksRequest): Promise<string[]> {
     const repo = await this.getTaskRepository();
     this.logger.info(`finding tasks inactive for longer then ${req.inactiveTimeSec} seconds, with types: ${req.types ? req.types.join() : 'any'}`);
@@ -43,6 +52,7 @@ export class TaskManagementManager {
     return res;
   }
 
+  @withSpanAsyncV4
   public async updateExpiredJobsAndTasks(): Promise<void> {
     const jobsRepo = await this.getJobRepository();
     await jobsRepo.updateExpiredJobs();
@@ -50,6 +60,7 @@ export class TaskManagementManager {
     await taskRepo.updateTasksOfExpiredJobs();
   }
 
+  @withSpanAsyncV4
   public async abortJobAndTasks(req: IJobsParams, queryParams: IJobsQuery): Promise<void> {
     const jobRepo = await this.getJobRepository();
     const jobEntity = await jobRepo.getJob(req.jobId, { ...queryParams, shouldReturnTasks: false });
