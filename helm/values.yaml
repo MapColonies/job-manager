@@ -3,6 +3,8 @@ global:
   tracing: {}
   metrics: {}
   environment: {}
+  ingress:
+    domain: 'apps.aroapp.io'  
 
 enabled: true
 environment: "development"
