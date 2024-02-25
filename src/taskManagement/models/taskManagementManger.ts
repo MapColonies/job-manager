@@ -22,7 +22,6 @@ export class TaskManagementManager {
     private readonly connectionManager: ConnectionManager
   ) {}
 
-  @withSpanAsyncV4
   public async retrieveAndStart(req: IRetrieveAndStartRequest): Promise<IGetTaskResponse> {
     const repo = await this.getTaskRepository();
     this.logger.debug(`try to start task by retrieving and updating to "In-Progress" for job type: ${req.jobType}, task type: ${req.taskType}`);

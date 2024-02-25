@@ -113,6 +113,7 @@ export class JobManager {
     await this.transactionManager.resetJob(jobId, newExpirationDate);
   }
 
+  @withSpanAsyncV4
   private async getAvailableActions(job: IGetJobResponse): Promise<IAvailableActions> {
     const isResettable = (await this.isResettable({ jobId: job.id })).isResettable;
     const isAbortable = await this.isAbortable(job);
@@ -123,6 +124,7 @@ export class JobManager {
     return availableActions;
   }
 
+  @withSpanAsyncV4
   private async isAbortable(job: IGetJobResponse): Promise<boolean> {
     const jobId = job.id;
     const repo = await this.getRepository();
