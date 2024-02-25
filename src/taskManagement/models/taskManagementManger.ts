@@ -22,18 +22,6 @@ export class TaskManagementManager {
     private readonly connectionManager: ConnectionManager
   ) {}
 
-  public async retrieveAndStart(req: IRetrieveAndStartRequest): Promise<IGetTaskResponse> {
-    const repo = await this.getTaskRepository();
-    this.logger.debug(`try to start task by retrieving and updating to "In-Progress" for job type: ${req.jobType}, task type: ${req.taskType}`);
-    const res = await repo.retrieveAndUpdate(req.jobType, req.taskType);
-    if (res === undefined) {
-      this.logger.debug(`Pending task was not found for job type: ${req.jobType}, task type: ${req.taskType}`);
-      throw new NotFoundError('Pending task was not found');
-    }
-    this.logger.info(`started task: ${res.id} of job: ${res.jobId}`);
-    return res;
-  }
-
   @withSpanAsyncV4
   public async releaseInactive(tasks: string[]): Promise<string[]> {
     const repo = await this.getTaskRepository();
@@ -76,6 +64,18 @@ export class TaskManagementManager {
     await jobRepo.updateJob({ jobId: req.jobId, status: OperationStatus.ABORTED });
     const taskRepo = await this.getTaskRepository();
     await taskRepo.abortJobTasks(req.jobId);
+  }
+
+  public async retrieveAndStart(req: IRetrieveAndStartRequest): Promise<IGetTaskResponse> {
+    const repo = await this.getTaskRepository();
+    this.logger.debug(`try to start task by retrieving and updating to "In-Progress" for job type: ${req.jobType}, task type: ${req.taskType}`);
+    const res = await repo.retrieveAndUpdate(req.jobType, req.taskType);
+    if (res === undefined) {
+      this.logger.debug(`Pending task was not found for job type: ${req.jobType}, task type: ${req.taskType}`);
+      throw new NotFoundError('Pending task was not found');
+    }
+    this.logger.info(`started task: ${res.id} of job: ${res.jobId}`);
+    return res;
   }
 
   private async getTaskRepository(): Promise<TaskRepository> {
