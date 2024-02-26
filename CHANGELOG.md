@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.5.0](https://github.com/MapColonies/job-manager/compare/v2.4.2...v2.5.0) (2024-02-26)
+
+
+### Features
+
+* adding traces support (MAPCO-3893) ([#36](https://github.com/MapColonies/job-manager/issues/36)) ([2e8920d](https://github.com/MapColonies/job-manager/commit/2e8920d0fecfc2a7b644679434b7097fb960201d))
+
 ### [2.4.2](https://github.com/MapColonies/job-manager/compare/v2.4.1...v2.4.2) (2024-02-15)
 
 
