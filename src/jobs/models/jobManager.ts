@@ -1,8 +1,9 @@
 import { Logger } from '@map-colonies/js-logger';
 import { NotFoundError } from '@map-colonies/error-types';
 import { inject, injectable } from 'tsyringe';
+import { Tracer } from '@opentelemetry/api';
+import { withSpanAsyncV4 } from '@map-colonies/telemetry';
 import { SERVICES } from '../../common/constants';
-
 import { ConnectionManager } from '../../DAL/connectionManager';
 import {
   FindJobsResponse,
@@ -26,10 +27,12 @@ export class JobManager {
   private repository?: JobRepository;
   public constructor(
     @inject(SERVICES.LOGGER) private readonly logger: Logger,
+    @inject(SERVICES.TRACER) public readonly tracer: Tracer,
     private readonly connectionManager: ConnectionManager,
     private readonly transactionManager: TransactionActions
   ) {}
 
+  @withSpanAsyncV4
   public async findJobs(req: IFindJobsRequest): Promise<FindJobsResponse> {
     const repo = await this.getRepository();
 
@@ -48,12 +51,14 @@ export class JobManager {
     return res;
   }
 
+  @withSpanAsyncV4
   public async getJobsByJobsParameters(req: JobParameters): Promise<FindJobsResponse> {
     const repo = await this.getRepository();
     const res = await repo.getJobByJobParameters(req);
     return res;
   }
 
+  @withSpanAsyncV4
   public async createJob(req: ICreateJobBody): Promise<ICreateJobResponse> {
     this.logger.debug(req, 'Create-job parameters');
     const repo = await this.getRepository();
@@ -61,6 +66,7 @@ export class JobManager {
     return res;
   }
 
+  @withSpanAsyncV4
   public async getJob(req: IJobsParams, query: IJobsQuery): Promise<IGetJobResponse> {
     const repo = await this.getRepository();
     let res = await repo.getJob(req.jobId, query);
@@ -76,12 +82,14 @@ export class JobManager {
     return res;
   }
 
+  @withSpanAsyncV4
   public async updateJob(req: IUpdateJobRequest): Promise<void> {
     this.logger.debug(req, 'Update-job parameters');
     const repo = await this.getRepository();
     await repo.updateJob(req);
   }
 
+  @withSpanAsyncV4
   public async deleteJob(req: IJobsParams): Promise<void> {
     this.logger.info({ jobId: req.jobId, msg: 'deleting job' });
     const repo = await this.getRepository();
@@ -89,6 +97,7 @@ export class JobManager {
     return res;
   }
 
+  @withSpanAsyncV4
   public async isResettable(req: IJobsParams): Promise<IIsResettableResponse> {
     const jobId = req.jobId;
     const repo = await this.getRepository();
@@ -96,6 +105,7 @@ export class JobManager {
     return { jobId, isResettable };
   }
 
+  @withSpanAsyncV4
   public async resetJob(req: IResetJobRequest): Promise<void> {
     const jobId = req.jobId;
     const newExpirationDate = req.newExpirationDate;
@@ -103,6 +113,7 @@ export class JobManager {
     await this.transactionManager.resetJob(jobId, newExpirationDate);
   }
 
+  @withSpanAsyncV4
   private async getAvailableActions(job: IGetJobResponse): Promise<IAvailableActions> {
     const isResettable = (await this.isResettable({ jobId: job.id })).isResettable;
     const isAbortable = await this.isAbortable(job);
@@ -113,6 +124,7 @@ export class JobManager {
     return availableActions;
   }
 
+  @withSpanAsyncV4
   private async isAbortable(job: IGetJobResponse): Promise<boolean> {
     const jobId = job.id;
     const repo = await this.getRepository();
