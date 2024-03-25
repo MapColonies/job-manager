@@ -4,7 +4,21 @@ global:
   metrics: {}
   environment: {}
   ingress:
-    domain: 'apps.aroapp.io'  
+    domain: 'apps.aroapp.io'
+  ca:
+    secretName: ''
+    path: '/usr/local/share/ca-certificates'
+    key: 'ca.crt'
+  db:
+    host: "localhost"
+    name: "common"
+    port: 5432
+    schema: ""
+    logging: false
+    sslEnabled: false
+    secrets:
+      useExternal: false
+      externalSecretName: ''
 
 enabled: true
 environment: "development"
@@ -28,19 +42,17 @@ authentication:
     useExternal: false
     externalSecretName: ""
 
-sharedData:
-  ca:
-    secretName: ''
-    path: '/usr/local/share/ca-certificates'
-    key: 'ca.crt'
-  db:
-    host: "localhost"
-    name: "raster"
-    port: 5432
-    sslEnabled: false
-    secrets:
-      useExternal: false
-      externalSecretName: ''
+db:
+  host: "localhost"
+  name: "common"
+  port: 5432
+  schema: "JobManager"
+  sslEnabled: false
+  logging: false
+  secrets:
+    useExternal: false
+    externalSecretName: ''    
+  
 
 # ====================================================================================================
 # Local certificate files variables
@@ -73,12 +85,7 @@ env:
   metrics:
     enabled: false
     url: "http://localhost:55681/v1/metrics"
-  db:
-    nameOverride: ""
-    schema: "public"
-    logging: false
-    rejectUnauthorized: true
-  
+
 resources:
   enabled: true
   value:
@@ -100,7 +107,8 @@ ingress:
   enabled: false
   type: 'nginx-org' # supported values: 'nginx-org' | 'nginx-kubernetes'
   path: /
-  host: "localhost"
+  host: ''
+  domain: ''
   cors:
     enabled: true
     origin: '*'
