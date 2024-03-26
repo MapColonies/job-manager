@@ -43,15 +43,13 @@ authentication:
     externalSecretName: ""
 
 db:
-  host: "localhost"
-  name: "common"
+  host: ""
+  name: ""
   port: 5432
-  schema: "JobManager"
+  schema: ""
   sslEnabled: false
   logging: false
-  secrets:
-    useExternal: false
-    externalSecretName: ''    
+
   
 
 # ====================================================================================================
