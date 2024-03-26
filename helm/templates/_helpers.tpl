@@ -27,13 +27,6 @@ Create chart name and version as used by the chart label.
 {{- end }}
 
 {{/*
-Create service name as used by the service name label.
-*/}}
-{{- define "service.fullname" -}}
-{{- printf "%s-%s" .Release.Name "service" }}
-{{- end }}
-
-{{/*
 Common labels
 */}}
 {{- define "job-manager.labels" -}}
@@ -136,7 +129,9 @@ Returns the full ingress host.
 {{- define "ingress.host" -}}
 {{- if .Values.ingress.host }}
     {{- .Values.ingress.host -}}
+{{- else if .Values.ingress.domain -}}
+{{- printf "%s-%s.%s" .Release.Name .Chart.Name .Values.ingress.domain }}
 {{- else -}}
-{{- printf "%s-%s.%s" .Release.Name .Chart.Name .Values.global.ingress.domain | indent 1 }}
+{{- printf "%s-%s.%s" .Release.Name .Chart.Name .Values.global.ingress.domain }}
 {{- end -}}
 {{- end -}}
