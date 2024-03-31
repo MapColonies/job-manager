@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.6.0](https://github.com/MapColonies/job-manager/compare/v2.5.0...v2.6.0) (2024-03-31)
+
+
+### Features
+
+* changes for new common job-manager umbrella and new build and push (MAPCO-4080) ([#37](https://github.com/MapColonies/job-manager/issues/37)) ([7b2549e](https://github.com/MapColonies/job-manager/commit/7b2549e94f27b9b64acec8fd2c6dc48cac4a890e))
+
 ## [2.5.0](https://github.com/MapColonies/job-manager/compare/v2.4.2...v2.5.0) (2024-02-26)
 
 
