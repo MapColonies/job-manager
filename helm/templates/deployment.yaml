@@ -1,14 +1,17 @@
 {{- $releaseName := .Release.Name -}}
 {{- $chartName := include "job-manager.name" . -}}
 {{- $cloudProviderFlavor := include "job-manager.cloudProviderFlavor" . -}}
+{{- $configmapName := include "configmap.fullname" . }}
+{{- $deploymentName := include "deployment.fullname" . }}
 {{- $cloudProviderDockerRegistryUrl := include "job-manager.cloudProviderDockerRegistryUrl" . -}}
 {{- $cloudProviderImagePullSecretName := include "job-manager.cloudProviderImagePullSecretName" . -}}
 {{- $imageTag := include "job-manager.tag" . -}}
+{{- $db := (include "common.db.merged" .) | fromYaml }}
 
 {{- if .Values.enabled -}}
 
 {{ $sslSecretName := ternary .Values.authentication.ssl.externalSecretName (printf "%s%s" .Release.Name "-open-ssl") .Values.authentication.ssl.useExternal }}
-{{ $postgresSecretName := ternary .Values.sharedData.db.secrets.externalSecretName (printf "%s%s" .Release.Name "-postgres-secret") .Values.sharedData.db.secrets.useExternal }}
+{{ $postgresSecretName := ternary $db.secrets.externalSecretName (printf "%s%s" .Release.Name "-postgres-secret") $db.secrets.useExternal }}
 
 {{- if .Values.authentication.ssl.enabled }}
 {{- if and .Values.authentication.ssl.useExternal (not .Values.authentication.ssl.externalSecretName) }}
@@ -19,7 +22,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ $releaseName }}-deployment
+  name: {{ $deploymentName }}
   labels:
     app: {{ $chartName }}
     component: {{ $chartName }}
@@ -56,11 +59,11 @@ spec:
           image: {{ $cloudProviderDockerRegistryUrl }}{{ .repository }}:{{ $imageTag }}
           {{- end }}
           env:
-          {{- if .Values.sharedData.ca.secretName }}
+          {{- if .Values.global.ca.secretName }}
             - name: REQUESTS_CA_BUNDLE
-              value: {{ printf "%s/%s" .Values.sharedData.ca.path .Values.sharedData.ca.key | quote }}
+              value: {{ printf "%s/%s" .Values.global.ca.path .Values.global.ca.key | quote }}
             - name: NODE_EXTRA_CA_CERTS
-              value: {{ printf "%s/%s" .Values.sharedData.ca.path .Values.sharedData.ca.key | quote }}
+              value: {{ printf "%s/%s" .Values.global.ca.path .Values.global.ca.key | quote }}
           {{- end }}
             - name: SERVER_PORT
               value: {{ .Values.env.targetPort | quote }}
@@ -75,7 +78,7 @@ spec:
                   name: {{ $postgresSecretName }}
                   key: password
             - name: DB_SSL_ENABLE
-              value: {{ quote .Values.sharedData.db.sslEnabled }}
+              value: {{ quote $db.sslEnabled }}
             - name: DB_SSL_CA
               value: "/opt/certs/ca/ca.pem"
             - name: DB_SSL_KEY
@@ -84,7 +87,7 @@ spec:
               value: "/opt/certs/cert/cert.pem"
           envFrom:
             - configMapRef:
-                name: {{ $releaseName }}-configmap
+                name: {{ $configmapName }}
           ports:
             - name: http
               containerPort: {{ .Values.env.targetPort }}
@@ -95,17 +98,17 @@ spec:
               path: /liveness
               port: {{ .Values.env.targetPort }}
           volumeMounts:
-             {{- if .Values.sharedData.ca.secretName }}
+             {{- if .Values.global.ca.secretName }}
             - name: root-ca
-              mountPath: {{ printf "%s/%s" .Values.sharedData.ca.path .Values.sharedData.ca.key | quote }}
-              subPath: {{ quote .Values.sharedData.ca.key }}
+              mountPath: {{ printf "%s/%s" .Values.global.ca.path .Values.global.ca.key | quote }}
+              subPath: {{ quote .Values.global.ca.key }}
             {{- end }}
             {{- if .Values.authentication.ssl.enabled }}
             - name: open-ssl
               mountPath: "/etc/ssl/openssl.cnf"
               subPath: "openssl.cnf"
             {{- end }}
-           {{- if .Values.sharedData.db.sslEnabled }}
+           {{- if $db.sslEnabled }}
             - name: ca-file
               mountPath: "/opt/certs/ca/ca.pem"
               subPath: ca.pem
@@ -121,17 +124,17 @@ spec:
             {{- toYaml .Values.resources.value | nindent 12 }}
           {{- end }}
       volumes:
-        {{- if .Values.sharedData.ca.secretName }}
+        {{- if .Values.global.ca.secretName }}
         - name: root-ca
           secret:
-            secretName: {{ .Values.sharedData.ca.secretName }}
+            secretName: {{ .Values.global.ca.secretName }}
         {{- end }}
         {{- if .Values.authentication.ssl.enabled }}
         - name: open-ssl
           secret:
             secretName: {{ $sslSecretName }}
         {{- end }}
-      {{- if .Values.sharedData.db.sslEnabled }}
+      {{- if $db.sslEnabled }}
         - name: ca-file
           secret:
             secretName: {{ $postgresSecretName }}
