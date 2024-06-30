@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.6.1](https://github.com/MapColonies/job-manager/compare/v2.6.0...v2.6.1) (2024-06-30)
+
+
+### Bug Fixes
+
+* add default not value empty string to "additionalIdentifiers" ([#38](https://github.com/MapColonies/job-manager/issues/38)) ([6c8d974](https://github.com/MapColonies/job-manager/commit/6c8d97474f1b2e7694f3dc8b07d8909b3140324e))
+
 ## [2.6.0](https://github.com/MapColonies/job-manager/compare/v2.5.0...v2.6.0) (2024-03-31)
 
 
