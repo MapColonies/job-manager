@@ -35,7 +35,7 @@ CREATE TABLE "Job"
   "pendingTasks" int NOT NULL DEFAULT 0,
   "inProgressTasks" int NOT NULL DEFAULT 0,
   "abortedTasks" int NOT NULL DEFAULT 0,
-  "additionalIdentifiers" text COLLATE pg_catalog."default",
+  "additionalIdentifiers" text COLLATE pg_catalog."default" NOT NULL DEFAULT ''::text,
   "domain" text COLLATE pg_catalog."default" NOT NULL DEFAULT ''::text,
   CONSTRAINT "PK_job_id" PRIMARY KEY (id),
   CONSTRAINT "UQ_uniqueness_on_active_tasks" EXCLUDE ("resourceId" with =, "version" with =, "type" with =, "additionalIdentifiers" with =) WHERE (status = 'Pending' OR status = 'In-Progress')
