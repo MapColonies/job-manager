@@ -3,7 +3,7 @@ SET search_path TO "JobManager", public; -- CHANGE SCHEMA NAME TO MATCH ENVIRONM
 WITH marked_for_delete AS (
 	SELECT unnest((array_agg(id))[2:]) id
 	FROM "Job"
-	WHERE ("additionalIdentifiers" IS NULL) 
+	WHERE ((status = 'Pending' OR status = 'In-Progress') AND ("additionalIdentifiers" IS NULL)) 
 	GROUP BY "resourceId","version","type"
 ), deleteTasks as (
 	DELETE FROM "Task"
