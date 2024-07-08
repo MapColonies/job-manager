@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.6.2](https://github.com/MapColonies/job-manager/compare/v2.6.1...v2.6.2) (2024-07-08)
+
+
+### Bug Fixes
+
+* handle ingestion vs export raster jobs with nullish identifier ([#39](https://github.com/MapColonies/job-manager/issues/39)) ([d360597](https://github.com/MapColonies/job-manager/commit/d360597a83f196034ac9b65ca6fc58835cb65e4a))
+
 ### [2.6.1](https://github.com/MapColonies/job-manager/compare/v2.6.0...v2.6.1) (2024-06-30)
 
 
