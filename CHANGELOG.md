@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.6.4](https://github.com/MapColonies/job-manager/compare/v2.6.3...v2.6.4) (2024-07-08)
+
+
+### Bug Fixes
+
+* adapting new CI workflow version ([#40](https://github.com/MapColonies/job-manager/issues/40)) ([deb1672](https://github.com/MapColonies/job-manager/commit/deb16721d0e01d77b32d54981066a933d7931f21))
+
 ### [2.6.3](https://github.com/MapColonies/job-manager/compare/v2.6.2...v2.6.3) (2024-07-08)
 
 ### [2.6.2](https://github.com/MapColonies/job-manager/compare/v2.6.1...v2.6.2) (2024-07-08)
