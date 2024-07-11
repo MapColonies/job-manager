@@ -97,11 +97,11 @@ export class JobRepository extends GeneralRepository<JobEntity> {
       filter.relations = ['tasks'];
     }
     const queryBuilder = this.createQueryBuilder().select('job').from(JobEntity, 'job').where(filter);
-    if ((req.type?.length ?? 0) > 0) {
-      queryBuilder.andWhere('job.type IN (:...types)', { types: req.type });
+    if ((req.types?.length ?? 0) > 0) {
+      queryBuilder.andWhere('job.type IN (:...types)', { types: req.types });
     }
-    if ((req.status?.length ?? 0) > 0) {
-      queryBuilder.andWhere('job.status IN (:...statuses)', { statuses: req.status });
+    if ((req.statuses?.length ?? 0) > 0) {
+      queryBuilder.andWhere('job.status IN (:...statuses)', { statuses: req.statuses });
     }
     const entities = await queryBuilder.getMany();
     const models = entities.map((entity) => this.jobConvertor.entityToModel(entity));

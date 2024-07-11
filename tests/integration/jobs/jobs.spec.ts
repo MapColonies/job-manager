@@ -594,8 +594,8 @@ describe('job', function () {
         const filter = {
           isCleaned: true,
           resourceId: '1',
-          status: ['Pending'],
-          type: ['2'],
+          statuses: ['Pending'],
+          types: ['2'],
           version: '3',
         };
         const jobModel = createJobDataForFind();
@@ -625,8 +625,8 @@ describe('job', function () {
         const filter = {
           isCleaned: true,
           resourceId: '1',
-          status: ['Pending'],
-          type: ['2'],
+          statuses: ['Pending'],
+          types: ['2'],
           version: '3',
         };
 
