@@ -621,7 +621,7 @@ describe('job', function () {
         expect(response).toSatisfyApiSpec();
       });
 
-      it('should no jobs and return 200', async function () {
+      it('should not find matched jobs and return status 200 with an empty array', async function () {
         const filter = {
           isCleaned: true,
           resourceId: '1',
@@ -645,6 +645,7 @@ describe('job', function () {
         expect(where).toHaveBeenCalledTimes(1);
         expect(andWhere).toHaveBeenCalledTimes(2);
         expect(getMany).toHaveBeenCalledTimes(1);
+        expect(response.body).toEqual([]);
 
         expect(response).toSatisfyApiSpec();
       });
