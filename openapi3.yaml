@@ -70,6 +70,27 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorMessage'
+  /jobs/find:
+    post:
+      operationId: findJobsByCriteria
+      summary: gets jobs by criteria
+      tags:
+        - jobs
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getJobsByCriteria'
+      responses:
+        '200':
+          description: Array of jobs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/jobResponse'
   /jobs/{jobId}:
     parameters:
       - $ref: '#/components/parameters/jobId'
@@ -668,6 +689,43 @@ components:
         type: string
         format: uuid
   schemas:
+    getJobsByCriteria:
+      type: object
+      description: get jobs criteria
+      properties:
+        resourceId:
+          type: string
+        version:
+          type: string
+        isCleaned:
+          type: boolean
+        status:
+          type: array
+          items:
+            $ref: '#/components/schemas/status'
+        type:
+          type: array
+          items:
+            type: string
+        shouldReturnTasks:
+          type: boolean
+          default: false
+        fromDate:
+          type: string
+          format: date-time
+        tillDate:
+          type: string
+          format: date-time
+        productType:
+          type: string
+        internalId:
+          type: string
+          format: uuid
+        domain:
+          type: string
+        shouldReturnAvailableActions:
+          type: boolean
+          default: false
     findTaskRequest:
       type: object
       description: task find model

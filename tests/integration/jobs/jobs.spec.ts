@@ -589,6 +589,67 @@ describe('job', function () {
       });
     });
 
+    describe('findJobsByCriteria', () => {
+      it('should get all jobs and return 200', async function () {
+        const filter = {
+          isCleaned: true,
+          resourceId: '1',
+          status: ['Pending'],
+          type: ['2'],
+          version: '3',
+        };
+        const jobModel = createJobDataForFind();
+        const jobEntity = jobModelToEntity(jobModel);
+        const select = jobRepositoryMocks.queryBuilder.select;
+        const from = jobRepositoryMocks.queryBuilder.from;
+        const where = jobRepositoryMocks.queryBuilder.where;
+        const andWhere = jobRepositoryMocks.queryBuilder.andWhere;
+        const getMany = jobRepositoryMocks.queryBuilder.getMany;
+        getMany.mockResolvedValue([jobEntity]);
+
+        const response = await requestSender.findJobs(filter);
+
+        expect(response.status).toBe(httpStatusCodes.OK);
+        expect(select).toHaveBeenCalledTimes(1);
+        expect(from).toHaveBeenCalledTimes(1);
+        expect(where).toHaveBeenCalledTimes(1);
+        expect(andWhere).toHaveBeenCalledTimes(2);
+        expect(getMany).toHaveBeenCalledTimes(1);
+
+        const jobs = response.body as unknown;
+        expect(jobs).toEqual([jobModel]);
+        expect(response).toSatisfyApiSpec();
+      });
+
+      it('should no jobs and return 200', async function () {
+        const filter = {
+          isCleaned: true,
+          resourceId: '1',
+          status: ['Pending'],
+          type: ['2'],
+          version: '3',
+        };
+
+        const select = jobRepositoryMocks.queryBuilder.select;
+        const from = jobRepositoryMocks.queryBuilder.from;
+        const where = jobRepositoryMocks.queryBuilder.where;
+        const andWhere = jobRepositoryMocks.queryBuilder.andWhere;
+        const getMany = jobRepositoryMocks.queryBuilder.getMany;
+        getMany.mockResolvedValue([]);
+
+        const response = await requestSender.findJobs(filter);
+
+        expect(response.status).toBe(httpStatusCodes.OK);
+        expect(select).toHaveBeenCalledTimes(1);
+        expect(from).toHaveBeenCalledTimes(1);
+        expect(where).toHaveBeenCalledTimes(1);
+        expect(andWhere).toHaveBeenCalledTimes(2);
+        expect(getMany).toHaveBeenCalledTimes(1);
+
+        expect(response).toSatisfyApiSpec();
+      });
+    });
+
     describe('getJob', () => {
       it('should get specific job and return 200', async function () {
         const jobModel = createJobDataForGetJob();
