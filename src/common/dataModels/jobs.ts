@@ -30,8 +30,8 @@ export interface IFindJobsByCriteriaBody {
   resourceId?: string;
   version?: string;
   isCleaned?: boolean;
-  status?: [OperationStatus];
-  type?: [string];
+  status?: OperationStatus[];
+  type?: string[];
   shouldReturnTasks?: boolean;
   shouldReturnAvailableActions?: boolean;
   productType?: string;
