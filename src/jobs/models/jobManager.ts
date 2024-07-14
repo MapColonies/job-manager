@@ -17,6 +17,7 @@ import {
   IIsResettableResponse,
   IResetJobRequest,
   IAvailableActions,
+  IFindJobsByCriteriaBody,
 } from '../../common/dataModels/jobs';
 import { JobParameters, JobRepository } from '../../DAL/repositories/jobRepository';
 import { TransactionActions } from '../../DAL/repositories/transactionActions';
@@ -37,6 +38,24 @@ export class JobManager {
     const repo = await this.getRepository();
 
     let res = await repo.findJobs(req);
+
+    if (req.shouldReturnAvailableActions === true) {
+      if (res.length !== 0) {
+        res = await Promise.all(
+          res.map(async (job) => ({
+            ...job,
+            availableActions: await this.getAvailableActions(job),
+          }))
+        );
+      }
+    }
+    return res;
+  }
+
+  @withSpanAsyncV4
+  public async findJobsByCriteria(req: IFindJobsByCriteriaBody): Promise<FindJobsResponse> {
+    const repo = await this.getRepository();
+    let res = await repo.findJobsByCriteria(req);
 
     if (req.shouldReturnAvailableActions === true) {
       if (res.length !== 0) {

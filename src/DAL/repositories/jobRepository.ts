@@ -14,6 +14,7 @@ import {
   IFindJobsRequest,
   IUpdateJobRequest,
   IJobsQuery,
+  IFindJobsByCriteriaBody,
 } from '../../common/dataModels/jobs';
 import { JobModelConvertor } from '../convertors/jobModelConverter';
 import { OperationStatus } from '../../common/dataModels/enums';
@@ -65,6 +66,44 @@ export class JobRepository extends GeneralRepository<JobEntity> {
     }
 
     const entities = await this.find(options);
+    const models = entities.map((entity) => this.jobConvertor.entityToModel(entity));
+    return models;
+  }
+
+  public async findJobsByCriteria(req: IFindJobsByCriteriaBody): Promise<FindJobsResponse> {
+    const filter: Record<string, unknown> = {
+      resourceId: req.resourceId,
+      version: req.version,
+      isCleaned: req.isCleaned,
+      productType: req.productType,
+      internalId: req.internalId,
+      domain: req.domain,
+    };
+
+    if (req.fromDate != undefined && req.tillDate != undefined) {
+      filter.updateTime = Between(req.fromDate, req.tillDate);
+    } else if (req.tillDate != undefined) {
+      filter.updateTime = LessThanOrEqual(req.tillDate);
+    } else if (req.fromDate != undefined) {
+      filter.updateTime = MoreThanOrEqual(req.fromDate);
+    }
+
+    for (const key of Object.keys(filter)) {
+      if (filter[key] == undefined) {
+        delete filter[key];
+      }
+    }
+    if (req.shouldReturnTasks !== false) {
+      filter.relations = ['tasks'];
+    }
+    const queryBuilder = this.createQueryBuilder().select('job').from(JobEntity, 'job').where(filter);
+    if ((req.types?.length ?? 0) > 0) {
+      queryBuilder.andWhere('job.type IN (:...types)', { types: req.types });
+    }
+    if ((req.statuses?.length ?? 0) > 0) {
+      queryBuilder.andWhere('job.status IN (:...statuses)', { statuses: req.statuses });
+    }
+    const entities = await queryBuilder.getMany();
     const models = entities.map((entity) => this.jobConvertor.entityToModel(entity));
     return models;
   }

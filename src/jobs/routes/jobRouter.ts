@@ -9,6 +9,7 @@ const jobRouterFactory: FactoryFunction<Router> = (dependencyContainer) => {
   const tasksController = dependencyContainer.resolve(TaskController);
 
   router.get('/', jobsController.findResource);
+  router.post('/find', jobsController.findResourceByCriteria);
   router.post('/', jobsController.createResource);
   router.get('/parameters', jobsController.getJobByJobsParameters);
   router.get('/:jobId', jobsController.getResource);

@@ -26,6 +26,21 @@ export interface IFindJobsRequest {
   domain?: string;
 }
 
+export interface IFindJobsByCriteriaBody {
+  resourceId?: string;
+  version?: string;
+  isCleaned?: boolean;
+  statuses?: OperationStatus[];
+  types?: string[];
+  shouldReturnTasks?: boolean;
+  shouldReturnAvailableActions?: boolean;
+  productType?: string;
+  fromDate?: string;
+  tillDate?: string;
+  internalId?: string;
+  domain?: string;
+}
+
 export interface ICreateJobBody {
   resourceId: string;
   version: string;

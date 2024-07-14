@@ -41,6 +41,10 @@ export class JobsRequestSender {
     return supertest.agent(this.app).post(`/jobs`).set('Content-Type', 'application/json').send(body);
   }
 
+  public async findJobs(body: Record<string, unknown>): Promise<supertest.Response> {
+    return supertest.agent(this.app).post(`/jobs/find`).set('Content-Type', 'application/json').send(body);
+  }
+
   public async deleteResource(id: string): Promise<supertest.Response> {
     return supertest.agent(this.app).delete(`/jobs/${id}`).set('Content-Type', 'application/json');
   }

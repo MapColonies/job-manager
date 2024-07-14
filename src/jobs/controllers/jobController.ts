@@ -7,6 +7,7 @@ import {
   FindJobsResponse,
   ICreateJobBody,
   ICreateJobResponse,
+  IFindJobsByCriteriaBody,
   IFindJobsRequest,
   IGetJobResponse,
   IIsResettableResponse,
@@ -22,6 +23,7 @@ import { JobParameters } from '../../DAL/repositories/jobRepository';
 
 type CreateResourceHandler = RequestHandler<undefined, ICreateJobResponse, ICreateJobBody>;
 type FindResourceHandler = RequestHandler<undefined, FindJobsResponse, undefined, IFindJobsRequest>;
+type FindResourceByCriteriaHandler = RequestHandler<undefined, FindJobsResponse, IFindJobsByCriteriaBody>;
 type GetJobsByJobsParametersHandler = RequestHandler<undefined, FindJobsResponse, undefined, JobParameters>;
 type GetResourceHandler = RequestHandler<IJobsParams, IGetJobResponse, undefined, IJobsQuery>;
 type DeleteResourceHandler = RequestHandler<IJobsParams, DefaultResponse>;
@@ -44,6 +46,15 @@ export class JobController {
   public findResource: FindResourceHandler = async (req, res, next) => {
     try {
       const jobsRes = await this.manager.findJobs(req.query);
+      return res.status(httpStatus.OK).json(jobsRes);
+    } catch (err) {
+      return next(err);
+    }
+  };
+
+  public findResourceByCriteria: FindResourceByCriteriaHandler = async (req, res, next) => {
+    try {
+      const jobsRes = await this.manager.findJobsByCriteria(req.body);
       return res.status(httpStatus.OK).json(jobsRes);
     } catch (err) {
       return next(err);
