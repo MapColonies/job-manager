@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.7.0](https://github.com/MapColonies/job-manager/compare/v2.6.4...v2.7.0) (2024-07-14)
+
+
+### Features
+
+* enable search with multiple types and statuses (MAPCO-4427, MAPCO-4430) ([#41](https://github.com/MapColonies/job-manager/issues/41)) ([17a4724](https://github.com/MapColonies/job-manager/commit/17a4724898873b8dbc5f55f51bbb760da8276dac))
+
 ### [2.6.4](https://github.com/MapColonies/job-manager/compare/v2.6.3...v2.6.4) (2024-07-08)
 
 
