@@ -189,6 +189,7 @@ describe('tasks', function () {
         dbFindInactiveTasks.mockResolvedValue(taskIds);
 
         const response = await requestSender.findInactive(req);
+        console.log(2630, response.body);
 
         expect(response.status).toBe(httpStatusCodes.OK);
         expect(response.body).toEqual(taskIds);

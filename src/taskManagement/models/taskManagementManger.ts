@@ -10,6 +10,7 @@ import { IFindInactiveTasksRequest, IGetTaskResponse, IRetrieveAndStartRequest }
 import { JobRepository } from '../../DAL/repositories/jobRepository';
 import { OperationStatus } from '../../common/dataModels/enums';
 import { IJobsParams, IJobsQuery } from '../../common/dataModels/jobs';
+import { HeartbeatClient } from '../../clients/heartbeatClient';
 
 @injectable()
 export class TaskManagementManager {
@@ -19,7 +20,8 @@ export class TaskManagementManager {
   public constructor(
     @inject(SERVICES.LOGGER) private readonly logger: Logger,
     @inject(SERVICES.TRACER) public readonly tracer: Tracer,
-    private readonly connectionManager: ConnectionManager
+    private readonly connectionManager: ConnectionManager,
+    private readonly heartbeatClient: HeartbeatClient
   ) {}
 
   @withSpanAsyncV4
@@ -35,8 +37,16 @@ export class TaskManagementManager {
   public async getInactiveTasks(req: IFindInactiveTasksRequest): Promise<string[]> {
     const repo = await this.getTaskRepository();
     this.logger.info(`finding tasks inactive for longer then ${req.inactiveTimeSec} seconds, with types: ${req.types ? req.types.join() : 'any'}`);
-    const res = await repo.findInactiveTasks(req);
-    return res;
+    const inactives = await repo.findInactiveTasks(req);
+    const inactivesNoHeartbeat: string[] = [];
+    for (const task of inactives) {
+      try {
+        await this.heartbeatClient.getHeartbeat(task);
+      } catch (NotFoundError) {
+        inactivesNoHeartbeat.push(task);
+      }
+    }
+    return inactivesNoHeartbeat;
   }
 
   @withSpanAsyncV4

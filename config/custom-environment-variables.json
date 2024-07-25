@@ -40,6 +40,17 @@
       }
     }
   },
+  "heartbeat": {
+    "enabled": {
+      "__name": "HEARTBEAT_ENABLED",
+      "__format": "boolean"
+    },
+    "failedDurationMS": {
+      "__name": "HEARTBEAT_FAILED_DURATION_MS",
+      "__format": "number"
+    },
+    "serviceUrl": "HEARTBEAT_SERVICE_URL"
+  },
   "typeOrm": {
     "host": "DB_HOST",
     "port": {
@@ -62,6 +73,17 @@
       "ca": "DB_SSL_CA",
       "key": "DB_SSL_KEY",
       "cert": "DB_SSL_CERT"
+    }
+  },
+  "httpRetry": {
+    "attempts": {
+      "__name": "HTTP_RETRY_ATTEMPTS",
+      "__format": "number"
+    },
+    "delay": "HTTP_RETRY_DELAY",
+    "shouldResetTimeout": {
+      "__name": "HTTP_RETRY_RESET_TIMEOUT",
+      "__format": "boolean"
     }
   }
 }

@@ -30,6 +30,11 @@
       }
     }
   },
+  "heartbeat": {
+    "enabled": true,
+    "failedDurationMS": 1000,
+    "serviceUrl": ""
+  },
   "typeOrm": {
     "type": "postgres",
     "host": "",
@@ -54,5 +59,10 @@
       "migrationsDir": "src/DAL/migration",
       "subscribersDir": "src/DAL/subscriber"
     }
+  },
+  "httpRetry": {
+    "attempts": 3,
+    "delay": "exponential",
+    "shouldResetTimeout": true
   }
 }

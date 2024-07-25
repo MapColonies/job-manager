@@ -21,6 +21,12 @@ data:
   DB_LOGGING: {{ $db.logging | quote }}
   DB_SSL_ENABLE: {{ $db.sslEnabled | quote }}
   PGAPPNAME: {{ $chartName }}
+  HTTP_RETRY_ATTEMPTS: {{ .Values.env.httpRetry.attempts | quote }}
+  HTTP_RETRY_DELAY: {{ .Values.env.httpRetry.delay | quote }}
+  HTTP_RETRY_RESET_TIMEOUT: {{ .Values.env.httpRetry.shouldResetTimeout | quote }}
+  HEARTBEAT_ENABLED: {{ .Values.env.heartbeat.enabled | quote }}
+  HEARTBEAT_FAILED_DURATION_MS: {{ .Values.env.heartbeat.failedDurationMs | quote }}
+  HEARTBEAT_SERVICE_URL: {{ .Values.serviceUrls.heartbeatManager | quote }}
   {{ if .Values.env.tracing.enabled }}
   TELEMETRY_TRACING_ENABLED: 'true'
   TELEMETRY_TRACING_URL: {{ $tracingUrl }}
