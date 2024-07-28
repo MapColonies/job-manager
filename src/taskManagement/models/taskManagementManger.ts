@@ -42,8 +42,10 @@ export class TaskManagementManager {
     for (const task of inactives) {
       try {
         await this.heartbeatClient.getHeartbeat(task);
-      } catch (NotFoundError) {
-        inactivesNoHeartbeat.push(task);
+      } catch (error) {
+        if (error instanceof NotFoundError) {
+          inactivesNoHeartbeat.push(task);
+        }
       }
     }
     return inactivesNoHeartbeat;

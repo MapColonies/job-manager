@@ -1,4 +1,5 @@
 import httpStatusCodes from 'http-status-codes';
+import nock from 'nock';
 import { getContainerConfig, resetContainer } from '../testContainerConfig';
 import { getApp } from '../../../src/app';
 import { createJobAndTaskStatus, createUuid } from '../../mocks/values';
@@ -111,6 +112,7 @@ function jobModelToEntity(jobModel: unknown): JobEntity {
   return jobEntity;
 }
 describe('tasks', function () {
+  const heartbeatManagerURL = 'http://heartbeaturl';
   let requestSender: TaskManagementRequestSender;
   beforeEach(function () {
     initTypeOrmMocks();
@@ -187,9 +189,11 @@ describe('tasks', function () {
         const dbFindInactiveTasks = jest.fn();
         taskRepositoryMock.findInactiveTasks = dbFindInactiveTasks;
         dbFindInactiveTasks.mockResolvedValue(taskIds);
+        taskIds.forEach((id) => {
+          nock(heartbeatManagerURL).get(`/heartbeat/${id}`).reply(404);
+        });
 
         const response = await requestSender.findInactive(req);
-        console.log(2630, response.body);
 
         expect(response.status).toBe(httpStatusCodes.OK);
         expect(response.body).toEqual(taskIds);
@@ -212,6 +216,9 @@ describe('tasks', function () {
         const dbFindInactiveTasks = jest.fn();
         taskRepositoryMock.findInactiveTasks = dbFindInactiveTasks;
         dbFindInactiveTasks.mockResolvedValue(taskIds);
+        taskIds.forEach((id) => {
+          nock(heartbeatManagerURL).get(`/heartbeat/${id}`).reply(404);
+        });
 
         const response = await requestSender.findInactive(req);
 
@@ -236,6 +243,9 @@ describe('tasks', function () {
         const dbFindInactiveTasks = jest.fn();
         taskRepositoryMock.findInactiveTasks = dbFindInactiveTasks;
         dbFindInactiveTasks.mockResolvedValue(taskIds);
+        taskIds.forEach((id) => {
+          nock(heartbeatManagerURL).get(`/heartbeat/${id}`).reply(404);
+        });
 
         const response = await requestSender.findInactive(req);
 
@@ -266,11 +276,35 @@ describe('tasks', function () {
         const dbFindInactiveTasks = jest.fn();
         taskRepositoryMock.findInactiveTasks = dbFindInactiveTasks;
         dbFindInactiveTasks.mockResolvedValue(taskIds);
+        taskIds.forEach((id) => {
+          nock(heartbeatManagerURL).get(`/heartbeat/${id}`).reply(404);
+        });
 
         const response = await requestSender.findInactive(req);
 
         expect(response.status).toBe(httpStatusCodes.OK);
         expect(response.body).toEqual(taskIds);
+        expect(dbFindInactiveTasks).toHaveBeenCalledTimes(1);
+        expect(dbFindInactiveTasks).toHaveBeenCalledWith(req);
+        expect(response).toSatisfyApiSpec();
+      });
+
+      it('should not return any tasks if tasks ever had a heartbeat', async function () {
+        const req = {
+          inactiveTimeSec: 500,
+        };
+        const taskIds = ['6716ddc8-40fb-41b2-bf1d-5c433fe4728f'];
+        const dbFindInactiveTasks = jest.fn();
+        taskRepositoryMock.findInactiveTasks = dbFindInactiveTasks;
+        dbFindInactiveTasks.mockResolvedValue(taskIds);
+        taskIds.forEach((id) => {
+          nock(heartbeatManagerURL).get(`/heartbeat/${id}`).reply(200);
+        });
+
+        const response = await requestSender.findInactive(req);
+
+        expect(response.status).toBe(httpStatusCodes.OK);
+        expect(response.body.length).toBe(0);
         expect(dbFindInactiveTasks).toHaveBeenCalledTimes(1);
         expect(dbFindInactiveTasks).toHaveBeenCalledWith(req);
         expect(response).toSatisfyApiSpec();
