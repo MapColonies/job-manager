@@ -13,6 +13,7 @@ import { ResponseCodes } from '../../../src/common/constants';
 import { IJobAndTaskStatus } from '../../../src/common/interfaces';
 import { JobEntity } from '../../../src/DAL/entity/job';
 import { TaskManagementRequestSender } from './helpers/taskManagementRequestSender';
+import { configMock } from '../../mocks/config';
 
 let taskRepositoryMocks: RepositoryMocks;
 let jobRepositoryMocks: RepositoryMocks;
@@ -112,8 +113,8 @@ function jobModelToEntity(jobModel: unknown): JobEntity {
   return jobEntity;
 }
 describe('tasks', function () {
-  const heartbeatManagerURL = 'http://heartbeaturl';
   let requestSender: TaskManagementRequestSender;
+  let heartbeatManagerURL: string;
   beforeEach(function () {
     initTypeOrmMocks();
 
@@ -126,6 +127,7 @@ describe('tasks', function () {
     jobRepositoryMock = new JobRepository();
     jobRepositoryMocks = registerRepository(JobRepository, jobRepositoryMock);
     requestSender = new TaskManagementRequestSender(app);
+    heartbeatManagerURL = configMock.get<string>('heartbeat.serviceUrl');
   });
   afterEach(function () {
     resetContainer();

@@ -64,6 +64,11 @@ const registerDefaultConfig = (): void => {
         subscribersDir: 'src/DAL/subscriber',
       },
     },
+    heartbeat: {
+      enabled: true,
+      failedDurationMS: 1000,
+      serviceUrl: 'http://heartbeaturl',
+    },
   };
   setConfigValues(config);
 };
