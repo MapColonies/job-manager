@@ -36,6 +36,9 @@ image:
   repository: "job-manager"
   tag: "latest"
 
+serviceUrls:
+  heartbeatManager: 'http://heartbeat-service-url'
+
 authentication:
   ssl:
     enabled: false
