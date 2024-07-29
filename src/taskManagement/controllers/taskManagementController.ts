@@ -7,7 +7,7 @@ import { injectable, inject } from 'tsyringe';
 import { ResponseCodes, SERVICES } from '../../common/constants';
 import { IFindInactiveTasksRequest, IGetTaskResponse, IRetrieveAndStartRequest } from '../../common/dataModels/tasks';
 import { DefaultResponse } from '../../common/interfaces';
-import { TaskManagementManager } from '../models/taskManagementManger';
+import { TaskManagementManager } from '../models/taskManagementManager';
 import { IJobsParams, IJobsQuery } from '../../common/dataModels/jobs';
 
 type RetrieveAndStartHandler = RequestHandler<IRetrieveAndStartRequest, IGetTaskResponse | ErrorResponse>;
