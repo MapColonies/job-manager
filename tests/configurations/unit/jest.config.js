@@ -14,6 +14,7 @@ module.exports = {
     '!**/routes/**',
     '!<rootDir>/src/*',
     '!<rootDir>/src/DAL/*',
+    '!<rootDir>/src/clients/*',
   ],
   coverageDirectory: '<rootDir>/coverage',
   reporters: [
