@@ -12,8 +12,8 @@ import { IGetTaskResponse } from '../../../src/common/dataModels/tasks';
 import { ResponseCodes } from '../../../src/common/constants';
 import { IJobAndTaskStatus } from '../../../src/common/interfaces';
 import { JobEntity } from '../../../src/DAL/entity/job';
-import { TaskManagementRequestSender } from './helpers/taskManagementRequestSender';
 import { configMock } from '../../mocks/config';
+import { TaskManagementRequestSender } from './helpers/taskManagementRequestSender';
 
 let taskRepositoryMocks: RepositoryMocks;
 let jobRepositoryMocks: RepositoryMocks;
@@ -306,7 +306,7 @@ describe('tasks', function () {
         const response = await requestSender.findInactive(req);
 
         expect(response.status).toBe(httpStatusCodes.OK);
-        expect(response.body.length).toBe(0);
+        expect(response.body).toHaveLength(0);
         expect(dbFindInactiveTasks).toHaveBeenCalledTimes(1);
         expect(dbFindInactiveTasks).toHaveBeenCalledWith(req);
         expect(response).toSatisfyApiSpec();

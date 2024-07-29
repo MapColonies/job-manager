@@ -4,8 +4,8 @@ import { inject } from 'tsyringe';
 import axiosRetry, { exponentialDelay, IAxiosRetryConfig } from 'axios-retry';
 import { isNumber } from 'lodash';
 import { Logger } from '@map-colonies/js-logger';
-import { SERVICES } from '../common/constants';
 import { BadRequestError, HttpError, InternalServerError, NotFoundError } from '@map-colonies/error-types';
+import { SERVICES } from '../common/constants';
 
 export interface IHttpRetryConfig {
   attempts: number;
