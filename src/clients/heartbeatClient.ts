@@ -21,14 +21,4 @@ export class HeartbeatClient extends HttpClient {
     const url = `${this.baseUrl}/heartbeat/${id}`;
     return this.get<string>(url);
   }
-
-  public async getInactiveTasks(): Promise<string[]> {
-    const url = `${this.baseUrl}/heartbeat/expired/${this.failedHeartbeatDuration}`;
-    return this.get<string[]>(url);
-  }
-
-  public async removeTasks(ids: string[]): Promise<void> {
-    const url = `${this.baseUrl}/heartbeat/remove`;
-    await this.post(url, ids);
-  }
 }
