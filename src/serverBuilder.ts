@@ -62,7 +62,7 @@ export class ServerBuilder {
           res.statusCode >= 400 &&
           !(res.statusCode == statusCodes.NOT_FOUND && ress.req.url.endsWith('startPending')))
         ? 'error'
-        : 'info';
+        : 'debug';
     };
 
     this.serverInstance.use(httpLogger({ logger: this.logger, customLogLevel }));
