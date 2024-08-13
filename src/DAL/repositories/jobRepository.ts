@@ -80,30 +80,44 @@ export class JobRepository extends GeneralRepository<JobEntity> {
       domain: req.domain,
     };
 
-    if (req.fromDate != undefined && req.tillDate != undefined) {
+    if (req.fromDate !== undefined && req.tillDate != undefined) {
       filter.updateTime = Between(req.fromDate, req.tillDate);
-    } else if (req.tillDate != undefined) {
+    } else if (req.tillDate !== undefined) {
       filter.updateTime = LessThanOrEqual(req.tillDate);
-    } else if (req.fromDate != undefined) {
+    } else if (req.fromDate !== undefined) {
       filter.updateTime = MoreThanOrEqual(req.fromDate);
     }
 
     for (const key of Object.keys(filter)) {
-      if (filter[key] == undefined) {
+      if (filter[key] === undefined) {
         delete filter[key];
       }
     }
     if (req.shouldReturnTasks !== false) {
       filter.relations = ['tasks'];
     }
-    const queryBuilder = this.createQueryBuilder().select('job').from(JobEntity, 'job').where(filter);
+    const queryBuilder = this.createQueryBuilder('job').select().where(filter);
     if ((req.types?.length ?? 0) > 0) {
       queryBuilder.andWhere('job.type IN (:...types)', { types: req.types });
     }
     if ((req.statuses?.length ?? 0) > 0) {
       queryBuilder.andWhere('job.status IN (:...statuses)', { statuses: req.statuses });
     }
+
+    if (req.taskType !== undefined) {
+      queryBuilder.innerJoin('job.tasks', 'task');
+      queryBuilder
+        .addSelect(`COUNT(CASE WHEN task.type = '${req.taskType}' THEN 1 ELSE NULL END)`, 'job_taskCount')
+        .addSelect(`SUM(CASE WHEN task.status = 'Completed' THEN 1 ELSE 0 END)`, 'job_completedTasks')
+        .addSelect(`SUM(CASE WHEN task.status = 'In-Progress' THEN 1 ELSE 0 END)`, 'job_inProgressTasks')
+        .addSelect(`SUM(CASE WHEN task.status = 'Pending' THEN 1 ELSE 0 END)`, 'job_pendingTasks')
+        .addSelect(`SUM(CASE WHEN task.status = 'Aborted' THEN 1 ELSE 0 END)`, 'job_abortedTasks')
+        .addSelect(`SUM(CASE WHEN task.status = 'Failed' THEN 1 ELSE 0 END)`, 'job_failedTasks')
+        .andWhere(`task.type  = '${req.taskType}'`)
+        .groupBy('job.id');
+    }
     const entities = await queryBuilder.getMany();
+
     const models = entities.map((entity) => this.jobConvertor.entityToModel(entity));
     return models;
   }

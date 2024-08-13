@@ -601,7 +601,6 @@ describe('job', function () {
         const jobModel = createJobDataForFind();
         const jobEntity = jobModelToEntity(jobModel);
         const select = jobRepositoryMocks.queryBuilder.select;
-        const from = jobRepositoryMocks.queryBuilder.from;
         const where = jobRepositoryMocks.queryBuilder.where;
         const andWhere = jobRepositoryMocks.queryBuilder.andWhere;
         const getMany = jobRepositoryMocks.queryBuilder.getMany;
@@ -611,9 +610,44 @@ describe('job', function () {
 
         expect(response.status).toBe(httpStatusCodes.OK);
         expect(select).toHaveBeenCalledTimes(1);
-        expect(from).toHaveBeenCalledTimes(1);
         expect(where).toHaveBeenCalledTimes(1);
         expect(andWhere).toHaveBeenCalledTimes(2);
+        expect(getMany).toHaveBeenCalledTimes(1);
+
+        const jobs = response.body as unknown;
+        expect(jobs).toEqual([jobModel]);
+        expect(response).toSatisfyApiSpec();
+      });
+
+      it('should get all jobs with specific task type and return 200', async function () {
+        const filter = {
+          isCleaned: true,
+          resourceId: '1',
+          statuses: ['Pending'],
+          types: ['2'],
+          version: '3',
+          taskType: 'init',
+        };
+        const jobModel = createJobDataForFind();
+        const jobEntity = jobModelToEntity(jobModel);
+        const select = jobRepositoryMocks.queryBuilder.select;
+        const where = jobRepositoryMocks.queryBuilder.where;
+        const andWhere = jobRepositoryMocks.queryBuilder.andWhere;
+        const addSelect = jobRepositoryMocks.queryBuilder.addSelect;
+        const innerJoin = jobRepositoryMocks.queryBuilder.innerJoin;
+        const groupBy = jobRepositoryMocks.queryBuilder.groupBy;
+        const getMany = jobRepositoryMocks.queryBuilder.getMany;
+        getMany.mockResolvedValue([jobEntity]);
+
+        const response = await requestSender.findJobs(filter);
+
+        expect(response.status).toBe(httpStatusCodes.OK);
+        expect(select).toHaveBeenCalledTimes(1);
+        expect(addSelect).toHaveBeenCalledTimes(6);
+        expect(innerJoin).toHaveBeenCalledTimes(1);
+        expect(groupBy).toHaveBeenCalledTimes(1);
+        expect(where).toHaveBeenCalledTimes(1);
+        expect(andWhere).toHaveBeenCalledTimes(3);
         expect(getMany).toHaveBeenCalledTimes(1);
 
         const jobs = response.body as unknown;
@@ -631,7 +665,6 @@ describe('job', function () {
         };
 
         const select = jobRepositoryMocks.queryBuilder.select;
-        const from = jobRepositoryMocks.queryBuilder.from;
         const where = jobRepositoryMocks.queryBuilder.where;
         const andWhere = jobRepositoryMocks.queryBuilder.andWhere;
         const getMany = jobRepositoryMocks.queryBuilder.getMany;
@@ -641,7 +674,6 @@ describe('job', function () {
 
         expect(response.status).toBe(httpStatusCodes.OK);
         expect(select).toHaveBeenCalledTimes(1);
-        expect(from).toHaveBeenCalledTimes(1);
         expect(where).toHaveBeenCalledTimes(1);
         expect(andWhere).toHaveBeenCalledTimes(2);
         expect(getMany).toHaveBeenCalledTimes(1);

@@ -39,6 +39,7 @@ export interface IFindJobsByCriteriaBody {
   tillDate?: string;
   internalId?: string;
   domain?: string;
+  taskType?: string;
 }
 
 export interface ICreateJobBody {
