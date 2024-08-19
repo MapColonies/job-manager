@@ -619,7 +619,7 @@ describe('job', function () {
         expect(response).toSatisfyApiSpec();
       });
 
-      it('should get all jobs with specific task type and return 200', async function () {
+      it('should get all jobs with task counts by task type and return 200', async function () {
         const filter = {
           isCleaned: true,
           resourceId: '1',
