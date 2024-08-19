@@ -80,7 +80,7 @@ export class JobRepository extends GeneralRepository<JobEntity> {
       domain: req.domain,
     };
 
-    if (req.fromDate !== undefined && req.tillDate != undefined) {
+    if (req.fromDate !== undefined && req.tillDate !== undefined) {
       filter.updateTime = Between(req.fromDate, req.tillDate);
     } else if (req.tillDate !== undefined) {
       filter.updateTime = LessThanOrEqual(req.tillDate);
@@ -107,12 +107,12 @@ export class JobRepository extends GeneralRepository<JobEntity> {
     if (req.taskType !== undefined) {
       queryBuilder.innerJoin('job.tasks', 'task');
       queryBuilder
-        .addSelect(`COUNT(CASE WHEN task.type = '${req.taskType}' THEN 1 ELSE NULL END)`, 'job_taskCount')
-        .addSelect(`SUM(CASE WHEN task.status = 'Completed' THEN 1 ELSE 0 END)`, 'job_completedTasks')
-        .addSelect(`SUM(CASE WHEN task.status = 'In-Progress' THEN 1 ELSE 0 END)`, 'job_inProgressTasks')
-        .addSelect(`SUM(CASE WHEN task.status = 'Pending' THEN 1 ELSE 0 END)`, 'job_pendingTasks')
-        .addSelect(`SUM(CASE WHEN task.status = 'Aborted' THEN 1 ELSE 0 END)`, 'job_abortedTasks')
-        .addSelect(`SUM(CASE WHEN task.status = 'Failed' THEN 1 ELSE 0 END)`, 'job_failedTasks')
+        .addSelect(`CAST(COUNT(CASE WHEN task.type = '${req.taskType}' THEN 1 ELSE NULL END) as integer)`, 'job_taskCount')
+        .addSelect(`CAST(SUM(CASE WHEN task.status = 'Completed' THEN 1 ELSE 0 END) as integer)`, 'job_completedTasks')
+        .addSelect(`CAST(SUM(CASE WHEN task.status = 'In-Progress' THEN 1 ELSE 0 END) as integer)`, 'job_inProgressTasks')
+        .addSelect(`CAST(SUM(CASE WHEN task.status = 'Pending' THEN 1 ELSE 0 END) as integer)`, 'job_pendingTasks')
+        .addSelect(`CAST(SUM(CASE WHEN task.status = 'Aborted' THEN 1 ELSE 0 END) as integer)`, 'job_abortedTasks')
+        .addSelect(`CAST(SUM(CASE WHEN task.status = 'Failed' THEN 1 ELSE 0 END) as integer)`, 'job_failedTasks')
         .andWhere(`task.type  = '${req.taskType}'`)
         .groupBy('job.id');
     }
