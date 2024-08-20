@@ -108,11 +108,11 @@ export class JobRepository extends GeneralRepository<JobEntity> {
       queryBuilder.innerJoin('job.tasks', 'task');
       queryBuilder
         .addSelect(`CAST(COUNT(CASE WHEN task.type = '${req.taskType}' THEN 1 ELSE NULL END) as integer)`, 'job_taskCount')
-        .addSelect(`CAST(SUM(CASE WHEN task.status = '${OperationStatus.COMPLETED}' THEN 1 ELSE 0 END) as integer)`, 'job_completedTasks')
-        .addSelect(`CAST(SUM(CASE WHEN task.status = '${OperationStatus.IN_PROGRESS}' THEN 1 ELSE 0 END) as integer)`, 'job_inProgressTasks')
-        .addSelect(`CAST(SUM(CASE WHEN task.status = '${OperationStatus.PENDING}' THEN 1 ELSE 0 END) as integer)`, 'job_pendingTasks')
-        .addSelect(`CAST(SUM(CASE WHEN task.status = '${OperationStatus.ABORTED}' THEN 1 ELSE 0 END) as integer)`, 'job_abortedTasks')
-        .addSelect(`CAST(SUM(CASE WHEN task.status = '${OperationStatus.FAILED}' THEN 1 ELSE 0 END) as integer)`, 'job_failedTasks')
+        .addSelect(`CAST(COUNT(CASE WHEN task.status = '${OperationStatus.COMPLETED}' THEN 1 ELSE NULL END) as integer)`, 'job_completedTasks')
+        .addSelect(`CAST(COUNT(CASE WHEN task.status = '${OperationStatus.IN_PROGRESS}' THEN 1 ELSE NULL END) as integer)`, 'job_inProgressTasks')
+        .addSelect(`CAST(COUNT(CASE WHEN task.status = '${OperationStatus.PENDING}' THEN 1 ELSE NULL END) as integer)`, 'job_pendingTasks')
+        .addSelect(`CAST(COUNT(CASE WHEN task.status = '${OperationStatus.ABORTED}' THEN 1 ELSE NULL END) as integer)`, 'job_abortedTasks')
+        .addSelect(`CAST(COUNT(CASE WHEN task.status = '${OperationStatus.FAILED}' THEN 1 ELSE NULL END) as integer)`, 'job_failedTasks')
         .andWhere(`task.type  = '${req.taskType}'`)
         .groupBy('job.id');
     }
