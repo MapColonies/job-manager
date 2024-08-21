@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.8.0](https://github.com/MapColonies/job-manager/compare/v2.7.0...v2.8.0) (2024-08-21)
+
+
+### Features
+
+* add taskType to find query(MAPCO-4570) ([#45](https://github.com/MapColonies/job-manager/issues/45)) ([06fd445](https://github.com/MapColonies/job-manager/commit/06fd44589afb80d1f63caa910edb8d5c53915ebc))
+
+
+### Bug Fixes
+
+* start pending request log should be debug ([#44](https://github.com/MapColonies/job-manager/issues/44)) ([1028ac1](https://github.com/MapColonies/job-manager/commit/1028ac110f9a1ba4734ea98c77e09a1477c77c76))
+
 ## [2.7.0](https://github.com/MapColonies/job-manager/compare/v2.6.4...v2.7.0) (2024-07-14)
 
 
