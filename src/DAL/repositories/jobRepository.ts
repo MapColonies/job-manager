@@ -80,30 +80,44 @@ export class JobRepository extends GeneralRepository<JobEntity> {
       domain: req.domain,
     };
 
-    if (req.fromDate != undefined && req.tillDate != undefined) {
+    if (req.fromDate !== undefined && req.tillDate !== undefined) {
       filter.updateTime = Between(req.fromDate, req.tillDate);
-    } else if (req.tillDate != undefined) {
+    } else if (req.tillDate !== undefined) {
       filter.updateTime = LessThanOrEqual(req.tillDate);
-    } else if (req.fromDate != undefined) {
+    } else if (req.fromDate !== undefined) {
       filter.updateTime = MoreThanOrEqual(req.fromDate);
     }
 
     for (const key of Object.keys(filter)) {
-      if (filter[key] == undefined) {
+      if (filter[key] === undefined) {
         delete filter[key];
       }
     }
     if (req.shouldReturnTasks !== false) {
       filter.relations = ['tasks'];
     }
-    const queryBuilder = this.createQueryBuilder().select('job').from(JobEntity, 'job').where(filter);
+    const queryBuilder = this.createQueryBuilder('job').select().where(filter);
     if ((req.types?.length ?? 0) > 0) {
       queryBuilder.andWhere('job.type IN (:...types)', { types: req.types });
     }
     if ((req.statuses?.length ?? 0) > 0) {
       queryBuilder.andWhere('job.status IN (:...statuses)', { statuses: req.statuses });
     }
+
+    if (req.taskType !== undefined) {
+      queryBuilder.innerJoin('job.tasks', 'task');
+      queryBuilder
+        .addSelect(`CAST(COUNT(CASE WHEN task.type = '${req.taskType}' THEN 1 ELSE NULL END) as integer)`, 'job_taskCount')
+        .addSelect(`CAST(COUNT(CASE WHEN task.status = '${OperationStatus.COMPLETED}' THEN 1 ELSE NULL END) as integer)`, 'job_completedTasks')
+        .addSelect(`CAST(COUNT(CASE WHEN task.status = '${OperationStatus.IN_PROGRESS}' THEN 1 ELSE NULL END) as integer)`, 'job_inProgressTasks')
+        .addSelect(`CAST(COUNT(CASE WHEN task.status = '${OperationStatus.PENDING}' THEN 1 ELSE NULL END) as integer)`, 'job_pendingTasks')
+        .addSelect(`CAST(COUNT(CASE WHEN task.status = '${OperationStatus.ABORTED}' THEN 1 ELSE NULL END) as integer)`, 'job_abortedTasks')
+        .addSelect(`CAST(COUNT(CASE WHEN task.status = '${OperationStatus.FAILED}' THEN 1 ELSE NULL END) as integer)`, 'job_failedTasks')
+        .andWhere(`task.type  = '${req.taskType}'`)
+        .groupBy('job.id');
+    }
     const entities = await queryBuilder.getMany();
+
     const models = entities.map((entity) => this.jobConvertor.entityToModel(entity));
     return models;
   }

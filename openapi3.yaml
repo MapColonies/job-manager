@@ -723,6 +723,8 @@ components:
           format: uuid
         domain:
           type: string
+        taskType:
+          type: string
         shouldReturnAvailableActions:
           type: boolean
           default: false
