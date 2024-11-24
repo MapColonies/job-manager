@@ -38,7 +38,7 @@ export class TaskManagementController {
 
   public releaseInactive: ReleaseInactiveTasksHandler = async (req, res, next) => {
     try {
-      const releasedIds = await this.manager.releaseInactive(req.body, req.query.raiseAttempts);
+      const releasedIds = await this.manager.releaseInactive(req.body, req.query.shouldRaiseAttempts);
       return res.status(httpStatus.OK).json(releasedIds);
     } catch (err) {
       return next(err);

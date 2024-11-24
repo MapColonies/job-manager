@@ -495,7 +495,7 @@ paths:
             schema:
               $ref: '#/components/schemas/taskIdList'
       parameters:
-        - $ref: '#/components/parameters/raiseAttempts'
+        - $ref: '#/components/parameters/shouldRaiseAttempts'
       responses:
         '200':
           description: OK
@@ -690,9 +690,9 @@ components:
       schema:
         type: string
         format: uuid
-    raiseAttempts:
+    shouldRaiseAttempts:
       in: query
-      name: raiseAttempts
+      name: shouldRaiseAttempts
       description: whether or not to raise task attempts on release
       required: false
       schema:

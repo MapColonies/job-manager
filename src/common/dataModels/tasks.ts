@@ -52,7 +52,7 @@ export interface IFindInactiveTasksRequest {
 }
 
 export interface IReleaseInactiveQuery {
-  raiseAttempts?: boolean;
+  shouldRaiseAttempts?: boolean;
 }
 
 //responses
