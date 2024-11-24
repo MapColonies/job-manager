@@ -23,10 +23,10 @@ export class TaskManagementManager {
   ) {}
 
   @withSpanAsyncV4
-  public async releaseInactive(tasks: string[]): Promise<string[]> {
+  public async releaseInactive(tasks: string[], raiseAttempts?: boolean): Promise<string[]> {
     const repo = await this.getTaskRepository();
     this.logger.info(`trying to release dead tasks: ${tasks.join(',')}`);
-    const releasedTasks = await repo.releaseInactiveTask(tasks);
+    const releasedTasks = await repo.releaseInactiveTask(tasks, raiseAttempts ?? true);
     this.logger.info(`released dead tasks: ${releasedTasks.join(',')}`);
     return releasedTasks;
   }

@@ -141,7 +141,7 @@ export class TaskRepository extends GeneralRepository<TaskEntity> {
     return this.taskConvertor.entityToModel(entity);
   }
 
-  public async releaseInactiveTask(taskIds: string[]): Promise<string[]> {
+  public async releaseInactiveTask(taskIds: string[], raiseAttempts: boolean): Promise<string[]> {
     const getJobStatusQuery = `
       SELECT task.id as "taskId", "jobId", task.status as "taskStatus", job.status as "jobStatus"
       FROM "Job" job, "Task" task
@@ -166,14 +166,14 @@ export class TaskRepository extends GeneralRepository<TaskEntity> {
     // Execute update query for Pending status
     if (pendingEntities.length > 0) {
       const pendingTaskIds = pendingEntities.map((entity) => entity.taskId);
-      await this.updateTaskStatus(pendingTaskIds, OperationStatus.PENDING);
+      await this.updateTaskStatus(pendingTaskIds, OperationStatus.PENDING, raiseAttempts);
       updatedIds.push(...pendingTaskIds);
     }
 
     // Execute update query for Aborted status
     if (abortedEntities.length > 0) {
       const abortedTaskIds = abortedEntities.map((entity) => entity.taskId);
-      await this.updateTaskStatus(abortedTaskIds, OperationStatus.ABORTED);
+      await this.updateTaskStatus(abortedTaskIds, OperationStatus.ABORTED, raiseAttempts);
       updatedIds.push(...abortedTaskIds);
     }
 
@@ -306,10 +306,10 @@ export class TaskRepository extends GeneralRepository<TaskEntity> {
     }
   }
 
-  private async updateTaskStatus(taskIds: string[], newStatus: OperationStatus): Promise<void> {
+  private async updateTaskStatus(taskIds: string[], newStatus: OperationStatus, raiseAttempts: boolean): Promise<void> {
     await this.createQueryBuilder()
       .update()
-      .set({ status: newStatus, attempts: () => 'attempts + 1' })
+      .set({ status: newStatus, attempts: () => (raiseAttempts ? 'attempts + 1' : 'attempts') })
       .where({ id: In(taskIds) })
       .returning('id')
       .updateEntity(true)

@@ -42,7 +42,7 @@
       "key": "",
       "cert": ""
     },
-    "database": "raster",
+    "database": "common",
     "schema": "public",
     "synchronize": false,
     "logging": false,

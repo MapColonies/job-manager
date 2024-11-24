@@ -5,13 +5,13 @@ import { ErrorResponse } from '@map-colonies/error-express-handler';
 import httpStatus from 'http-status-codes';
 import { injectable, inject } from 'tsyringe';
 import { ResponseCodes, SERVICES } from '../../common/constants';
-import { IFindInactiveTasksRequest, IGetTaskResponse, IRetrieveAndStartRequest } from '../../common/dataModels/tasks';
+import { IFindInactiveTasksRequest, IGetTaskResponse, IReleaseInactiveQuery, IRetrieveAndStartRequest } from '../../common/dataModels/tasks';
 import { DefaultResponse } from '../../common/interfaces';
 import { TaskManagementManager } from '../models/taskManagementManger';
 import { IJobsParams, IJobsQuery } from '../../common/dataModels/jobs';
 
 type RetrieveAndStartHandler = RequestHandler<IRetrieveAndStartRequest, IGetTaskResponse | ErrorResponse>;
-type ReleaseInactiveTasksHandler = RequestHandler<undefined, string[], string[]>;
+type ReleaseInactiveTasksHandler = RequestHandler<undefined, string[], string[], IReleaseInactiveQuery>;
 type FindInactiveTasksHandler = RequestHandler<undefined, string[], IFindInactiveTasksRequest>;
 type UpdateExpiredStatusHandler = RequestHandler<undefined, DefaultResponse>;
 type AbortHandler = RequestHandler<IJobsParams, DefaultResponse, undefined, IJobsQuery>;
@@ -38,7 +38,7 @@ export class TaskManagementController {
 
   public releaseInactive: ReleaseInactiveTasksHandler = async (req, res, next) => {
     try {
-      const releasedIds = await this.manager.releaseInactive(req.body);
+      const releasedIds = await this.manager.releaseInactive(req.body, req.query.raiseAttempts);
       return res.status(httpStatus.OK).json(releasedIds);
     } catch (err) {
       return next(err);
