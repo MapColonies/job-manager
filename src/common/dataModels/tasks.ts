@@ -51,7 +51,7 @@ export interface IFindInactiveTasksRequest {
   ignoreTypes?: ITaskType[];
 }
 
-export interface IReleaseInactiveQuery {
+export interface IReleaseInactiveQueryParams {
   shouldRaiseAttempts?: boolean;
 }
 

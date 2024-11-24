@@ -5,13 +5,13 @@ import { ErrorResponse } from '@map-colonies/error-express-handler';
 import httpStatus from 'http-status-codes';
 import { injectable, inject } from 'tsyringe';
 import { ResponseCodes, SERVICES } from '../../common/constants';
-import { IFindInactiveTasksRequest, IGetTaskResponse, IReleaseInactiveQuery, IRetrieveAndStartRequest } from '../../common/dataModels/tasks';
+import { IFindInactiveTasksRequest, IGetTaskResponse, IReleaseInactiveQueryParams, IRetrieveAndStartRequest } from '../../common/dataModels/tasks';
 import { DefaultResponse } from '../../common/interfaces';
 import { TaskManagementManager } from '../models/taskManagementManger';
 import { IJobsParams, IJobsQuery } from '../../common/dataModels/jobs';
 
 type RetrieveAndStartHandler = RequestHandler<IRetrieveAndStartRequest, IGetTaskResponse | ErrorResponse>;
-type ReleaseInactiveTasksHandler = RequestHandler<undefined, string[], string[], IReleaseInactiveQuery>;
+type ReleaseInactiveTasksHandler = RequestHandler<undefined, string[], string[], IReleaseInactiveQueryParams>;
 type FindInactiveTasksHandler = RequestHandler<undefined, string[], IFindInactiveTasksRequest>;
 type UpdateExpiredStatusHandler = RequestHandler<undefined, DefaultResponse>;
 type AbortHandler = RequestHandler<IJobsParams, DefaultResponse, undefined, IJobsQuery>;
