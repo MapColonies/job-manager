@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.9.0](https://github.com/MapColonies/job-manager/compare/v2.8.0...v2.9.0) (2024-11-24)
+
+
+### Features
+
+* added option for releaseInactive to not raise task attempts (MAPCO-5466) ([#46](https://github.com/MapColonies/job-manager/issues/46)) ([660f0db](https://github.com/MapColonies/job-manager/commit/660f0dbea8c5169983c4590316f0e8b08c2c3b2a))
+
 ## [2.8.0](https://github.com/MapColonies/job-manager/compare/v2.7.0...v2.8.0) (2024-08-21)
 
 
