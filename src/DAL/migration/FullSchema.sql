@@ -5,7 +5,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 SET search_path TO "JobManager", public; -- CHANGE SCHEMA NAME TO MATCH ENVIRONMENT
 CREATE TYPE "operation_status_enum" AS ENUM
-    ('Pending', 'In-Progress', 'Completed', 'Failed', 'Expired', 'Aborted');
+    ('Pending', 'In-Progress', 'Completed', 'Failed', 'Expired', 'Aborted', 'Suspended');
 
 CREATE TABLE "Job"
 (
@@ -35,6 +35,7 @@ CREATE TABLE "Job"
   "pendingTasks" int NOT NULL DEFAULT 0,
   "inProgressTasks" int NOT NULL DEFAULT 0,
   "abortedTasks" int NOT NULL DEFAULT 0,
+  "suspendedTasks" int NOT NULL DEFAULT 0,
   "additionalIdentifiers" text COLLATE pg_catalog."default",
   "domain" text COLLATE pg_catalog."default" NOT NULL DEFAULT ''::text,
   CONSTRAINT "PK_job_id" PRIMARY KEY (id),
@@ -108,6 +109,7 @@ BEGIN
     "pendingTasks" = "pendingTasks" + CASE WHEN NEW."status" = 'Pending' THEN 1 ELSE 0 END,
     "inProgressTasks" = "inProgressTasks" + CASE WHEN NEW."status" = 'In-Progress' THEN 1 ELSE 0 END,
     "abortedTasks" = "abortedTasks" + CASE WHEN NEW."status" = 'Aborted' THEN 1 ELSE 0 END
+    "suspendedTasks" = "suspendedTasks" + CASE WHEN NEW."status" = 'Suspended' THEN 1 ELSE 0 END
   WHERE id = NEW."jobId";
   RETURN NULL;
 END;
@@ -132,6 +134,7 @@ BEGIN
     "pendingTasks" = "pendingTasks" - CASE WHEN OLD."status" = 'Pending' THEN 1 ELSE 0 END,
     "inProgressTasks" = "inProgressTasks" - CASE WHEN OLD."status" = 'In-Progress' THEN 1 ELSE 0 END,
     "abortedTasks" = "abortedTasks" - CASE WHEN OLD."status" = 'Aborted' THEN 1 ELSE 0 END
+    "suspendedTasks" = "suspendedTasks" - CASE WHEN OLD."status" = 'Suspended' THEN 1 ELSE 0 END
   WHERE id = OLD."jobId";
   RETURN NULL;
 END;
@@ -157,6 +160,7 @@ BEGIN
       "pendingTasks" = "pendingTasks" + CASE WHEN NEW."status" = 'Pending' THEN 1 WHEN OLD."status" = 'Pending' THEN -1 ELSE 0 END,
       "inProgressTasks" = "inProgressTasks" + CASE WHEN NEW."status" = 'In-Progress' THEN 1 WHEN OLD."status" = 'In-Progress' THEN -1 ELSE 0 END,
       "abortedTasks" = "abortedTasks" + CASE WHEN NEW."status" = 'Aborted' THEN 1 WHEN OLD."status" = 'Aborted' THEN -1 ELSE 0 END
+      "suspendedTasks" = "suspendedTasks" + CASE WHEN NEW."status" = 'Suspended' THEN 1 WHEN OLD."status" = 'Suspended' THEN -1 ELSE 0 END
     WHERE id = NEW."jobId";
   END IF;
   RETURN NULL;
