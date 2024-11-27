@@ -113,6 +113,7 @@ export class JobRepository extends GeneralRepository<JobEntity> {
         .addSelect(`CAST(COUNT(CASE WHEN task.status = '${OperationStatus.PENDING}' THEN 1 ELSE NULL END) as integer)`, 'job_pendingTasks')
         .addSelect(`CAST(COUNT(CASE WHEN task.status = '${OperationStatus.ABORTED}' THEN 1 ELSE NULL END) as integer)`, 'job_abortedTasks')
         .addSelect(`CAST(COUNT(CASE WHEN task.status = '${OperationStatus.FAILED}' THEN 1 ELSE NULL END) as integer)`, 'job_failedTasks')
+        .addSelect(`CAST(COUNT(CASE WHEN task.status = '${OperationStatus.SUSPENDED}' THEN 1 ELSE NULL END) as integer)`, 'job_suspendedTasks')
         .andWhere(`task.type  = '${req.taskType}'`)
         .groupBy('job.id');
     }
@@ -250,7 +251,7 @@ export class JobRepository extends GeneralRepository<JobEntity> {
       FROM "Job" AS jb
       INNER JOIN "Task" as tk ON tk."jobId" = jb.id
       WHERE jb.id = $1 AND 
-        (jb.status = '${OperationStatus.EXPIRED}' OR jb.status = '${OperationStatus.FAILED}' OR jb.status = '${OperationStatus.ABORTED}') AND
+        (jb.status = '${OperationStatus.EXPIRED}' OR jb.status = '${OperationStatus.FAILED}' OR jb.status = '${OperationStatus.ABORTED} OR jb.status = '${OperationStatus.SUSPENDED}') AND
         (tk.status = '${OperationStatus.EXPIRED}' OR tk.status = '${OperationStatus.FAILED}' OR tk.status = '${OperationStatus.ABORTED}') AND
         jb."isCleaned" = FALSE`;
     const sqlRes = (await this.query(query, [jobId])) as { unResettableTasks: string; failedTasks: string }[];

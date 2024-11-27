@@ -5,7 +5,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 SET search_path TO "JobManager", public; -- CHANGE SCHEMA NAME TO MATCH ENVIRONMENT
 CREATE TYPE "operation_status_enum" AS ENUM
-    ('Pending', 'In-Progress', 'Completed', 'Failed', 'Expired', 'Aborted');
+    ('Pending', 'In-Progress', 'Completed', 'Failed', 'Expired', 'Aborted', 'Suspended');
 
 CREATE TABLE "Job"
 (
@@ -35,11 +35,12 @@ CREATE TABLE "Job"
   "pendingTasks" int NOT NULL DEFAULT 0,
   "inProgressTasks" int NOT NULL DEFAULT 0,
   "abortedTasks" int NOT NULL DEFAULT 0,
+  "suspendedTasks" int NOT NULL DEFAULT 0,
   "additionalIdentifiers" text COLLATE pg_catalog."default",
   "domain" text COLLATE pg_catalog."default" NOT NULL DEFAULT ''::text,
   CONSTRAINT "PK_job_id" PRIMARY KEY (id),
-  CONSTRAINT "UQ_uniqueness_on_active_tasks" EXCLUDE ("resourceId" with =, "version" with =, "type" with =, "additionalIdentifiers" with =) WHERE ((status = 'Pending' OR status = 'In-Progress') AND ("additionalIdentifiers" IS NOT NULL)),
-  CONSTRAINT "UQ_uniqueness_on_active_tasks_no_additional_identifier" EXCLUDE ("resourceId" with =, "version" with =, "type" with =) WHERE ((status = 'Pending' OR status = 'In-Progress') AND ("additionalIdentifiers" IS NULL))
+  CONSTRAINT "UQ_uniqueness_on_active_tasks" EXCLUDE ("resourceId" with =, "version" with =, "type" with =, "additionalIdentifiers" with =) WHERE ((status = 'Pending' OR status = 'In-Progress' OR status = 'Suspended') AND ("additionalIdentifiers" IS NOT NULL)),
+  CONSTRAINT "UQ_uniqueness_on_active_tasks_no_additional_identifier" EXCLUDE ("resourceId" with =, "version" with =, "type" with =) WHERE ((status = 'Pending' OR status = 'In-Progress' OR status = 'Suspended') AND ("additionalIdentifiers" IS NULL))
 );
 
 CREATE INDEX "jobCleanedIndex" 
@@ -107,7 +108,8 @@ BEGIN
     "expiredTasks" = "expiredTasks" + CASE WHEN NEW."status" = 'Expired' THEN 1 ELSE 0 END,
     "pendingTasks" = "pendingTasks" + CASE WHEN NEW."status" = 'Pending' THEN 1 ELSE 0 END,
     "inProgressTasks" = "inProgressTasks" + CASE WHEN NEW."status" = 'In-Progress' THEN 1 ELSE 0 END,
-    "abortedTasks" = "abortedTasks" + CASE WHEN NEW."status" = 'Aborted' THEN 1 ELSE 0 END
+    "abortedTasks" = "abortedTasks" + CASE WHEN NEW."status" = 'Aborted' THEN 1 ELSE 0 END,
+    "suspendedTasks" = "suspendedTasks" + CASE WHEN NEW."status" = 'Suspended' THEN 1 ELSE 0 END
   WHERE id = NEW."jobId";
   RETURN NULL;
 END;
@@ -131,7 +133,8 @@ BEGIN
     "expiredTasks" = "expiredTasks" - CASE WHEN OLD."status" = 'Expired' THEN 1 ELSE 0 END,
     "pendingTasks" = "pendingTasks" - CASE WHEN OLD."status" = 'Pending' THEN 1 ELSE 0 END,
     "inProgressTasks" = "inProgressTasks" - CASE WHEN OLD."status" = 'In-Progress' THEN 1 ELSE 0 END,
-    "abortedTasks" = "abortedTasks" - CASE WHEN OLD."status" = 'Aborted' THEN 1 ELSE 0 END
+    "abortedTasks" = "abortedTasks" - CASE WHEN OLD."status" = 'Aborted' THEN 1 ELSE 0 END,
+    "suspendedTasks" = "suspendedTasks" - CASE WHEN OLD."status" = 'Suspended' THEN 1 ELSE 0 END
   WHERE id = OLD."jobId";
   RETURN NULL;
 END;
@@ -156,7 +159,8 @@ BEGIN
       "expiredTasks" = "expiredTasks" + CASE WHEN NEW."status" = 'Expired' THEN 1 WHEN OLD."status" = 'Expired' THEN -1 ELSE 0 END,
       "pendingTasks" = "pendingTasks" + CASE WHEN NEW."status" = 'Pending' THEN 1 WHEN OLD."status" = 'Pending' THEN -1 ELSE 0 END,
       "inProgressTasks" = "inProgressTasks" + CASE WHEN NEW."status" = 'In-Progress' THEN 1 WHEN OLD."status" = 'In-Progress' THEN -1 ELSE 0 END,
-      "abortedTasks" = "abortedTasks" + CASE WHEN NEW."status" = 'Aborted' THEN 1 WHEN OLD."status" = 'Aborted' THEN -1 ELSE 0 END
+      "abortedTasks" = "abortedTasks" + CASE WHEN NEW."status" = 'Aborted' THEN 1 WHEN OLD."status" = 'Aborted' THEN -1 ELSE 0 END,
+      "suspendedTasks" = "suspendedTasks" + CASE WHEN NEW."status" = 'Suspended' THEN 1 WHEN OLD."status" = 'Suspended' THEN -1 ELSE 0 END
     WHERE id = NEW."jobId";
   END IF;
   RETURN NULL;
