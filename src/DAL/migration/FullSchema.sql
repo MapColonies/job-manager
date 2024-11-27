@@ -159,7 +159,7 @@ BEGIN
       "expiredTasks" = "expiredTasks" + CASE WHEN NEW."status" = 'Expired' THEN 1 WHEN OLD."status" = 'Expired' THEN -1 ELSE 0 END,
       "pendingTasks" = "pendingTasks" + CASE WHEN NEW."status" = 'Pending' THEN 1 WHEN OLD."status" = 'Pending' THEN -1 ELSE 0 END,
       "inProgressTasks" = "inProgressTasks" + CASE WHEN NEW."status" = 'In-Progress' THEN 1 WHEN OLD."status" = 'In-Progress' THEN -1 ELSE 0 END,
-      "abortedTasks" = "abortedTasks" + CASE WHEN NEW."status" = 'Aborted' THEN 1 WHEN OLD."status" = 'Aborted' THEN -1 ELSE 0 END
+      "abortedTasks" = "abortedTasks" + CASE WHEN NEW."status" = 'Aborted' THEN 1 WHEN OLD."status" = 'Aborted' THEN -1 ELSE 0 END,
       "suspendedTasks" = "suspendedTasks" + CASE WHEN NEW."status" = 'Suspended' THEN 1 WHEN OLD."status" = 'Suspended' THEN -1 ELSE 0 END
     WHERE id = NEW."jobId";
   END IF;
