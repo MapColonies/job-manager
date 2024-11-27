@@ -801,6 +801,7 @@ components:
         - Failed
         - Expired
         - Aborted
+        - Suspended
       example: Pending
     jobResponse:
       type: object
@@ -815,6 +816,7 @@ components:
         - pendingTasks
         - inProgressTasks
         - abortedTasks
+        - suspendedTasks
         - status
         - percentage
         - reason
