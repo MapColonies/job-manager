@@ -133,7 +133,7 @@ BEGIN
     "expiredTasks" = "expiredTasks" - CASE WHEN OLD."status" = 'Expired' THEN 1 ELSE 0 END,
     "pendingTasks" = "pendingTasks" - CASE WHEN OLD."status" = 'Pending' THEN 1 ELSE 0 END,
     "inProgressTasks" = "inProgressTasks" - CASE WHEN OLD."status" = 'In-Progress' THEN 1 ELSE 0 END,
-    "abortedTasks" = "abortedTasks" - CASE WHEN OLD."status" = 'Aborted' THEN 1 ELSE 0 END
+    "abortedTasks" = "abortedTasks" - CASE WHEN OLD."status" = 'Aborted' THEN 1 ELSE 0 END,
     "suspendedTasks" = "suspendedTasks" - CASE WHEN OLD."status" = 'Suspended' THEN 1 ELSE 0 END
   WHERE id = OLD."jobId";
   RETURN NULL;
