@@ -1,5 +1,5 @@
 -- Alter the table to add the modified and new constraints
-ALTER TYPE "operation_status_enum" ADD VALUE 'Suspended';
+ALTER TYPE "JobManager"."operation_status_enum" ADD VALUE 'Suspended';
 
 ALTER TABLE "Job" ADD COLUMN "suspendedTasks" INT DEFAULT 0 NOT NULL;
 
@@ -14,7 +14,6 @@ DROP CONSTRAINT IF EXISTS "UQ_uniqueness_on_active_tasks_no_additional_identifie
 
 ALTER TABLE "Job"
 ADD CONSTRAINT "UQ_uniqueness_on_active_tasks_no_additional_identifier" EXCLUDE ("resourceId" with =, "version" with =, "type" with =) WHERE ((status = 'Pending' OR status = 'In-Progress' OR status = 'Suspended') AND ("additionalIdentifiers" IS NULL));
-
 
 CREATE OR REPLACE FUNCTION update_tasks_counters_insert() RETURNS trigger
     SET search_path FROM CURRENT
