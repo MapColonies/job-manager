@@ -267,7 +267,12 @@ export class TaskRepository extends GeneralRepository<TaskEntity> {
       .where('"jobId" = :jobId', { jobId })
       .andWhere(
         new Brackets((qb) => {
-          qb.where([{ status: OperationStatus.FAILED }, { status: OperationStatus.EXPIRED }, { status: OperationStatus.ABORTED }, { status: OperationStatus.SUSPENDED }]);
+          qb.where([
+            { status: OperationStatus.FAILED },
+            { status: OperationStatus.EXPIRED },
+            { status: OperationStatus.ABORTED },
+            { status: OperationStatus.SUSPENDED },
+          ]);
         })
       )
       .execute();
