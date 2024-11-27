@@ -643,7 +643,7 @@ describe('job', function () {
 
         expect(response.status).toBe(httpStatusCodes.OK);
         expect(select).toHaveBeenCalledTimes(1);
-        expect(addSelect).toHaveBeenCalledTimes(6);
+        expect(addSelect).toHaveBeenCalledTimes(7);
         expect(innerJoin).toHaveBeenCalledTimes(1);
         expect(groupBy).toHaveBeenCalledTimes(1);
         expect(where).toHaveBeenCalledTimes(1);
