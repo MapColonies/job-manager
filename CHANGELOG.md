@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.10.0](https://github.com/MapColonies/job-manager/compare/v2.9.0...v2.10.0) (2024-12-04)
+
+
+### Features
+
+* add suspended status code(MAPCO-5527) ([#48](https://github.com/MapColonies/job-manager/issues/48)) ([1cb313a](https://github.com/MapColonies/job-manager/commit/1cb313a4cbcb1c8c8912fdeed413ef0f59f4d87a))
+
 ## [2.9.0](https://github.com/MapColonies/job-manager/compare/v2.8.0...v2.9.0) (2024-11-24)
 
 
