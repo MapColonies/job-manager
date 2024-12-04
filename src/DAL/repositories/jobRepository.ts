@@ -2,6 +2,7 @@ import { EntityRepository, FindManyOptions, LessThan, Brackets, Between, LessTha
 import { container } from 'tsyringe';
 import { Logger } from '@map-colonies/js-logger';
 import { ConflictError, NotFoundError } from '@map-colonies/error-types';
+import { OperationStatus } from '@map-colonies/mc-priority-queue';
 import { DBConstraintError } from '../../common/errors';
 import { SERVICES } from '../../common/constants';
 import { JobEntity } from '../entity/job';
@@ -17,7 +18,6 @@ import {
   IFindJobsByCriteriaBody,
 } from '../../common/dataModels/jobs';
 import { JobModelConvertor } from '../convertors/jobModelConverter';
-import { OperationStatus } from '../../common/dataModels/enums';
 import { GeneralRepository } from './generalRepository';
 
 export type JobParameters = Record<string, unknown>;
@@ -250,7 +250,7 @@ export class JobRepository extends GeneralRepository<JobEntity> {
       FROM "Job" AS jb
       INNER JOIN "Task" as tk ON tk."jobId" = jb.id
       WHERE jb.id = $1 AND 
-        (jb.status = '${OperationStatus.EXPIRED}' OR jb.status = '${OperationStatus.FAILED}' OR jb.status = '${OperationStatus.ABORTED}') AND
+        (jb.status = '${OperationStatus.EXPIRED}' OR jb.status = '${OperationStatus.FAILED}' OR jb.status = '${OperationStatus.ABORTED}' OR jb.status = '${OperationStatus.SUSPENDED}') AND
         (tk.status = '${OperationStatus.EXPIRED}' OR tk.status = '${OperationStatus.FAILED}' OR tk.status = '${OperationStatus.ABORTED}') AND
         jb."isCleaned" = FALSE`;
     const sqlRes = (await this.query(query, [jobId])) as { unResettableTasks: string; failedTasks: string }[];

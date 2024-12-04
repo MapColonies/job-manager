@@ -1,7 +1,7 @@
 import { singleton } from 'tsyringe';
 import { ObjectType, QueryRunner } from 'typeorm';
 import { BadRequestError } from '@map-colonies/error-types';
-import { OperationStatus } from '../../common/dataModels/enums';
+import { OperationStatus } from '@map-colonies/mc-priority-queue';
 import { ConnectionManager } from '../connectionManager';
 import { JobRepository } from './jobRepository';
 import { TaskRepository } from './taskRepository';

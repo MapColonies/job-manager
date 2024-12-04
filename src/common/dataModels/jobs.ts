@@ -1,5 +1,5 @@
 //requests
-import { OperationStatus } from './enums';
+import { OperationStatus } from '@map-colonies/mc-priority-queue';
 import { GetTasksResponse, ICreateTaskBody } from './tasks';
 
 export interface IJobsParams {

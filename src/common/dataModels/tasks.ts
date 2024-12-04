@@ -1,4 +1,4 @@
-import { OperationStatus } from './enums';
+import { OperationStatus } from '@map-colonies/mc-priority-queue';
 
 //requests
 export interface IAllTasksParams {

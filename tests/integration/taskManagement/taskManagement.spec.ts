@@ -1,11 +1,11 @@
 import httpStatusCodes from 'http-status-codes';
+import { OperationStatus } from '@map-colonies/mc-priority-queue';
 import { getContainerConfig, resetContainer } from '../testContainerConfig';
 import { getApp } from '../../../src/app';
 import { createJobAndTaskStatus, createUuid } from '../../mocks/values';
 import { TaskRepository } from '../../../src/DAL/repositories/taskRepository';
 import { JobRepository } from '../../../src/DAL/repositories/jobRepository';
 import { registerRepository, initTypeOrmMocks, RepositoryMocks, In } from '../../mocks/DBMock';
-import { OperationStatus } from '../../../src/common/dataModels/enums';
 import { TaskEntity } from '../../../src/DAL/entity/task';
 import { IGetTaskResponse } from '../../../src/common/dataModels/tasks';
 import { ResponseCodes } from '../../../src/common/constants';

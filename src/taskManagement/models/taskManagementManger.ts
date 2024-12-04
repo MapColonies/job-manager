@@ -3,12 +3,12 @@ import { NotFoundError, BadRequestError } from '@map-colonies/error-types';
 import { Tracer } from '@opentelemetry/api';
 import { withSpanAsyncV4 } from '@map-colonies/telemetry';
 import { inject, injectable } from 'tsyringe';
+import { OperationStatus } from '@map-colonies/mc-priority-queue';
 import { SERVICES } from '../../common/constants';
 import { ConnectionManager } from '../../DAL/connectionManager';
 import { TaskRepository } from '../../DAL/repositories/taskRepository';
 import { IFindInactiveTasksRequest, IGetTaskResponse, IRetrieveAndStartRequest } from '../../common/dataModels/tasks';
 import { JobRepository } from '../../DAL/repositories/jobRepository';
-import { OperationStatus } from '../../common/dataModels/enums';
 import { IJobsParams, IJobsQuery } from '../../common/dataModels/jobs';
 
 @injectable()
