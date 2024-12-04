@@ -1,6 +1,6 @@
 import { randUuid } from '@ngneat/falso';
+import { OperationStatus } from '@map-colonies/mc-priority-queue';
 import { IJobAndTaskStatus } from '../../src/common/interfaces';
-import { OperationStatus } from '../../src/common/dataModels/enums';
 
 export const createUuid = (): string => {
   return randUuid();

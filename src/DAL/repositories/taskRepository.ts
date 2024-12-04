@@ -2,6 +2,7 @@ import { EntityRepository, LessThan, Brackets, UpdateResult, In } from 'typeorm'
 import { container } from 'tsyringe';
 import { Logger } from '@map-colonies/js-logger';
 import { ConflictError, NotFoundError } from '@map-colonies/error-types';
+import { OperationStatus } from '@map-colonies/mc-priority-queue';
 import { SERVICES } from '../../common/constants';
 import { TaskEntity } from '../entity/task';
 import { TaskModelConvertor } from '../convertors/taskModelConvertor';
@@ -19,7 +20,6 @@ import {
   ITaskType,
   IUpdateTaskRequest,
 } from '../../common/dataModels/tasks';
-import { OperationStatus } from '../../common/dataModels/enums';
 import { JobEntity } from '../entity/job';
 import { IJobAndTaskStatus } from '../../common/interfaces';
 import { GeneralRepository } from './generalRepository';

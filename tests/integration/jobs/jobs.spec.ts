@@ -1,4 +1,5 @@
 import httpStatusCodes from 'http-status-codes';
+import { OperationStatus } from '@map-colonies/mc-priority-queue';
 import { getContainerConfig, resetContainer } from '../testContainerConfig';
 import { JobParameters, JobRepository } from '../../../src/DAL/repositories/jobRepository';
 import { JobEntity } from '../../../src/DAL/entity/job';
@@ -15,7 +16,6 @@ import {
 import { getApp } from '../../../src/app';
 import { FindJobsResponse, IAvailableActions, IGetJobResponse } from '../../../src/common/dataModels/jobs';
 import { TaskRepository } from '../../../src/DAL/repositories/taskRepository';
-import { OperationStatus } from '../../../src/common/dataModels/enums';
 import { TaskEntity } from '../../../src/DAL/entity/task';
 import { ResponseCodes } from '../../../src/common/constants';
 import { JobManager } from '../../../src/jobs/models/jobManager';

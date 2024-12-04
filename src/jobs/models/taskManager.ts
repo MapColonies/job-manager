@@ -3,6 +3,7 @@ import { NotFoundError } from '@map-colonies/error-types';
 import { Tracer } from '@opentelemetry/api';
 import { withSpanAsyncV4 } from '@map-colonies/telemetry';
 import { inject, injectable } from 'tsyringe';
+import { OperationStatus } from '@map-colonies/mc-priority-queue';
 import { SERVICES } from '../../common/constants';
 import { ConnectionManager } from '../../DAL/connectionManager';
 import { TaskRepository } from '../../DAL/repositories/taskRepository';
@@ -17,7 +18,6 @@ import {
   ISpecificTaskParams,
   IUpdateTaskRequest,
 } from '../../common/dataModels/tasks';
-import { OperationStatus } from '../../common/dataModels/enums';
 import { JobManager } from './jobManager';
 
 @injectable()

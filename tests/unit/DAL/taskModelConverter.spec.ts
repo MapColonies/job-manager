@@ -1,4 +1,4 @@
-import { OperationStatus } from '../../../src/common/dataModels/enums';
+import { OperationStatus } from '@map-colonies/mc-priority-queue';
 import { IGetTaskResponse, IUpdateTaskRequest } from '../../../src/common/dataModels/tasks';
 import { TaskModelConvertor } from '../../../src/DAL/convertors/taskModelConvertor';
 import { TaskEntity } from '../../../src/DAL/entity/task';

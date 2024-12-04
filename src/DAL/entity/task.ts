@@ -1,5 +1,5 @@
 import { Entity, Column, PrimaryColumn, UpdateDateColumn, Generated, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
-import { OperationStatus } from '../../common/dataModels/enums';
+import { OperationStatus } from '@map-colonies/mc-priority-queue';
 import { JobEntity } from './job';
 
 @Entity('Task')

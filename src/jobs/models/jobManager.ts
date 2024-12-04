@@ -3,6 +3,7 @@ import { NotFoundError } from '@map-colonies/error-types';
 import { inject, injectable } from 'tsyringe';
 import { Tracer } from '@opentelemetry/api';
 import { withSpanAsyncV4 } from '@map-colonies/telemetry';
+import { OperationStatus } from '@map-colonies/mc-priority-queue';
 import { SERVICES } from '../../common/constants';
 import { ConnectionManager } from '../../DAL/connectionManager';
 import {
@@ -21,7 +22,6 @@ import {
 } from '../../common/dataModels/jobs';
 import { JobParameters, JobRepository } from '../../DAL/repositories/jobRepository';
 import { TransactionActions } from '../../DAL/repositories/transactionActions';
-import { OperationStatus } from '../../common/dataModels/enums';
 
 @injectable()
 export class JobManager {

@@ -1,5 +1,6 @@
 import httpStatusCodes from 'http-status-codes';
 import { NotFoundError } from '@map-colonies/error-types';
+import { OperationStatus } from '@map-colonies/mc-priority-queue';
 import { getContainerConfig, resetContainer } from '../testContainerConfig';
 import { TaskRepository } from '../../../src/DAL/repositories/taskRepository';
 import { TaskEntity } from '../../../src/DAL/entity/task';
@@ -9,7 +10,6 @@ import { ICreateTaskBody, IGetTaskResponse, IGetTasksStatus } from '../../../src
 import { IFindTasksRequest } from '../../../src/common/dataModels/tasks';
 import { JobEntity } from '../../../src/DAL/entity/job';
 
-import { OperationStatus } from '../../../src/common/dataModels/enums';
 import { getApp } from '../../../src/app';
 import { ResponseCodes } from '../../../src/common/constants';
 import { TasksRequestSender } from './helpers/tasksRequestSender';

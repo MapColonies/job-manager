@@ -1,6 +1,6 @@
 import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions';
+import { OperationStatus } from '@map-colonies/mc-priority-queue';
 import { ResponseCodes } from './constants';
-import { OperationStatus } from './dataModels/enums';
 
 export interface IConfig {
   get: <T>(setting: string) => T;
