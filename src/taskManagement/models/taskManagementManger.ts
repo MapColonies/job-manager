@@ -36,7 +36,7 @@ export class TaskManagementManager {
     const repo = await this.getTaskRepository();
 
     this.logger.info(
-      `finding tasks inactive for longer then ${req.inactiveTimeSec} seconds, with types:  ${
+      `finding tasks inactive for longer than ${req.inactiveTimeSec} seconds, with types:  ${
         req.types ? req.types.map((type) => `{jobType: ${type.jobType}, taskType: ${type.taskType}}`).join(', ') : 'any'
       }`
     );
