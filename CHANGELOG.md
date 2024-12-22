@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.0.0](https://github.com/MapColonies/job-manager/compare/v2.10.1...v3.0.0) (2024-12-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* **db:** - The `percentage` column is now NOT NULL. This will cause failures in any code attempting to insert or update rows with a null value for `percentage`.
+- Existing data has been migrated to set null values to 0.
+- A DEFAULT constraint of 0 has been added, altering the behavior of inserts when `percentage` is not specified.
+
+Applications relying on nullable `percentage` values or handling null explicitly must be updated to comply with these changes.
+
+* chore(db):migration script version change
+
+### Features
+
+* **db:** make `percentage` column NOT NULL and add DEFAULT 0 ([#50](https://github.com/MapColonies/job-manager/issues/50)) ([2690186](https://github.com/MapColonies/job-manager/commit/2690186c8653aa7a6cf188e5d0fa4b5b476b849e))
+
 ### [2.10.1](https://github.com/MapColonies/job-manager/compare/v2.10.0...v2.10.1) (2024-12-17)
 
 ## [2.10.0](https://github.com/MapColonies/job-manager/compare/v2.9.0...v2.10.0) (2024-12-04)
