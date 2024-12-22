@@ -41,7 +41,7 @@ export class JobEntity {
   @Column({ type: 'enum', enum: OperationStatus, default: OperationStatus.PENDING, nullable: false })
   public status: OperationStatus;
 
-  @Column('smallint', { nullable: true })
+  @Column('smallint', { nullable: false, default: 0 })
   public percentage: number;
 
   @Column('varchar', { default: '', nullable: false })
