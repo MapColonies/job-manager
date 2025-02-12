@@ -488,7 +488,11 @@ describe('job', function () {
 
         expect(response.status).toBe(httpStatusCodes.OK);
         expect(jobsFindMock).toHaveBeenCalledTimes(1);
-        expect(jobsFindMock).toHaveBeenCalledWith({ relations: ['tasks'], where: { internalId: '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d' }, select: expect.arrayContaining([expect.any(String)]) });
+        expect(jobsFindMock).toHaveBeenCalledWith({
+          relations: ['tasks'],
+          where: { internalId: '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d' },
+          select: expect.arrayContaining([expect.any(String)]),
+        });
 
         const jobs = response.body as unknown;
         expect(jobs).toEqual([jobModel]);
@@ -509,7 +513,7 @@ describe('job', function () {
         expect(jobsFindMock).toHaveBeenCalledTimes(1);
         expect(jobsFindMock).toHaveBeenCalledWith({
           where: { updateTime: 'moreThanOrEqualMock' },
-          select: expect.arrayContaining([expect.any(String)])
+          select: expect.arrayContaining([expect.any(String)]),
         });
         expect(moreThanOrEqualMock).toHaveBeenCalledTimes(1);
         expect(moreThanOrEqualMock).toHaveBeenCalledWith('2000-01-01T00:00:00Z');
@@ -535,7 +539,7 @@ describe('job', function () {
         expect(jobsFindMock).toHaveBeenCalledTimes(1);
         expect(jobsFindMock).toHaveBeenCalledWith({
           where: { updateTime: 'lessThanOrEqualMock' },
-          select: expect.arrayContaining([expect.any(String)])
+          select: expect.arrayContaining([expect.any(String)]),
         });
         expect(moreThanOrEqualMock).toHaveBeenCalledTimes(0);
         expect(lessThanOrEqualMock).toHaveBeenCalledTimes(1);
@@ -560,7 +564,7 @@ describe('job', function () {
         expect(jobsFindMock).toHaveBeenCalledTimes(1);
         expect(jobsFindMock).toHaveBeenCalledWith({
           where: { updateTime: 'betweenMock' },
-          select: expect.arrayContaining([expect.any(String)])
+          select: expect.arrayContaining([expect.any(String)]),
         });
         expect(moreThanOrEqualMock).toHaveBeenCalledTimes(0);
         expect(lessThanOrEqualMock).toHaveBeenCalledTimes(0);

@@ -64,7 +64,7 @@ export class JobRepository extends GeneralRepository<JobEntity> {
       where: filter,
       select: excludeColumns(JobEntity, ['parameters']),
     };
-  
+
     if (req.shouldReturnTasks !== false) {
       options.relations = ['tasks'];
     }
