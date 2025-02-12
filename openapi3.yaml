@@ -245,6 +245,12 @@ paths:
   /jobs/{jobId}/tasks:
     parameters:
       - $ref: '#/components/parameters/jobId'
+      - in: query
+        name: excludeParameters
+        description: Whether to exclude the 'parameters' column from the response
+        required: false
+        schema:
+          type: boolean
     get:
       operationId: getTasks
       tags:

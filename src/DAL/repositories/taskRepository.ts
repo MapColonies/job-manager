@@ -1,11 +1,9 @@
-import { EntityRepository, LessThan, Brackets, UpdateResult, In } from 'typeorm';
+import { EntityRepository, LessThan, Brackets, UpdateResult, In, FindManyOptions } from 'typeorm';
 import { container } from 'tsyringe';
 import { Logger } from '@map-colonies/js-logger';
 import { ConflictError, NotFoundError } from '@map-colonies/error-types';
 import { OperationStatus } from '@map-colonies/mc-priority-queue';
 import { SERVICES } from '../../common/constants';
-import { TaskEntity } from '../entity/task';
-import { TaskModelConvertor } from '../convertors/taskModelConvertor';
 import {
   CreateTasksRequest,
   CreateTasksResponse,
@@ -20,8 +18,11 @@ import {
   ITaskType,
   IUpdateTaskRequest,
 } from '../../common/dataModels/tasks';
-import { JobEntity } from '../entity/job';
 import { IJobAndTaskStatus } from '../../common/interfaces';
+import { excludeColumns } from '../../common/utils';
+import { TaskModelConvertor } from '../convertors/taskModelConvertor';
+import { JobEntity } from '../entity/job';
+import { TaskEntity } from '../entity/task';
 import { GeneralRepository } from './generalRepository';
 
 declare type SqlRawResponse = [unknown[], number];
@@ -38,8 +39,12 @@ export class TaskRepository extends GeneralRepository<TaskEntity> {
     this.taskConvertor = container.resolve(TaskModelConvertor);
   }
 
-  public async getTasks(req: IAllTasksParams): Promise<GetTasksResponse> {
-    const entities = await this.find(req);
+  public async getTasks(req: IAllTasksParams, excludeParameters: boolean = false): Promise<GetTasksResponse> {
+    const options: FindManyOptions<TaskEntity> = {
+      where: req,
+      select: excludeParameters ? excludeColumns(TaskEntity, ['parameters']) : undefined,
+    };
+    const entities = await this.find(options);
     const models = entities.map((entity) => this.taskConvertor.entityToModel(entity));
     return models;
   }

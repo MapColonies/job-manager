@@ -5,8 +5,7 @@ import { ConflictError, NotFoundError } from '@map-colonies/error-types';
 import { OperationStatus } from '@map-colonies/mc-priority-queue';
 import { DBConstraintError } from '../../common/errors';
 import { SERVICES } from '../../common/constants';
-import { JobEntity } from '../entity/job';
-import { paramsQueryBuilder } from '../../common/utils';
+import { excludeColumns, paramsQueryBuilder } from '../../common/utils';
 import {
   FindJobsResponse,
   ICreateJobBody,
@@ -18,6 +17,7 @@ import {
   IFindJobsByCriteriaBody,
 } from '../../common/dataModels/jobs';
 import { JobModelConvertor } from '../convertors/jobModelConverter';
+import { JobEntity } from '../entity/job';
 import { GeneralRepository } from './generalRepository';
 
 export type JobParameters = Record<string, unknown>;
@@ -45,7 +45,7 @@ export class JobRepository extends GeneralRepository<JobEntity> {
       internalId: req.internalId,
       domain: req.domain,
     };
-
+  
     if (req.fromDate != undefined && req.tillDate != undefined) {
       filter.updateTime = Between(req.fromDate, req.tillDate);
     } else if (req.tillDate != undefined) {
@@ -60,11 +60,15 @@ export class JobRepository extends GeneralRepository<JobEntity> {
       }
     }
 
-    const options: FindManyOptions<JobEntity> = { where: filter };
+    const options: FindManyOptions<JobEntity> = {
+      where: filter,
+      select: excludeColumns(JobEntity, ['parameters']),
+    };
+  
     if (req.shouldReturnTasks !== false) {
       options.relations = ['tasks'];
     }
-
+  
     const entities = await this.find(options);
     const models = entities.map((entity) => this.jobConvertor.entityToModel(entity));
     return models;

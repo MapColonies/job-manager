@@ -171,7 +171,7 @@ describe('tasks', function () {
       expect(response.status).toBe(httpStatusCodes.OK);
       expect(taskFindMock).toHaveBeenCalledTimes(1);
       expect(taskFindMock).toHaveBeenCalledWith({
-        jobId: jobId,
+        where: { jobId: jobId }
       });
       const tasks = response.body as IGetTaskResponse[];
       const entityFromResponse = convertTaskResponseToEntity(tasks[0]);
@@ -191,7 +191,7 @@ describe('tasks', function () {
       expect(response.status).toBe(httpStatusCodes.OK);
       expect(jobsFindMock).toHaveBeenCalledTimes(1);
       expect(jobsFindMock).toHaveBeenCalledWith({
-        jobId: jobId,
+        where: { jobId: jobId }
       });
     });
 
@@ -351,7 +351,7 @@ describe('tasks', function () {
       expect(response.status).toBe(httpStatusCodes.OK);
       expect(taskfindMock).toHaveBeenCalledTimes(1);
       expect(taskfindMock).toHaveBeenCalledWith({
-        where: findTasksBody,
+        where: findTasksBody
       });
 
       const taskResponses = response.body as IGetTaskResponse[];
@@ -410,7 +410,7 @@ describe('tasks', function () {
 
       expect(taskfindMock).toHaveBeenCalledTimes(1);
       expect(taskfindMock).toHaveBeenCalledWith({
-        where: findTasksBody,
+        where: findTasksBody
       });
       expect(response.status).toBe(httpStatusCodes.NOT_FOUND);
       expect(response).toSatisfyApiSpec();

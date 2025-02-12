@@ -63,7 +63,7 @@ export class TaskController {
   };
   public getResources: GetResourcesHandler = async (req, res, next) => {
     try {
-      const tasksRes = await this.manager.getAllTasks(req.params);
+      const tasksRes = await this.manager.getAllTasks(req.params, !!req.query.excludeParameters);
       return res.status(httpStatus.OK).json(tasksRes);
     } catch (err) {
       return next(err);

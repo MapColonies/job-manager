@@ -14,3 +14,9 @@ export const paramsQueryBuilder = (params: Record<string, unknown>): string => {
   }
   return fullQuery;
 };
+
+export const excludeColumns = <T extends object>(EntityClass: new () => T, exclude: string[]): (keyof T)[] => {
+  const entityInstance = new EntityClass();
+  const allColumns = Object.keys(entityInstance) as (keyof T)[];
+  return allColumns.filter(column => !exclude.includes(column as string));
+};
