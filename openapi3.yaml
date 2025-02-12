@@ -246,7 +246,7 @@ paths:
     parameters:
       - $ref: '#/components/parameters/jobId'
       - in: query
-        name: excludeParameters
+        name: shouldExcludeParameters
         description: Whether to exclude the 'parameters' column from the response
         required: false
         schema:
