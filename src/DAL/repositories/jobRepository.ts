@@ -45,7 +45,7 @@ export class JobRepository extends GeneralRepository<JobEntity> {
       internalId: req.internalId,
       domain: req.domain,
     };
-  
+
     if (req.fromDate != undefined && req.tillDate != undefined) {
       filter.updateTime = Between(req.fromDate, req.tillDate);
     } else if (req.tillDate != undefined) {
@@ -68,7 +68,7 @@ export class JobRepository extends GeneralRepository<JobEntity> {
     if (req.shouldReturnTasks !== false) {
       options.relations = ['tasks'];
     }
-  
+
     const entities = await this.find(options);
     const models = entities.map((entity) => this.jobConvertor.entityToModel(entity));
     return models;
