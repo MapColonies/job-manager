@@ -39,7 +39,7 @@ export class TaskRepository extends GeneralRepository<TaskEntity> {
     this.taskConvertor = container.resolve(TaskModelConvertor);
   }
 
-  public async getTasks(req: IAllTasksParams, excludeParameters: boolean = false): Promise<GetTasksResponse> {
+  public async getTasks(req: IAllTasksParams, excludeParameters = false): Promise<GetTasksResponse> {
     const options: FindManyOptions<TaskEntity> = {
       where: req,
       select: excludeParameters ? excludeColumns(TaskEntity, ['parameters']) : undefined,

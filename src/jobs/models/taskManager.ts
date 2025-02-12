@@ -32,7 +32,7 @@ export class TaskManager {
   ) {}
 
   @withSpanAsyncV4
-  public async getAllTasks(req: IAllTasksParams, excludeParameters: boolean = false): Promise<GetTasksResponse> {
+  public async getAllTasks(req: IAllTasksParams, excludeParameters = false): Promise<GetTasksResponse> {
     const repo = await this.getRepository();
     const res = await repo.getTasks(req, excludeParameters);
     return res;
