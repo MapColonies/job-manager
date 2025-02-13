@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { ErrorResponse } from '@map-colonies/error-express-handler';
 import { Logger } from '@map-colonies/js-logger';
 import { NotFoundError } from '@map-colonies/error-types';
@@ -62,7 +63,7 @@ export class TaskController {
       return next(err);
     }
   };
-  
+
   public getResources: GetResourcesHandler = async (req, res, next) => {
     try {
       const tasksRes = await this.manager.getAllTasks(req.params, req.query.shouldExcludeParameters);
