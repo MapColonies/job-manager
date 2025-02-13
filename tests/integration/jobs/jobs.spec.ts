@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import httpStatusCodes from 'http-status-codes';
 import { OperationStatus } from '@map-colonies/mc-priority-queue';
 import { getContainerConfig, resetContainer } from '../testContainerConfig';

@@ -194,6 +194,11 @@ describe('tasks', function () {
         resettable: false,
       } as unknown as TaskEntity;
 
+      const args: { where: { jobId: string }; select?: string[] } = {
+        where: { jobId: jobId },
+        select: expect.not.arrayContaining(['parameters']),
+      };
+
       const taskFindMock = taskRepositoryMocks.findMock;
       taskFindMock.mockResolvedValue([taskEntity]);
 
@@ -201,10 +206,7 @@ describe('tasks', function () {
 
       expect(response.status).toBe(httpStatusCodes.OK);
       expect(taskFindMock).toHaveBeenCalledTimes(1);
-      expect(taskFindMock).toHaveBeenCalledWith({
-        where: { jobId: jobId },
-        select: expect.not.arrayContaining(['parameters']),
-      });
+      expect(taskFindMock).toHaveBeenCalledWith(args);
       const tasks = response.body as IGetTaskResponse[];
       const entityFromResponse = convertTaskResponseToEntity(tasks[0]);
       expect(entityFromResponse).not.toHaveProperty('parameters');
