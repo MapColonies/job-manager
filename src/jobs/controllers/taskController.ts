@@ -62,6 +62,7 @@ export class TaskController {
       return next(err);
     }
   };
+  
   public getResources: GetResourcesHandler = async (req, res, next) => {
     try {
       const tasksRes = await this.manager.getAllTasks(req.params, req.query.shouldExcludeParameters);

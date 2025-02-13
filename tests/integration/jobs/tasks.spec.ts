@@ -9,7 +9,6 @@ import { JobRepository } from '../../../src/DAL/repositories/jobRepository';
 import { ICreateTaskBody, IGetTaskResponse, IGetTasksStatus } from '../../../src/common/dataModels/tasks';
 import { IFindTasksRequest } from '../../../src/common/dataModels/tasks';
 import { JobEntity } from '../../../src/DAL/entity/job';
-
 import { getApp } from '../../../src/app';
 import { ResponseCodes } from '../../../src/common/constants';
 import { TasksRequestSender } from './helpers/tasksRequestSender';
@@ -175,6 +174,40 @@ describe('tasks', function () {
       });
       const tasks = response.body as IGetTaskResponse[];
       const entityFromResponse = convertTaskResponseToEntity(tasks[0]);
+      expect(entityFromResponse).toEqual(entityFromResponse);
+
+      expect(response).toSatisfyApiSpec();
+    });
+
+    it('should get all tasks without parameters and return 200', async function () {
+      const taskEntity = {
+        jobId: jobId,
+        id: taskId,
+        creationTime: new Date(Date.UTC(2000, 1, 2)),
+        updateTime: new Date(Date.UTC(2000, 1, 2)),
+        attempts: 0,
+        description: '1',
+        reason: '3',
+        percentage: 4,
+        type: '5',
+        status: OperationStatus.IN_PROGRESS,
+        resettable: false,
+      } as unknown as TaskEntity;
+
+      const taskFindMock = taskRepositoryMocks.findMock;
+      taskFindMock.mockResolvedValue([taskEntity]);
+
+      const response = await requestSender.getAllResources(jobId, true);
+
+      expect(response.status).toBe(httpStatusCodes.OK);
+      expect(taskFindMock).toHaveBeenCalledTimes(1);
+      expect(taskFindMock).toHaveBeenCalledWith({
+        where: { jobId: jobId },
+        select: expect.not.arrayContaining(['parameters']),
+      });
+      const tasks = response.body as IGetTaskResponse[];
+      const entityFromResponse = convertTaskResponseToEntity(tasks[0]);
+      expect(entityFromResponse).not.toHaveProperty('parameters');
       expect(entityFromResponse).toEqual(entityFromResponse);
 
       expect(response).toSatisfyApiSpec();
@@ -361,6 +394,7 @@ describe('tasks', function () {
       expect(response).toSatisfyApiSpec();
     });
   });
+
   describe('Bad Path', function () {
     it('should return status code 400 on PUT request with invalid body', async function () {
       const taskCountMock = taskRepositoryMocks.countMock;
