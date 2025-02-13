@@ -17,13 +17,13 @@ import {
   CreateTasksRequest,
   IFindTasksRequest,
   IGetTasksStatus,
-  GetTasksQueryParams,
+  IGetTasksQueryParams,
 } from '../../common/dataModels/tasks';
 import { DefaultResponse } from '../../common/interfaces';
 import { TaskManager } from '../models/taskManager';
 
 type CreateResourceHandler = RequestHandler<IAllTasksParams, CreateTasksResponse, CreateTasksBody>;
-type GetResourcesHandler = RequestHandler<IAllTasksParams, GetTasksResponse, undefined, GetTasksQueryParams>;
+type GetResourcesHandler = RequestHandler<IAllTasksParams, GetTasksResponse, undefined, IGetTasksQueryParams>;
 type GetResourceHandler = RequestHandler<ISpecificTaskParams, IGetTaskResponse>;
 type DeleteResourceHandler = RequestHandler<ISpecificTaskParams, DefaultResponse>;
 type UpdateResourceHandler = RequestHandler<ISpecificTaskParams, DefaultResponse, IUpdateTaskBody>;
