@@ -245,12 +245,7 @@ paths:
   /jobs/{jobId}/tasks:
     parameters:
       - $ref: '#/components/parameters/jobId'
-      - in: query
-        name: shouldExcludeParameters
-        description: Whether to exclude the 'parameters' column from the response
-        required: false
-        schema:
-          type: boolean
+      - $ref: '#/components/parameters/shouldExcludeParameters'
     get:
       operationId: getTasks
       tags:
@@ -566,6 +561,13 @@ components:
       required: true
       schema:
         $ref: '#/components/schemas/jobId'
+    shouldExcludeParameters:
+      in: query
+      name: shouldExcludeParameters
+      description: Whether to exclude the 'parameters' column from the response
+      required: false
+      schema:
+        $ref: '#/components/schemas/shouldExcludeParameters'
     taskId:
       in: path
       name: taskId
@@ -791,6 +793,9 @@ components:
     jobId:
       type: string
       format: uuid
+    shouldExcludeParameters:
+      type: boolean
+      default: false
     taskId:
       type: string
       format: uuid
