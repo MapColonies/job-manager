@@ -17,12 +17,13 @@ import {
   CreateTasksRequest,
   IFindTasksRequest,
   IGetTasksStatus,
+  GetTasksQueryParams,
 } from '../../common/dataModels/tasks';
 import { DefaultResponse } from '../../common/interfaces';
 import { TaskManager } from '../models/taskManager';
 
 type CreateResourceHandler = RequestHandler<IAllTasksParams, CreateTasksResponse, CreateTasksBody>;
-type GetResourcesHandler = RequestHandler<IAllTasksParams, GetTasksResponse>;
+type GetResourcesHandler = RequestHandler<IAllTasksParams, GetTasksResponse, undefined, GetTasksQueryParams>;
 type GetResourceHandler = RequestHandler<ISpecificTaskParams, IGetTaskResponse>;
 type DeleteResourceHandler = RequestHandler<ISpecificTaskParams, DefaultResponse>;
 type UpdateResourceHandler = RequestHandler<ISpecificTaskParams, DefaultResponse, IUpdateTaskBody>;
@@ -63,7 +64,7 @@ export class TaskController {
   };
   public getResources: GetResourcesHandler = async (req, res, next) => {
     try {
-      const tasksRes = await this.manager.getAllTasks(req.params, !!req.query.shouldExcludeParameters);
+      const tasksRes = await this.manager.getAllTasks(req.params, req.query.shouldExcludeParameters);
       return res.status(httpStatus.OK).json(tasksRes);
     } catch (err) {
       return next(err);
