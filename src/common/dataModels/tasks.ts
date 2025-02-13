@@ -99,6 +99,6 @@ export interface IFindTasksRequest extends Partial<ICreateTaskBody> {
   updateTime?: Date;
 }
 
-export interface IGetTasksQueryParams { 
-  shouldExcludeParameters?: boolean
+export interface IGetTasksQueryParams {
+  shouldExcludeParameters?: boolean;
 }
