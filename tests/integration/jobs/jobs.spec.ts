@@ -15,9 +15,9 @@ import {
 } from '../../mocks/DBMock';
 import { getApp } from '../../../src/app';
 import { FindJobsResponse, IAvailableActions, IGetJobResponse } from '../../../src/common/dataModels/jobs';
+import { ResponseCodes } from '../../../src/common/constants';
 import { TaskRepository } from '../../../src/DAL/repositories/taskRepository';
 import { TaskEntity } from '../../../src/DAL/entity/task';
-import { ResponseCodes } from '../../../src/common/constants';
 import { JobManager } from '../../../src/jobs/models/jobManager';
 import { JobsRequestSender, SearchJobsParams } from './helpers/jobsRequestSender';
 
@@ -418,7 +418,11 @@ describe('job', function () {
 
         expect(response.status).toBe(httpStatusCodes.OK);
         expect(jobsFindMock).toHaveBeenCalledTimes(1);
-        expect(jobsFindMock).toHaveBeenCalledWith({ relations: ['tasks'], where: {} });
+        expect(jobsFindMock).toHaveBeenCalledWith({
+          relations: ['tasks'],
+          where: {},
+          select: expect.not.arrayContaining(['parameters']) as string[],
+        });
 
         const jobs = response.body as unknown;
         expect(jobs).toEqual([jobModel]);
@@ -487,7 +491,11 @@ describe('job', function () {
 
         expect(response.status).toBe(httpStatusCodes.OK);
         expect(jobsFindMock).toHaveBeenCalledTimes(1);
-        expect(jobsFindMock).toHaveBeenCalledWith({ relations: ['tasks'], where: { internalId: '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d' } });
+        expect(jobsFindMock).toHaveBeenCalledWith({
+          relations: ['tasks'],
+          where: { internalId: '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d' },
+          select: expect.not.arrayContaining(['parameters']) as string[],
+        });
 
         const jobs = response.body as unknown;
         expect(jobs).toEqual([jobModel]);
@@ -508,6 +516,7 @@ describe('job', function () {
         expect(jobsFindMock).toHaveBeenCalledTimes(1);
         expect(jobsFindMock).toHaveBeenCalledWith({
           where: { updateTime: 'moreThanOrEqualMock' },
+          select: expect.not.arrayContaining(['parameters']) as string[],
         });
         expect(moreThanOrEqualMock).toHaveBeenCalledTimes(1);
         expect(moreThanOrEqualMock).toHaveBeenCalledWith('2000-01-01T00:00:00Z');
@@ -533,6 +542,7 @@ describe('job', function () {
         expect(jobsFindMock).toHaveBeenCalledTimes(1);
         expect(jobsFindMock).toHaveBeenCalledWith({
           where: { updateTime: 'lessThanOrEqualMock' },
+          select: expect.not.arrayContaining(['parameters']) as string[],
         });
         expect(moreThanOrEqualMock).toHaveBeenCalledTimes(0);
         expect(lessThanOrEqualMock).toHaveBeenCalledTimes(1);
@@ -557,6 +567,7 @@ describe('job', function () {
         expect(jobsFindMock).toHaveBeenCalledTimes(1);
         expect(jobsFindMock).toHaveBeenCalledWith({
           where: { updateTime: 'betweenMock' },
+          select: expect.not.arrayContaining(['parameters']) as string[],
         });
         expect(moreThanOrEqualMock).toHaveBeenCalledTimes(0);
         expect(lessThanOrEqualMock).toHaveBeenCalledTimes(0);
@@ -584,7 +595,7 @@ describe('job', function () {
         expect(response.body).toEqual([]);
         expect(response.status).toBe(httpStatusCodes.OK);
         expect(jobsFindMock).toHaveBeenCalledTimes(1);
-        expect(jobsFindMock).toHaveBeenCalledWith({ where: filter });
+        expect(jobsFindMock).toHaveBeenCalledWith({ where: filter, select: expect.not.arrayContaining(['parameters']) as string[] });
         expect(response).toSatisfyApiSpec();
       });
     });

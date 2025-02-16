@@ -4,8 +4,8 @@ import { IFindTasksRequest } from '../../../../src/common/dataModels/tasks';
 export class TasksRequestSender {
   public constructor(private readonly app: Express.Application) {}
 
-  public async getAllResources(jobId: string): Promise<supertest.Response> {
-    return supertest.agent(this.app).get(`/jobs/${jobId}/tasks`).set('Content-Type', 'application/json');
+  public async getAllResources(jobId: string, shouldExcludeParameters = false): Promise<supertest.Response> {
+    return supertest.agent(this.app).get(`/jobs/${jobId}/tasks`).query({ shouldExcludeParameters }).set('Content-Type', 'application/json');
   }
 
   public async getResource(jobId: string, taskId: string): Promise<supertest.Response> {

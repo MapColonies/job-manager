@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { ErrorResponse } from '@map-colonies/error-express-handler';
 import { Logger } from '@map-colonies/js-logger';
 import { NotFoundError } from '@map-colonies/error-types';
@@ -17,12 +18,13 @@ import {
   CreateTasksRequest,
   IFindTasksRequest,
   IGetTasksStatus,
+  IGetTasksQueryParams,
 } from '../../common/dataModels/tasks';
 import { DefaultResponse } from '../../common/interfaces';
 import { TaskManager } from '../models/taskManager';
 
 type CreateResourceHandler = RequestHandler<IAllTasksParams, CreateTasksResponse, CreateTasksBody>;
-type GetResourcesHandler = RequestHandler<IAllTasksParams, GetTasksResponse>;
+type GetResourcesHandler = RequestHandler<IAllTasksParams, GetTasksResponse, undefined, IGetTasksQueryParams>;
 type GetResourceHandler = RequestHandler<ISpecificTaskParams, IGetTaskResponse>;
 type DeleteResourceHandler = RequestHandler<ISpecificTaskParams, DefaultResponse>;
 type UpdateResourceHandler = RequestHandler<ISpecificTaskParams, DefaultResponse, IUpdateTaskBody>;
@@ -61,9 +63,10 @@ export class TaskController {
       return next(err);
     }
   };
+
   public getResources: GetResourcesHandler = async (req, res, next) => {
     try {
-      const tasksRes = await this.manager.getAllTasks(req.params);
+      const tasksRes = await this.manager.getAllTasks(req.params, req.query.shouldExcludeParameters);
       return res.status(httpStatus.OK).json(tasksRes);
     } catch (err) {
       return next(err);
