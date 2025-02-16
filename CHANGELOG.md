@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.0.0](https://github.com/MapColonies/job-manager/compare/v3.0.0...v4.0.0) (2025-02-16)
+
+
+### ⚠ BREAKING CHANGES
+
+* exclude parameters column (#51)
+
+### Features
+
+* exclude parameters column ([#51](https://github.com/MapColonies/job-manager/issues/51)) ([3ad9b4d](https://github.com/MapColonies/job-manager/commit/3ad9b4d0eb3dce91442b7fd1b29115f3fd3c3544))
+
 ## [3.0.0](https://github.com/MapColonies/job-manager/compare/v2.10.1...v3.0.0) (2024-12-22)
 
 
