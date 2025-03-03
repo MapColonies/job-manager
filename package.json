@@ -1,6 +1,6 @@
 {
   "name": "job-manager",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "Service for handling mapcolonies job & task statuses",
   "main": "./src/index.ts",
   "scripts": {
