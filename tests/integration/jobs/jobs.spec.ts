@@ -938,48 +938,27 @@ describe('job', function () {
     });
 
     describe('resettable', () => {
-      it('returns 200 and true when job is resettable', async () => {
-        jobRepositoryMocks.queryMock.mockResolvedValue([{ unResettableTasks: '0', failedTasks: '1' }]);
+      it('returns true when job exists and is eligible for reset', async () => {
+        jobRepositoryMocks.queryBuilder.getCount.mockResolvedValue(1);
         const id = 'dabf6137-8160-4b62-9110-2d1c1195398b';
 
         const res = await requestSender.resettable(id);
+
         expect(res.status).toBe(httpStatusCodes.OK);
         expect(res.body).toEqual({ jobId: id, isResettable: true });
-        expect(jobRepositoryMocks.queryMock).toHaveBeenCalledTimes(1);
+        expect(jobRepositoryMocks.queryBuilder.getCount).toHaveBeenCalledTimes(1);
         expect(res).toSatisfyApiSpec();
       });
 
-      it('returns 200 and false when job has un-resettable task', async () => {
-        jobRepositoryMocks.queryMock.mockResolvedValue([{ unResettableTasks: '1', failedTasks: '1' }]);
-        const id = 'dabf6137-8160-4b62-9110-2d1c1195398b';
-
-        const res = await requestSender.resettable(id);
-        expect(res.status).toBe(httpStatusCodes.OK);
-        expect(res.body).toEqual({ jobId: id, isResettable: false });
-        expect(jobRepositoryMocks.queryMock).toHaveBeenCalledTimes(1);
-        expect(res).toSatisfyApiSpec();
-      });
-
-      it('returns 200 and false when job has no failed tasks', async () => {
-        jobRepositoryMocks.queryMock.mockResolvedValue([{ unResettableTasks: '0', failedTasks: '0' }]);
-        const id = 'dabf6137-8160-4b62-9110-2d1c1195398b';
-
-        const res = await requestSender.resettable(id);
-        expect(res.status).toBe(httpStatusCodes.OK);
-        expect(res.body).toEqual({ jobId: id, isResettable: false });
-        expect(jobRepositoryMocks.queryMock).toHaveBeenCalledTimes(1);
-        expect(res).toSatisfyApiSpec();
-      });
-
-      it('returns 200 and false when no matching job is returned', async () => {
-        jobRepositoryMocks.queryMock.mockResolvedValue([]);
+      it('returns false when job does not exist or is not eligible', async () => {
+        jobRepositoryMocks.queryBuilder.getCount.mockResolvedValue(0);
         const id = 'dabf6137-8160-4b62-9110-2d1c1195398b';
 
         const res = await requestSender.resettable(id);
 
         expect(res.status).toBe(httpStatusCodes.OK);
         expect(res.body).toEqual({ jobId: id, isResettable: false });
-        expect(jobRepositoryMocks.queryMock).toHaveBeenCalledTimes(1);
+        expect(jobRepositoryMocks.queryBuilder.getCount).toHaveBeenCalledTimes(1);
         expect(res).toSatisfyApiSpec();
       });
     });
