@@ -253,12 +253,7 @@ export class JobRepository extends GeneralRepository<JobEntity> {
     const count = await this.createQueryBuilder('job')
       .where('job.id = :jobId', { jobId })
       .andWhere('job.status IN (:...statuses)', {
-        statuses: [
-          OperationStatus.EXPIRED,
-          OperationStatus.FAILED,
-          OperationStatus.ABORTED,
-          OperationStatus.SUSPENDED,
-        ],
+        statuses: [OperationStatus.EXPIRED, OperationStatus.FAILED, OperationStatus.ABORTED, OperationStatus.SUSPENDED],
       })
       .andWhere('job.isCleaned = false')
       .getCount();
