@@ -135,7 +135,7 @@ export class JobManager {
   @withSpanAsyncV4
   private async getAvailableActions(job: IGetJobResponse): Promise<IAvailableActions> {
     const isResettable = (await this.isResettable({ jobId: job.id })).isResettable;
-    const isAbortable = await this.isAbortable(job);
+    const isAbortable = this.isAbortable(job);
     const availableActions: IAvailableActions = {
       isResumable: isResettable,
       isAbortable: isAbortable,
@@ -144,7 +144,7 @@ export class JobManager {
   }
 
   private isAbortable(job: IGetJobResponse): boolean {
-    return (job.status !== OperationStatus.COMPLETED && job.status !== OperationStatus.ABORTED);
+    return job.status !== OperationStatus.COMPLETED && job.status !== OperationStatus.ABORTED;
   }
 
   private async getRepository(): Promise<JobRepository> {
