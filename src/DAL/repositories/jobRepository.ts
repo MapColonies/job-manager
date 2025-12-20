@@ -250,15 +250,15 @@ export class JobRepository extends GeneralRepository<JobEntity> {
   }
 
   public async isJobResettable(jobId: string): Promise<boolean> {
-    const count = await this.createQueryBuilder('job')
+    const resettableJobsCount = await this.createQueryBuilder('job')
       .where('job.id = :jobId', { jobId })
       .andWhere('job.status IN (:...statuses)', {
-        statuses: [OperationStatus.EXPIRED, OperationStatus.FAILED, OperationStatus.ABORTED, OperationStatus.SUSPENDED],
+        statuses: [OperationStatus.FAILED, OperationStatus.SUSPENDED],
       })
       .andWhere('job.isCleaned = false')
       .getCount();
 
-    return count > 0;
+    return resettableJobsCount > 0;
   }
 
   public async isJobHasPendingTasks(jobId: string): Promise<boolean> {

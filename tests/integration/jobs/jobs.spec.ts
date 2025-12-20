@@ -938,27 +938,72 @@ describe('job', function () {
     });
 
     describe('resettable', () => {
-      it('returns true when job exists and is eligible for reset', async () => {
-        jobRepositoryMocks.queryBuilder.getCount.mockResolvedValue(1);
+      describe('When job status allows reset(EXPIRED or SUSPENDED)', () => {
+        const id = 'dabf6137-8160-4b62-9110-2d1c1195398b';
+        it.each([OperationStatus.FAILED, OperationStatus.SUSPENDED])('isJobResettable returns true for status %s', async () => {
+          jobRepositoryMocks.queryBuilder.getCount.mockResolvedValue(1);
+          const res = await requestSender.resettable(id);
+
+          expect(res.status).toBe(httpStatusCodes.OK);
+          expect(res.body).toEqual({
+            jobId: id,
+            isResettable: true,
+          });
+          expect(jobRepositoryMocks.queryBuilder.getCount).toHaveBeenCalledTimes(1);
+          expect(jobRepositoryMocks.queryBuilder.andWhere).toHaveBeenCalledWith('job.status IN (:...statuses)', {
+            statuses: [OperationStatus.FAILED, OperationStatus.SUSPENDED],
+          });
+          expect(res).toSatisfyApiSpec();
+        });
+      });
+
+      describe('when job status does not allow reset(all others)', () => {
         const id = 'dabf6137-8160-4b62-9110-2d1c1195398b';
 
+        it.each([OperationStatus.PENDING, OperationStatus.IN_PROGRESS, OperationStatus.COMPLETED, OperationStatus.EXPIRED, OperationStatus.ABORTED])(
+          'returns resettable returns false for status %s',
+          async () => {
+            jobRepositoryMocks.queryBuilder.getCount.mockResolvedValue(0);
+            const res = await requestSender.resettable(id);
+
+            expect(res.status).toBe(httpStatusCodes.OK);
+            expect(res.body).toEqual({
+              jobId: id,
+              isResettable: false,
+            });
+            expect(jobRepositoryMocks.queryBuilder.getCount).toHaveBeenCalledTimes(1);
+            expect(res).toSatisfyApiSpec();
+          }
+        );
+      });
+    });
+
+    describe('resettable - isCleaned condition', () => {
+      const id = 'dabf6137-8160-4b62-9110-2d1c1195398b';
+
+      it('returns true when job is not cleaned', async () => {
+        jobRepositoryMocks.queryBuilder.getCount.mockResolvedValue(1);
         const res = await requestSender.resettable(id);
 
         expect(res.status).toBe(httpStatusCodes.OK);
-        expect(res.body).toEqual({ jobId: id, isResettable: true });
-        expect(jobRepositoryMocks.queryBuilder.getCount).toHaveBeenCalledTimes(1);
+        expect(res.body).toEqual({
+          jobId: id,
+          isResettable: true,
+        });
+        expect(jobRepositoryMocks.queryBuilder.andWhere).toHaveBeenCalledWith('job.isCleaned = false');
         expect(res).toSatisfyApiSpec();
       });
 
-      it('returns false when job does not exist or is not eligible', async () => {
+      it('returns false when job is cleaned', async () => {
         jobRepositoryMocks.queryBuilder.getCount.mockResolvedValue(0);
-        const id = 'dabf6137-8160-4b62-9110-2d1c1195398b';
-
         const res = await requestSender.resettable(id);
 
         expect(res.status).toBe(httpStatusCodes.OK);
-        expect(res.body).toEqual({ jobId: id, isResettable: false });
-        expect(jobRepositoryMocks.queryBuilder.getCount).toHaveBeenCalledTimes(1);
+        expect(res.body).toEqual({
+          jobId: id,
+          isResettable: false,
+        });
+        expect(jobRepositoryMocks.queryBuilder.andWhere).toHaveBeenCalledWith('job.isCleaned = false');
         expect(res).toSatisfyApiSpec();
       });
     });
