@@ -143,12 +143,8 @@ export class JobManager {
     return availableActions;
   }
 
-  @withSpanAsyncV4
-  private async isAbortable(job: IGetJobResponse): Promise<boolean> {
-    const jobId = job.id;
-    const repo = await this.getRepository();
-    const hasPendingTasks = await repo.isJobHasPendingTasks(jobId);
-    return hasPendingTasks && (job.status === OperationStatus.PENDING || job.status === OperationStatus.IN_PROGRESS);
+  private isAbortable(job: IGetJobResponse): boolean {
+    return (job.status !== OperationStatus.COMPLETED && job.status !== OperationStatus.ABORTED);
   }
 
   private async getRepository(): Promise<JobRepository> {

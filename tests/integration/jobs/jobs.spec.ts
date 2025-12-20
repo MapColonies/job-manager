@@ -816,7 +816,7 @@ describe('job', function () {
         delete jobEntity.tasks;
         jobsFindOneMock.mockResolvedValue(jobEntity);
         const expectedAvailableActions: IAvailableActions = {
-          isAbortable: false,
+          isAbortable: ![OperationStatus.COMPLETED, OperationStatus.ABORTED].includes(jobEntity.status),
           isResumable: false,
         };
 
