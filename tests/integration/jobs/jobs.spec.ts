@@ -1009,12 +1009,12 @@ describe('job', function () {
     });
 
     describe('reset', () => {
-      it('returns 200 and reset job when job is resettable', async () => {
+      it.each([OperationStatus.FAILED, OperationStatus.SUSPENDED])('returns 200 for resettable statuses and returns the reset job once it is resettable', async (status) => {
         const id = 'ebd585a2-b218-4b0f-8b58-7df27b5f5a4b';
         jobRepositoryMocks.queryBuilder.getCount.mockResolvedValue(1);
         jobRepositoryMocks.findOneMock.mockResolvedValue({
           id,
-          status: OperationStatus.FAILED,
+          status: status,
           isCleaned: false,
         });
         jobRepositoryMocks.countMock.mockResolvedValue(1);
