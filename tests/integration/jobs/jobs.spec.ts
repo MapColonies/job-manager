@@ -1009,36 +1009,39 @@ describe('job', function () {
     });
 
     describe('reset', () => {
-      it.each([OperationStatus.FAILED, OperationStatus.SUSPENDED])('returns 200 for resettable statuses and returns the reset job once it is resettable', async (status) => {
-        const id = 'ebd585a2-b218-4b0f-8b58-7df27b5f5a4b';
-        jobRepositoryMocks.queryBuilder.getCount.mockResolvedValue(1);
-        jobRepositoryMocks.findOneMock.mockResolvedValue({
-          id,
-          status: status,
-          isCleaned: false,
-        });
-        jobRepositoryMocks.countMock.mockResolvedValue(1);
-        const body = {
-          newExpirationDate: undefined,
-        };
-        const res = await requestSender.reset(id, body);
+      it.each([OperationStatus.FAILED, OperationStatus.SUSPENDED])(
+        'returns 200 for resettable statuses and returns the reset job once it is resettable',
+        async (status) => {
+          const id = 'ebd585a2-b218-4b0f-8b58-7df27b5f5a4b';
+          jobRepositoryMocks.queryBuilder.getCount.mockResolvedValue(1);
+          jobRepositoryMocks.findOneMock.mockResolvedValue({
+            id,
+            status: status,
+            isCleaned: false,
+          });
+          jobRepositoryMocks.countMock.mockResolvedValue(1);
+          const body = {
+            newExpirationDate: undefined,
+          };
+          const res = await requestSender.reset(id, body);
 
-        expect(res.status).toBe(httpStatusCodes.OK);
-        expect(res.body).toEqual({ code: ResponseCodes.JOB_RESET });
+          expect(res.status).toBe(httpStatusCodes.OK);
+          expect(res.body).toEqual({ code: ResponseCodes.JOB_RESET });
 
-        expect(queryRunnerMocks.connect).toHaveBeenCalledTimes(1);
-        expect(queryRunnerMocks.startTransaction).toHaveBeenCalledTimes(1);
-        expect(queryRunnerMocks.manager.getCustomRepository).toHaveBeenCalledTimes(2);
-        expect(queryRunnerMocks.commitTransaction).toHaveBeenCalledTimes(1);
-        expect(queryRunnerMocks.rollbackTransaction).toHaveBeenCalledTimes(0);
-        expect(queryRunnerMocks.release).toHaveBeenCalledTimes(1);
+          expect(queryRunnerMocks.connect).toHaveBeenCalledTimes(1);
+          expect(queryRunnerMocks.startTransaction).toHaveBeenCalledTimes(1);
+          expect(queryRunnerMocks.manager.getCustomRepository).toHaveBeenCalledTimes(2);
+          expect(queryRunnerMocks.commitTransaction).toHaveBeenCalledTimes(1);
+          expect(queryRunnerMocks.rollbackTransaction).toHaveBeenCalledTimes(0);
+          expect(queryRunnerMocks.release).toHaveBeenCalledTimes(1);
 
-        expect(jobRepositoryMocks.queryBuilder.getCount).toHaveBeenCalledTimes(1);
-        expect(jobRepositoryMocks.saveMock).toHaveBeenCalledTimes(1);
-        expect(jobRepositoryMocks.countMock).toHaveBeenCalledTimes(1);
-        expect(taskRepositoryMocks.queryBuilder.execute).toHaveBeenCalledTimes(1);
-        expect(res).toSatisfyApiSpec();
-      });
+          expect(jobRepositoryMocks.queryBuilder.getCount).toHaveBeenCalledTimes(1);
+          expect(jobRepositoryMocks.saveMock).toHaveBeenCalledTimes(1);
+          expect(jobRepositoryMocks.countMock).toHaveBeenCalledTimes(1);
+          expect(taskRepositoryMocks.queryBuilder.execute).toHaveBeenCalledTimes(1);
+          expect(res).toSatisfyApiSpec();
+        }
+      );
     });
   });
 
