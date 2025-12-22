@@ -42,7 +42,7 @@ export class JobManager {
     if (req.shouldReturnAvailableActions === true) {
       if (res.length !== 0) {
         res = await Promise.all(
-          res.map(async (job) => ({
+          res.map((job) => ({
             ...job,
             availableActions: this.getAvailableActions(job),
           }))
@@ -60,7 +60,7 @@ export class JobManager {
     if (req.shouldReturnAvailableActions === true) {
       if (res.length !== 0) {
         res = await Promise.all(
-          res.map(async (job) => ({
+          res.map((job) => ({
             ...job,
             availableActions: this.getAvailableActions(job),
           }))
@@ -124,6 +124,13 @@ export class JobManager {
     await this.transactionManager.resetJob(jobId, newExpirationDate);
   }
 
+  public isResettableJob(job: IGetJobResponse): IIsResettableResponse {
+    return {
+      jobId: job.id,
+      isResettable: !job.isCleaned && (job.status === OperationStatus.FAILED || job.status === OperationStatus.SUSPENDED),
+    };
+  }
+
   private getAvailableActions(job: IGetJobResponse): IAvailableActions {
     const isResettable = this.isResettableJob(job).isResettable;
     const isAbortable = this.isAbortable(job);
@@ -136,13 +143,6 @@ export class JobManager {
 
   private isAbortable(job: IGetJobResponse): boolean {
     return job.status !== OperationStatus.COMPLETED && job.status !== OperationStatus.ABORTED;
-  }
-
-  public isResettableJob(job: IGetJobResponse): IIsResettableResponse {
-    return {
-      jobId: job.id,
-      isResettable: !job.isCleaned && (job.status === OperationStatus.FAILED || job.status === OperationStatus.SUSPENDED),
-    };
   }
 
   private async getRepository(): Promise<JobRepository> {
