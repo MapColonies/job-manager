@@ -91,7 +91,6 @@ export class JobManager {
     let res = await repo.getJob(req.jobId, query);
 
     if (res === undefined) {
-      console.log('GOT HERE    -     -----throwing not found error');
       throw new NotFoundError('Job not found');
     }
 
