@@ -299,7 +299,9 @@ describe('job', function () {
   });
   afterEach(function () {
     resetContainer();
+    jest.clearAllMocks();
     jest.resetAllMocks();
+    jest.restoreAllMocks();
   });
 
   describe('Happy Path', function () {
@@ -941,11 +943,13 @@ describe('job', function () {
       describe('When job status allows reset(FAILED or SUSPENDED)', () => {
         const id = 'dabf6137-8160-4b62-9110-2d1c1195398b';
         it.each([OperationStatus.FAILED, OperationStatus.SUSPENDED])('isJobResettable returns true for status %s', async (status) => {
-          jobRepositoryMocks.getJob.mockResolvedValue({
+          const getJobMock = jobRepositoryMocks.findOneMock;
+          const getJobResponse = {
             id: id,
             status,
             isCleaned: false,
-          });
+          };
+          getJobMock.mockResolvedValueOnce(getJobResponse);
 
           const res = await requestSender.resettable(id);
 
@@ -954,7 +958,7 @@ describe('job', function () {
             jobId: id,
             isResettable: true,
           });
-          expect(jobRepositoryMocks.getJob).toHaveBeenCalledTimes(1);
+          expect(jobRepositoryMocks.findOneMock).toHaveBeenCalledTimes(1);
           expect(res).toSatisfyApiSpec();
         });
       });
@@ -965,7 +969,7 @@ describe('job', function () {
         it.each([OperationStatus.PENDING, OperationStatus.IN_PROGRESS, OperationStatus.COMPLETED, OperationStatus.EXPIRED, OperationStatus.ABORTED])(
           'returns resettable returns false for status %s',
           async (status) => {
-            jobRepositoryMocks.getJob.mockResolvedValue({
+            jobRepositoryMocks.findOneMock.mockResolvedValueOnce({
               id,
               status,
               isCleaned: false,
@@ -978,7 +982,7 @@ describe('job', function () {
               jobId: id,
               isResettable: false,
             });
-            expect(jobRepositoryMocks.getJob).toHaveBeenCalledTimes(1);
+            expect(jobRepositoryMocks.findOneMock).toHaveBeenCalledTimes(1);
             expect(res).toSatisfyApiSpec();
           }
         );
@@ -989,7 +993,7 @@ describe('job', function () {
       const id = 'dabf6137-8160-4b62-9110-2d1c1195398b';
 
       it('returns false when job is cleaned', async () => {
-        jobRepositoryMocks.getJob.mockResolvedValue({
+        jobRepositoryMocks.findOneMock.mockResolvedValueOnce({
           id,
           status: OperationStatus.FAILED,
           isCleaned: true,
@@ -1003,7 +1007,7 @@ describe('job', function () {
           isResettable: false,
         });
 
-        expect(jobRepositoryMocks.getJob).toHaveBeenCalledWith(id);
+        expect(jobRepositoryMocks.findOneMock).toHaveBeenCalledWith(id);
         expect(res).toSatisfyApiSpec();
       });
     });
@@ -1011,12 +1015,6 @@ describe('job', function () {
     describe('reset', () => {
       it.each([OperationStatus.FAILED, OperationStatus.SUSPENDED])('returns 200 for resettable statuses and resets the job', async (status) => {
         const id = 'ebd585a2-b218-4b0f-8b58-7df27b5f5a4b';
-
-        jobRepositoryMocks.getJob.mockResolvedValue({
-          id,
-          status,
-          isCleaned: false,
-        });
 
         jobRepositoryMocks.findOneMock.mockResolvedValue({
           id,

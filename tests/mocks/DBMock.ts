@@ -78,7 +78,6 @@ interface RepositoryMocks {
   queryBuilder: QueryBuilder;
   queryMock: jest.Mock;
   updateMock: jest.Mock;
-  getJob: jest.Mock;
 }
 
 const registerRepository = <T>(key: ObjectType<T>, instance: T): RepositoryMocks => {
