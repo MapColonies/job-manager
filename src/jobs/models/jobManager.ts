@@ -44,7 +44,7 @@ export class JobManager {
         res = await Promise.all(
           res.map(async (job) => ({
             ...job,
-            availableActions: await this.getAvailableActions(job),
+            availableActions: this.getAvailableActions(job),
           }))
         );
       }
@@ -62,7 +62,7 @@ export class JobManager {
         res = await Promise.all(
           res.map(async (job) => ({
             ...job,
-            availableActions: await this.getAvailableActions(job),
+            availableActions: this.getAvailableActions(job),
           }))
         );
       }
@@ -95,7 +95,7 @@ export class JobManager {
     }
 
     if (query.shouldReturnAvailableActions === true) {
-      const availableActions = await this.getAvailableActions(res);
+      const availableActions = this.getAvailableActions(res);
       res = { ...res, availableActions };
     }
     return res;
@@ -117,14 +117,6 @@ export class JobManager {
   }
 
   @withSpanAsyncV4
-  public async isResettable(req: IJobsParams): Promise<IIsResettableResponse> {
-    const jobId = req.jobId;
-    const repo = await this.getRepository();
-    const isResettable = await repo.isJobResettable(jobId);
-    return { jobId, isResettable };
-  }
-
-  @withSpanAsyncV4
   public async resetJob(req: IResetJobRequest): Promise<void> {
     const jobId = req.jobId;
     const newExpirationDate = req.newExpirationDate;
@@ -132,9 +124,8 @@ export class JobManager {
     await this.transactionManager.resetJob(jobId, newExpirationDate);
   }
 
-  @withSpanAsyncV4
-  private async getAvailableActions(job: IGetJobResponse): Promise<IAvailableActions> {
-    const isResettable = (await this.isResettable({ jobId: job.id })).isResettable;
+  private getAvailableActions(job: IGetJobResponse): IAvailableActions {
+    const isResettable = this.isResettableJob(job).isResettable;
     const isAbortable = this.isAbortable(job);
     const availableActions: IAvailableActions = {
       isResumable: isResettable,
@@ -145,6 +136,13 @@ export class JobManager {
 
   private isAbortable(job: IGetJobResponse): boolean {
     return job.status !== OperationStatus.COMPLETED && job.status !== OperationStatus.ABORTED;
+  }
+
+  public isResettableJob(job: IGetJobResponse): IIsResettableResponse {
+    return {
+      jobId: job.id,
+      isResettable: !job.isCleaned && (job.status === OperationStatus.FAILED || job.status === OperationStatus.SUSPENDED),
+    };
   }
 
   private async getRepository(): Promise<JobRepository> {
