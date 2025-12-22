@@ -938,10 +938,15 @@ describe('job', function () {
     });
 
     describe('resettable', () => {
-      describe('When job status allows reset(EXPIRED or SUSPENDED)', () => {
+      describe('When job status allows reset(FAILED or SUSPENDED)', () => {
         const id = 'dabf6137-8160-4b62-9110-2d1c1195398b';
-        it.each([OperationStatus.FAILED, OperationStatus.SUSPENDED])('isJobResettable returns true for status %s', async () => {
-          jobRepositoryMocks.queryBuilder.getCount.mockResolvedValue(1);
+        it.each([OperationStatus.FAILED, OperationStatus.SUSPENDED])('isJobResettable returns true for status %s', async (status) => {
+          jobRepositoryMocks.getJob.mockResolvedValue({
+            id: id,
+            status,
+            isCleaned: false,
+          });
+
           const res = await requestSender.resettable(id);
 
           expect(res.status).toBe(httpStatusCodes.OK);
@@ -949,10 +954,7 @@ describe('job', function () {
             jobId: id,
             isResettable: true,
           });
-          expect(jobRepositoryMocks.queryBuilder.getCount).toHaveBeenCalledTimes(1);
-          expect(jobRepositoryMocks.queryBuilder.andWhere).toHaveBeenCalledWith('job.status IN (:...statuses)', {
-            statuses: [OperationStatus.FAILED, OperationStatus.SUSPENDED],
-          });
+          expect(jobRepositoryMocks.getJob).toHaveBeenCalledTimes(1);
           expect(res).toSatisfyApiSpec();
         });
       });
@@ -962,8 +964,13 @@ describe('job', function () {
 
         it.each([OperationStatus.PENDING, OperationStatus.IN_PROGRESS, OperationStatus.COMPLETED, OperationStatus.EXPIRED, OperationStatus.ABORTED])(
           'returns resettable returns false for status %s',
-          async () => {
-            jobRepositoryMocks.queryBuilder.getCount.mockResolvedValue(0);
+          async (status) => {
+            jobRepositoryMocks.getJob.mockResolvedValue({
+              id,
+              status,
+              isCleaned: false,
+            });
+
             const res = await requestSender.resettable(id);
 
             expect(res.status).toBe(httpStatusCodes.OK);
@@ -971,7 +978,7 @@ describe('job', function () {
               jobId: id,
               isResettable: false,
             });
-            expect(jobRepositoryMocks.queryBuilder.getCount).toHaveBeenCalledTimes(1);
+            expect(jobRepositoryMocks.getJob).toHaveBeenCalledTimes(1);
             expect(res).toSatisfyApiSpec();
           }
         );
@@ -981,21 +988,13 @@ describe('job', function () {
     describe('resettable - isCleaned condition', () => {
       const id = 'dabf6137-8160-4b62-9110-2d1c1195398b';
 
-      it('returns true when job is not cleaned', async () => {
-        jobRepositoryMocks.queryBuilder.getCount.mockResolvedValue(1);
-        const res = await requestSender.resettable(id);
-
-        expect(res.status).toBe(httpStatusCodes.OK);
-        expect(res.body).toEqual({
-          jobId: id,
-          isResettable: true,
-        });
-        expect(jobRepositoryMocks.queryBuilder.andWhere).toHaveBeenCalledWith('job.isCleaned = false');
-        expect(res).toSatisfyApiSpec();
-      });
-
       it('returns false when job is cleaned', async () => {
-        jobRepositoryMocks.queryBuilder.getCount.mockResolvedValue(0);
+        jobRepositoryMocks.getJob.mockResolvedValue({
+          id,
+          status: OperationStatus.FAILED,
+          isCleaned: true,
+        });
+
         const res = await requestSender.resettable(id);
 
         expect(res.status).toBe(httpStatusCodes.OK);
@@ -1003,45 +1002,50 @@ describe('job', function () {
           jobId: id,
           isResettable: false,
         });
-        expect(jobRepositoryMocks.queryBuilder.andWhere).toHaveBeenCalledWith('job.isCleaned = false');
+
+        expect(jobRepositoryMocks.getJob).toHaveBeenCalledWith(id);
         expect(res).toSatisfyApiSpec();
       });
     });
 
     describe('reset', () => {
-      it.each([OperationStatus.FAILED, OperationStatus.SUSPENDED])(
-        'returns 200 for resettable statuses and returns the reset job once it is resettable',
-        async (status) => {
-          const id = 'ebd585a2-b218-4b0f-8b58-7df27b5f5a4b';
-          jobRepositoryMocks.queryBuilder.getCount.mockResolvedValue(1);
-          jobRepositoryMocks.findOneMock.mockResolvedValue({
-            id,
-            status: status,
-            isCleaned: false,
-          });
-          jobRepositoryMocks.countMock.mockResolvedValue(1);
-          const body = {
-            newExpirationDate: undefined,
-          };
-          const res = await requestSender.reset(id, body);
+      it.each([OperationStatus.FAILED, OperationStatus.SUSPENDED])('returns 200 for resettable statuses and resets the job', async (status) => {
+        const id = 'ebd585a2-b218-4b0f-8b58-7df27b5f5a4b';
 
-          expect(res.status).toBe(httpStatusCodes.OK);
-          expect(res.body).toEqual({ code: ResponseCodes.JOB_RESET });
+        jobRepositoryMocks.getJob.mockResolvedValue({
+          id,
+          status,
+          isCleaned: false,
+        });
 
-          expect(queryRunnerMocks.connect).toHaveBeenCalledTimes(1);
-          expect(queryRunnerMocks.startTransaction).toHaveBeenCalledTimes(1);
-          expect(queryRunnerMocks.manager.getCustomRepository).toHaveBeenCalledTimes(2);
-          expect(queryRunnerMocks.commitTransaction).toHaveBeenCalledTimes(1);
-          expect(queryRunnerMocks.rollbackTransaction).toHaveBeenCalledTimes(0);
-          expect(queryRunnerMocks.release).toHaveBeenCalledTimes(1);
+        jobRepositoryMocks.findOneMock.mockResolvedValue({
+          id,
+          status,
+          isCleaned: false,
+        });
 
-          expect(jobRepositoryMocks.queryBuilder.getCount).toHaveBeenCalledTimes(1);
-          expect(jobRepositoryMocks.saveMock).toHaveBeenCalledTimes(1);
-          expect(jobRepositoryMocks.countMock).toHaveBeenCalledTimes(1);
-          expect(taskRepositoryMocks.queryBuilder.execute).toHaveBeenCalledTimes(1);
-          expect(res).toSatisfyApiSpec();
-        }
-      );
+        jobRepositoryMocks.countMock.mockResolvedValue(1);
+        jobRepositoryMocks.queryBuilder.getCount.mockResolvedValue(1);
+
+        const body = {
+          newExpirationDate: undefined,
+        };
+
+        const res = await requestSender.reset(id, body);
+
+        expect(res.status).toBe(httpStatusCodes.OK);
+        expect(res.body).toEqual({ code: ResponseCodes.JOB_RESET });
+
+        expect(queryRunnerMocks.connect).toHaveBeenCalledTimes(1);
+        expect(queryRunnerMocks.startTransaction).toHaveBeenCalledTimes(1);
+        expect(queryRunnerMocks.commitTransaction).toHaveBeenCalledTimes(1);
+        expect(queryRunnerMocks.rollbackTransaction).toHaveBeenCalledTimes(0);
+        expect(queryRunnerMocks.release).toHaveBeenCalledTimes(1);
+
+        expect(jobRepositoryMocks.saveMock).toHaveBeenCalledTimes(1);
+        expect(taskRepositoryMocks.queryBuilder.execute).toHaveBeenCalledTimes(1);
+        expect(res).toSatisfyApiSpec();
+      });
     });
   });
 
