@@ -806,41 +806,50 @@ describe('job', function () {
         getJobSpy.mockRestore();
       });
 
-      it('should get specific job and return 200 with the available actions and false for isAbortable', async function () {
-        const jobModel = createJobDataForAvailableActionsWithoutAbortableJob();
-        const jobEntity = jobModelToEntity(jobModel);
-        const jobsFindOneMock = jobRepositoryMocks.findOneMock;
-        jobRepositoryMocks.queryMock.mockResolvedValue([{ unResettableTasks: '1', failedTasks: '3' }]);
-        const getJobSpy = jest.spyOn(JobManager.prototype, 'getJob');
-        const isJobHasPendingTasksSpy = jest.spyOn(JobRepository.prototype, 'isJobHasPendingTasks');
-        const condition = isJobHasPendingTasksMock(jobEntity.tasks);
-        isJobHasPendingTasksSpy.mockResolvedValue(condition);
-        delete jobEntity.tasks;
-        jobsFindOneMock.mockResolvedValue(jobEntity);
-        const expectedAvailableActions: IAvailableActions = {
-          isAbortable: false,
-          isResumable: false,
-        };
+      it.each([OperationStatus.COMPLETED, OperationStatus.ABORTED])(
+        'should get specific job and return 200 with the available actions and false for isAbortable when status is %s',
+        async (status) => {
+          const jobModel = createJobDataForAvailableActionsWithoutAbortableJob() as JobEntity;
+          const jobEntity = jobModelToEntity(jobModel);
 
-        const response = await requestSender.getResource('170dd8c0-8bad-498b-bb26-671dcf19aa3c', false, true);
+          jobEntity.status = status;
+          jobModel.status = status;
 
-        expect(response.status).toBe(httpStatusCodes.OK);
-        expect(jobsFindOneMock).toHaveBeenCalledTimes(1);
-        expect(jobsFindOneMock).toHaveBeenCalledWith('170dd8c0-8bad-498b-bb26-671dcf19aa3c');
+          const jobsFindOneMock = jobRepositoryMocks.findOneMock;
+          jobRepositoryMocks.queryMock.mockResolvedValue([{ unResettableTasks: '1', failedTasks: '3' }]);
 
-        const job = response.body as IGetJobResponse;
+          const getJobSpy = jest.spyOn(JobManager.prototype, 'getJob');
+          const isJobHasPendingTasksSpy = jest.spyOn(JobRepository.prototype, 'isJobHasPendingTasks');
+          const condition = isJobHasPendingTasksMock(jobEntity.tasks);
+          isJobHasPendingTasksSpy.mockResolvedValue(condition);
 
-        delete (jobModel as JobEntity).tasks;
-        expect(job).toEqual(jobModel);
-        expect(getJobSpy).toHaveBeenCalledWith(
-          { jobId: '170dd8c0-8bad-498b-bb26-671dcf19aa3c' },
-          { shouldReturnTasks: false, shouldReturnAvailableActions: true }
-        );
-        expect(Object.keys(job)).toContain('availableActions');
-        expect(job.availableActions).toEqual(expectedAvailableActions);
-        expect(response).toSatisfyApiSpec();
-        getJobSpy.mockRestore();
-      });
+          delete jobEntity.tasks;
+          jobsFindOneMock.mockResolvedValue(jobEntity);
+          const expectedAvailableActions: IAvailableActions = {
+            isAbortable: false,
+            isResumable: false,
+          };
+          const response = await requestSender.getResource('170dd8c0-8bad-498b-bb26-671dcf19aa3c', false, true);
+
+          expect(response.status).toBe(httpStatusCodes.OK);
+          expect(jobsFindOneMock).toHaveBeenCalledTimes(1);
+          expect(jobsFindOneMock).toHaveBeenCalledWith('170dd8c0-8bad-498b-bb26-671dcf19aa3c');
+
+          const job = response.body as IGetJobResponse;
+
+          delete jobModel.tasks;
+          expect(job).toEqual(jobModel);
+          expect(getJobSpy).toHaveBeenCalledWith(
+            { jobId: '170dd8c0-8bad-498b-bb26-671dcf19aa3c' },
+            { shouldReturnTasks: false, shouldReturnAvailableActions: true }
+          );
+          expect(job.availableActions).toEqual(expectedAvailableActions);
+          expect(response).toSatisfyApiSpec();
+
+          getJobSpy.mockRestore();
+          isJobHasPendingTasksSpy.mockRestore();
+        }
+      );
 
       it('should get specific job and return 200 without the available actions', async function () {
         const jobModel = createJobDataForGetJob();

@@ -109,9 +109,7 @@ const registerRepository = <T>(key: ObjectType<T>, instance: T): RepositoryMocks
     },
     queryMock: jest.fn(),
     updateMock: jest.fn(),
-    getJob: jest.fn(),
   };
-
   repo.findOne = mocks.findOneMock;
   repo.find = mocks.findMock;
   repo.save = mocks.saveMock;
