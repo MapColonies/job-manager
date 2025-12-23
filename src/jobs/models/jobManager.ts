@@ -117,14 +117,6 @@ export class JobManager {
   }
 
   @withSpanAsyncV4
-  public async isResettable(req: IJobsParams): Promise<IIsResettableResponse> {
-    const jobId = req.jobId;
-    const repo = await this.getRepository();
-    const isResettable = await repo.isJobResettable(jobId);
-    return { jobId, isResettable };
-  }
-
-  @withSpanAsyncV4
   public async resetJob(req: IResetJobRequest): Promise<void> {
     const jobId = req.jobId;
     const newExpirationDate = req.newExpirationDate;
@@ -134,7 +126,7 @@ export class JobManager {
 
   @withSpanAsyncV4
   private async getAvailableActions(job: IGetJobResponse): Promise<IAvailableActions> {
-    const isResettable = (await this.isResettable({ jobId: job.id })).isResettable;
+    const isResettable = this.isResettableJob(job).isResettable;
     const isAbortable = await this.isAbortable(job);
     const availableActions: IAvailableActions = {
       isResumable: isResettable,
@@ -149,6 +141,13 @@ export class JobManager {
     const repo = await this.getRepository();
     const hasPendingTasks = await repo.isJobHasPendingTasks(jobId);
     return hasPendingTasks && (job.status === OperationStatus.PENDING || job.status === OperationStatus.IN_PROGRESS);
+  }
+
+  public isResettableJob(job: IGetJobResponse): IIsResettableResponse {
+    return {
+      jobId: job.id,
+      isResettable: !job.isCleaned && (job.status === OperationStatus.FAILED || job.status === OperationStatus.SUSPENDED),
+    };
   }
 
   private async getRepository(): Promise<JobRepository> {

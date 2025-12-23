@@ -250,20 +250,15 @@ export class JobRepository extends GeneralRepository<JobEntity> {
   }
 
   public async isJobResettable(jobId: string): Promise<boolean> {
-    const query = `SELECT count(*) FILTER (WHERE tk."resettable" = FALSE) as "unResettableTasks", count(*) AS "failedTasks"
-      FROM "Job" AS jb
-      INNER JOIN "Task" as tk ON tk."jobId" = jb.id
-      WHERE jb.id = $1 AND 
-        (jb.status = '${OperationStatus.EXPIRED}' OR jb.status = '${OperationStatus.FAILED}' OR jb.status = '${OperationStatus.ABORTED}' OR jb.status = '${OperationStatus.SUSPENDED}') AND
-        (tk.status = '${OperationStatus.EXPIRED}' OR tk.status = '${OperationStatus.FAILED}' OR tk.status = '${OperationStatus.ABORTED}') AND
-        jb."isCleaned" = FALSE`;
-    const sqlRes = (await this.query(query, [jobId])) as { unResettableTasks: string; failedTasks: string }[];
-    if (sqlRes.length === 0) {
-      //no matching job found. it might not exist, not have task, be cleaned or not be in failed status
-      return false;
-    }
-    const res = sqlRes[0];
-    return parseInt(res.unResettableTasks) === 0 && parseInt(res.failedTasks) > 0;
+    const resettableJobsCount = await this.createQueryBuilder('job')
+      .where('job.id = :jobId', { jobId })
+      .andWhere('job.status IN (:...statuses)', {
+        statuses: [OperationStatus.FAILED, OperationStatus.SUSPENDED],
+      })
+      .andWhere('job.isCleaned = false')
+      .getCount();
+
+    return resettableJobsCount > 0;
   }
 
   public async isJobHasPendingTasks(jobId: string): Promise<boolean> {

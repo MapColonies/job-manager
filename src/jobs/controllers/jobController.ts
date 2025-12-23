@@ -100,8 +100,9 @@ export class JobController {
 
   public isResettable: IsResettableHandler = async (req, res, next) => {
     try {
-      const resettable = await this.manager.isResettable(req.params);
-      return res.status(httpStatus.OK).send(resettable);
+      const job = await this.manager.getJob(req.params, {});
+      const resettable = this.manager.isResettableJob(job);
+      return res.status(httpStatus.OK).json(resettable);
     } catch (err) {
       return next(err);
     }
