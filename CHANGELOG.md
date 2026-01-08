@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.1.0](https://github.com/MapColonies/job-manager/compare/v4.0.1...v4.1.0) (2026-01-08)
+
+
+### Features
+
+* remove inner join and tasks from isJobResettable (MAPCO-9340) ([#53](https://github.com/MapColonies/job-manager/issues/53)) ([dfbd4ea](https://github.com/MapColonies/job-manager/commit/dfbd4ea00222b836fc1e9cffcae28421f183728e))
+
 ### [4.0.1](https://github.com/MapColonies/job-manager/compare/v4.0.0...v4.0.1) (2025-03-03)
 
 ## [4.0.0](https://github.com/MapColonies/job-manager/compare/v3.0.0...v4.0.0) (2025-03-03)
