@@ -16,6 +16,7 @@ import {
 import { getApp } from '../../../src/app';
 import { FindJobsResponse, IAvailableActions, IGetJobResponse } from '../../../src/common/dataModels/jobs';
 import { ResponseCodes } from '../../../src/common/constants';
+import { excludeColumns } from '../../../src/common/utils';
 import { TaskRepository } from '../../../src/DAL/repositories/taskRepository';
 import { TaskEntity } from '../../../src/DAL/entity/task';
 import { JobManager } from '../../../src/jobs/models/jobManager';
@@ -23,6 +24,7 @@ import { JobsRequestSender, SearchJobsParams } from './helpers/jobsRequestSender
 
 let jobRepositoryMocks: RepositoryMocks;
 let taskRepositoryMocks: RepositoryMocks;
+
 function createJobDataForFind(): unknown {
   const taskModel = {
     jobId: 'jobId',
@@ -256,6 +258,7 @@ function createJobDataForAvailableActionsWithAbortableJob(): unknown {
   };
   return jobModel;
 }
+
 function jobModelToEntity(jobModel: unknown): JobEntity {
   const model = jobModel as {
     created: string;
@@ -666,6 +669,34 @@ describe('job', function () {
         const jobs = response.body as unknown;
         expect(jobs).toEqual([jobModel]);
         expect(response).toSatisfyApiSpec();
+      });
+
+      it('should exclude parameters when shouldExcludeParameters=true', async () => {
+        const jobEntity = jobModelToEntity(createJobDataForFind());
+
+        jobRepositoryMocks.queryBuilder.getMany.mockResolvedValue([jobEntity]);
+
+        await requestSender.findJobs({
+          shouldExcludeParameters: true,
+        });
+
+        expect(jobRepositoryMocks.queryBuilder.select).toHaveBeenCalledWith(
+          expect.arrayContaining(
+            excludeColumns(JobEntity, ['parameters', 'tasks']).map((c) => `job.${c}`)
+          )
+        );
+      });
+
+      it('should include parameters when shouldExcludeParameters=false', async () => {
+        const jobEntity = jobModelToEntity(createJobDataForFind());
+
+        jobRepositoryMocks.queryBuilder.getMany.mockResolvedValue([jobEntity]);
+
+        await requestSender.findJobs({
+          shouldExcludeParameters: false,
+        });
+
+        expect(jobRepositoryMocks.queryBuilder.select).toHaveBeenCalledWith('job');
       });
 
       it('should not find matched jobs and return status 200 with an empty array', async function () {
