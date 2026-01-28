@@ -681,9 +681,7 @@ describe('job', function () {
         });
 
         expect(jobRepositoryMocks.queryBuilder.select).toHaveBeenCalledWith(
-          expect.arrayContaining(
-            excludeColumns(JobEntity, ['parameters', 'tasks']).map((c) => `job.${c}`)
-          )
+          expect.arrayContaining(excludeColumns(JobEntity, ['parameters', 'tasks']).map((c) => `job.${c}`))
         );
       });
 
