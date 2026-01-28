@@ -97,10 +97,19 @@ export class JobRepository extends GeneralRepository<JobEntity> {
         delete filter[key];
       }
     }
-    if (req.shouldReturnTasks !== false) {
-      filter.relations = ['tasks'];
+    const queryBuilder = this.createQueryBuilder('job');
+
+    if (req.shouldExcludeParameters === true) {
+      queryBuilder.select(excludeColumns(JobEntity, ['parameters', 'tasks']).map((c) => `job.${c}`));
+    } else {
+      queryBuilder.select('job');
     }
-    const queryBuilder = this.createQueryBuilder('job').select().where(filter);
+
+    queryBuilder.where(filter);
+
+    if (req.shouldReturnTasks !== false) {
+      queryBuilder.leftJoinAndSelect('job.tasks', 'tasks');
+    }
     if ((req.types?.length ?? 0) > 0) {
       queryBuilder.andWhere('job.type IN (:...types)', { types: req.types });
     }
