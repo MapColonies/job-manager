@@ -34,6 +34,7 @@ export interface IFindJobsByCriteriaBody {
   types?: string[];
   shouldReturnTasks?: boolean;
   shouldReturnAvailableActions?: boolean;
+  shouldExcludeParameters?: boolean;
   productType?: string;
   fromDate?: string;
   tillDate?: string;
