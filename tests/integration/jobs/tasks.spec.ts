@@ -11,6 +11,7 @@ import { IFindTasksRequest } from '../../../src/common/dataModels/tasks';
 import { JobEntity } from '../../../src/DAL/entity/job';
 import { getApp } from '../../../src/app';
 import { ResponseCodes } from '../../../src/common/constants';
+import { JobManager } from '../../../src/jobs/models/jobManager';
 import { TasksRequestSender } from './helpers/tasksRequestSender';
 
 let taskRepositoryMocks: RepositoryMocks;
@@ -29,6 +30,7 @@ function convertTaskResponseToEntity(response: IGetTaskResponse): TaskEntity {
 
 describe('tasks', function () {
   let requestSender: TasksRequestSender;
+  let getJobSpy: jest.SpyInstance;
   beforeEach(function () {
     initTypeOrmMocks();
     const app = getApp({
@@ -37,13 +39,57 @@ describe('tasks', function () {
     });
     taskRepositoryMocks = registerRepository(TaskRepository, new TaskRepository());
     requestSender = new TasksRequestSender(app);
+    getJobSpy = jest.spyOn(JobManager.prototype, 'getJob');
   });
+
   afterEach(function () {
     resetContainer();
     jest.resetAllMocks();
+    jest.restoreAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('Happy Path', function () {
+    const validStatuses = Object.values(OperationStatus).filter((status) => status !== OperationStatus.ABORTED);
+
+    it.each(validStatuses)(
+      'should create task and return status code 201 and the created task id for available job status: %s',
+      async function (status) {
+        const createTaskModel = {
+          description: '1',
+          parameters: {
+            a: 2,
+          },
+          reason: '3',
+          percentage: 4,
+          type: '5',
+        };
+        const createTaskRes = {
+          id: taskId,
+        };
+        const taskEntity = {
+          ...createTaskModel,
+          jobId: jobId,
+          id: taskId,
+        } as unknown as TaskEntity;
+
+        getJobSpy.mockResolvedValue({ status });
+        const taskSaveMock = taskRepositoryMocks.saveMock;
+        taskSaveMock.mockResolvedValue(taskEntity);
+
+        const response = await requestSender.createResource(jobId, createTaskModel);
+        // TODO: remove the test comment when the following issue will be solved: https://github.com/openapi-library/OpenAPIValidators/issues/257
+        // expect(response).toSatisfyApiSpec();
+
+        expect(response.status).toBe(httpStatusCodes.CREATED);
+        expect(taskSaveMock).toHaveBeenCalledTimes(1);
+        expect(taskSaveMock).toHaveBeenCalledWith({ ...createTaskModel, jobId: jobId, blockDuplication: false });
+
+        const body = response.body as unknown;
+        expect(body).toEqual(createTaskRes);
+      }
+    );
+
     it('should create task and return status code 201 and the created task id', async function () {
       const createTaskModel = {
         description: '1',
@@ -63,6 +109,7 @@ describe('tasks', function () {
         id: taskId,
       } as unknown as TaskEntity;
 
+      getJobSpy.mockResolvedValue({ status: OperationStatus.IN_PROGRESS });
       const taskSaveMock = taskRepositoryMocks.saveMock;
       taskSaveMock.mockResolvedValue(taskEntity);
 
@@ -128,6 +175,7 @@ describe('tasks', function () {
         },
       ] as unknown as TaskEntity[];
 
+      getJobSpy.mockResolvedValue({ status: OperationStatus.IN_PROGRESS });
       const taskSaveMock = taskRepositoryMocks.saveMock;
       taskSaveMock.mockResolvedValueOnce(fullTaskEntities[0]).mockResolvedValueOnce(fullTaskEntities[1]);
 
@@ -524,19 +572,31 @@ describe('tasks', function () {
         type: '5',
       };
 
-      const taskSaveMock = taskRepositoryMocks.saveMock;
-      taskSaveMock.mockImplementation(() => {
-        const error = new Error('FK_task_job_id');
-        (error as unknown as { code: string }).code = '23503';
-        throw error;
-      });
+      getJobSpy.mockRejectedValue(new NotFoundError('not found'));
 
       const response = await requestSender.createResource(jobId, createTaskModel);
-      expect(response).toSatisfyApiSpec();
-
       expect(response.status).toBe(httpStatusCodes.NOT_FOUND);
-      expect(taskSaveMock).toHaveBeenCalledTimes(1);
-      expect(taskSaveMock).toHaveBeenCalledWith({ ...createTaskModel, jobId: jobId, blockDuplication: false });
+      expect(response).toSatisfyApiSpec();
+    });
+
+    it('should throw an Conflict Error in attempt to create task for aborted job', async function () {
+      const createTaskModel = {
+        description: '1',
+        parameters: {
+          a: 2,
+        },
+        reason: '3',
+        percentage: 4,
+        type: '5',
+      };
+
+      getJobSpy.mockResolvedValue({ status: OperationStatus.ABORTED });
+
+      const response = await requestSender.createResource(jobId, createTaskModel);
+
+      expect(response.status).toBe(httpStatusCodes.CONFLICT);
+      expect(getJobSpy).toHaveBeenCalledTimes(1);
+      expect(response).toSatisfyApiSpec();
     });
   });
 });

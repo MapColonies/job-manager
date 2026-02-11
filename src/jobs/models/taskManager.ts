@@ -1,5 +1,5 @@
 import { Logger } from '@map-colonies/js-logger';
-import { NotFoundError } from '@map-colonies/error-types';
+import { ConflictError, NotFoundError } from '@map-colonies/error-types';
 import { Tracer } from '@opentelemetry/api';
 import { withSpanAsyncV4 } from '@map-colonies/telemetry';
 import { inject, injectable } from 'tsyringe';
@@ -39,7 +39,13 @@ export class TaskManager {
   }
 
   @withSpanAsyncV4
-  public async createTask(req: CreateTasksRequest): Promise<CreateTasksResponse> {
+  public async createTask(jobId: string, req: CreateTasksRequest): Promise<CreateTasksResponse> {
+    const job = await this.jobManager.getJob({ jobId }, { shouldReturnTasks: false });
+    if (job.status === OperationStatus.ABORTED) {
+      const errorMessage = `Cannot create task for aborted job`;
+      this.logger.error({ msg: errorMessage, jobId });
+      throw new ConflictError(errorMessage);
+    }
     this.logger.debug(req, 'Create-task request parameters');
     const repo = await this.getRepository();
     const res = await repo.createTask(req);
