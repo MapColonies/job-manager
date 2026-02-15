@@ -620,7 +620,7 @@ describe('tasks', function () {
         const response = await requestSender.createResource(jobId, createTaskModel);
 
         expect(response.status).toBe(httpStatusCodes.CONFLICT);
-        expect(getJobSpy).toHaveBeenCalledTimes(2);
+        expect(getJobSpy).toHaveBeenCalledTimes(1);
         expect(response).toSatisfyApiSpec();
       }
     );
@@ -645,7 +645,7 @@ describe('tasks', function () {
         const response = await requestSender.createResource(jobId, createTaskModel);
 
         expect(response.status).toBe(httpStatusCodes.NOT_FOUND);
-        expect(getJobSpy).toHaveBeenCalledTimes(2);
+        expect(getJobSpy).toHaveBeenCalledTimes(1);
         expect(response).toSatisfyApiSpec();
       }
     );
