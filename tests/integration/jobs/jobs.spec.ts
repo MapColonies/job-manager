@@ -1257,8 +1257,7 @@ describe('job', function () {
           expect(queryRunnerMocks.connect).toHaveBeenCalledTimes(0);
           expect(taskRepositoryMocks.queryBuilder.execute).toHaveBeenCalledTimes(0);
           expect(res).toSatisfyApiSpec();
-        },
-        500000
+        }
       );
     });
   });
