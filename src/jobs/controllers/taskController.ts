@@ -36,7 +36,6 @@ export class TaskController {
   public constructor(@inject(SERVICES.LOGGER) private readonly logger: Logger, @inject(TaskManager) private readonly manager: TaskManager) {}
   public createResource: CreateResourceHandler = async (req, res, next) => {
     try {
-      const jobId = req.params.jobId;
       let tasksReq: CreateTasksRequest;
       if (Array.isArray(req.body)) {
         tasksReq = req.body.map((createBody) => {
@@ -45,7 +44,7 @@ export class TaskController {
       } else {
         tasksReq = { ...req.body, ...req.params };
       }
-      const task = await this.manager.createTask(jobId, tasksReq);
+      const task = await this.manager.createTask(tasksReq);
       return res.status(httpStatus.CREATED).json(task);
     } catch (err) {
       return next(err);

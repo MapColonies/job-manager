@@ -39,13 +39,7 @@ export class TaskManager {
   }
 
   @withSpanAsyncV4
-  public async createTask(jobId: string, req: CreateTasksRequest): Promise<CreateTasksResponse> {
-    const job = await this.jobManager.getJob({ jobId }, { shouldReturnTasks: false });
-    if (job.status === OperationStatus.ABORTED) {
-      const errorMessage = `Cannot create task for aborted job`;
-      this.logger.error({ msg: errorMessage, jobId });
-      throw new ConflictError(errorMessage);
-    }
+  public async createTask(req: CreateTasksRequest): Promise<CreateTasksResponse> {
     this.logger.debug(req, 'Create-task request parameters');
     const repo = await this.getRepository();
     const res = await repo.createTask(req);
