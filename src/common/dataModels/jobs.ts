@@ -99,7 +99,7 @@ export interface IGetJobResponse {
   tasks?: GetTasksResponse;
   created: Date;
   updated: Date;
-  status?: OperationStatus;
+  status: OperationStatus;
   percentage?: number;
   isCleaned: boolean;
   priority?: number;

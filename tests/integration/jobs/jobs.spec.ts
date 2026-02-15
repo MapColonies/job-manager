@@ -140,13 +140,6 @@ function createJobDataForGetJob(): unknown {
   return jobModel;
 }
 
-function isJobHasPendingTasksMock(tasks: TaskEntity[] | undefined): boolean {
-  if (tasks === undefined) {
-    return false;
-  }
-  return tasks.some((task) => task.status === OperationStatus.PENDING);
-}
-
 function createJobDataForAvailableActionsWithoutAbortableJob(): unknown {
   const taskModel = {
     jobId: '170dd8c0-8bad-498b-bb26-671dcf19aa3c',
@@ -308,6 +301,8 @@ describe('job', function () {
   });
 
   describe('Happy Path', function () {
+    const statusCases = [OperationStatus.PENDING, OperationStatus.IN_PROGRESS, OperationStatus.SUSPENDED, OperationStatus.FAILED];
+
     describe('createJob', () => {
       it('should create job with tasks and return status code 201 and the created job and tasks ids', async function () {
         const createTaskModel1 = {
@@ -438,8 +433,6 @@ describe('job', function () {
         const jobModel = createJobDataForFind();
         const jobEntity = jobModelToEntity(jobModel);
         const jobsFindMock = jobRepositoryMocks.findMock;
-        const isJobHasPendingTasksSpy = jest.spyOn(JobRepository.prototype, 'isJobHasPendingTasks');
-        isJobHasPendingTasksSpy.mockResolvedValue(true);
         jobRepositoryMocks.queryMock.mockResolvedValue([{ unResettableTasks: '1', failedTasks: '3' }]);
         const findJobsSpy = jest.spyOn(JobManager.prototype, 'findJobs');
         jobsFindMock.mockResolvedValue([jobEntity]);
@@ -772,8 +765,6 @@ describe('job', function () {
         const getJobSpy = jest.spyOn(JobManager.prototype, 'getJob');
         delete jobEntity.tasks;
         jobsFindOneMock.mockResolvedValue(jobEntity);
-        const isJobHasPendingTasksSpy = jest.spyOn(JobRepository.prototype, 'isJobHasPendingTasks');
-        isJobHasPendingTasksSpy.mockResolvedValue(true);
         const expectedAvailableActions: IAvailableActions = {
           isAbortable: true,
           isResumable: false,
@@ -805,9 +796,6 @@ describe('job', function () {
         const jobsFindOneMock = jobRepositoryMocks.findOneMock;
         jobRepositoryMocks.queryMock.mockResolvedValue([{ unResettableTasks: '1', failedTasks: '3' }]);
         const getJobSpy = jest.spyOn(JobManager.prototype, 'getJob');
-        const isJobHasPendingTasksSpy = jest.spyOn(JobRepository.prototype, 'isJobHasPendingTasks');
-        const condition = isJobHasPendingTasksMock(jobEntity.tasks);
-        isJobHasPendingTasksSpy.mockResolvedValue(condition);
         delete jobEntity.tasks;
         jobsFindOneMock.mockResolvedValue(jobEntity);
         const expectedAvailableActions: IAvailableActions = {
@@ -848,9 +836,6 @@ describe('job', function () {
           jobRepositoryMocks.queryMock.mockResolvedValue([{ unResettableTasks: '1', failedTasks: '3' }]);
 
           const getJobSpy = jest.spyOn(JobManager.prototype, 'getJob');
-          const isJobHasPendingTasksSpy = jest.spyOn(JobRepository.prototype, 'isJobHasPendingTasks');
-          const condition = isJobHasPendingTasksMock(jobEntity.tasks);
-          isJobHasPendingTasksSpy.mockResolvedValue(condition);
 
           delete jobEntity.tasks;
           jobsFindOneMock.mockResolvedValue(jobEntity);
@@ -876,7 +861,6 @@ describe('job', function () {
           expect(response).toSatisfyApiSpec();
 
           getJobSpy.mockRestore();
-          isJobHasPendingTasksSpy.mockRestore();
         }
       );
 
@@ -910,15 +894,16 @@ describe('job', function () {
         getJobSpy.mockRestore();
       });
 
-      it('should update job status and return 200', async function () {
+      it.each(statusCases)('should update job status to %s and return 200', async function (status) {
         const jobCountMock = jobRepositoryMocks.countMock;
         const jobSaveMock = jobRepositoryMocks.saveMock;
 
+        jobRepositoryMocks.findOneMock.mockResolvedValue({ status: OperationStatus.PENDING });
         jobCountMock.mockResolvedValue(1);
         jobSaveMock.mockResolvedValue({});
 
         const response = await requestSender.updateResource('170dd8c0-8bad-498b-bb26-671dcf19aa3c', {
-          status: 'In-Progress',
+          status,
         });
 
         expect(response.status).toBe(httpStatusCodes.OK);
@@ -926,7 +911,7 @@ describe('job', function () {
         expect(jobSaveMock).toHaveBeenCalledTimes(1);
         expect(jobSaveMock).toHaveBeenCalledWith({
           id: '170dd8c0-8bad-498b-bb26-671dcf19aa3c',
-          status: 'In-Progress',
+          status,
         });
         expect(response).toSatisfyApiSpec();
       });
@@ -1114,6 +1099,14 @@ describe('job', function () {
         jobRepositoryMocks.queryMock.mockResolvedValue([{ unResettableTasks: '1', failedTasks: '3' }]);
         const id = 'dabf6137-8160-4b62-9110-2d1c1195398b';
 
+        jobRepositoryMocks.findOneMock.mockResolvedValue({
+          id,
+          status: OperationStatus.FAILED,
+          isCleaned: false,
+        });
+        jobRepositoryMocks.countMock.mockResolvedValue(0);
+        jobRepositoryMocks.queryBuilder.getCount.mockResolvedValue(0);
+
         const body = {
           newExpirationDate: undefined,
         };
@@ -1122,7 +1115,7 @@ describe('job', function () {
         expect(res.status).toBe(httpStatusCodes.BAD_REQUEST);
         expect(queryRunnerMocks.connect).toHaveBeenCalledTimes(1);
         expect(queryRunnerMocks.startTransaction).toHaveBeenCalledTimes(1);
-        expect(queryRunnerMocks.manager.getCustomRepository).toHaveBeenCalledTimes(1);
+        expect(queryRunnerMocks.manager.getCustomRepository).toHaveBeenCalledTimes(2);
         expect(queryRunnerMocks.commitTransaction).toHaveBeenCalledTimes(0);
         expect(queryRunnerMocks.rollbackTransaction).toHaveBeenCalledTimes(1);
         expect(queryRunnerMocks.release).toHaveBeenCalledTimes(1);
@@ -1147,22 +1140,32 @@ describe('job', function () {
     });
 
     it('should return status code 404 on PUT request for non existing job', async function () {
-      const jobCountMock = jobRepositoryMocks.countMock;
-      const jobSaveMock = jobRepositoryMocks.saveMock;
-      jobCountMock.mockResolvedValue(0);
+      jobRepositoryMocks.findOneMock.mockResolvedValue(undefined);
 
       const response = await requestSender.updateResource('170dd8c0-8bad-498b-bb26-671dcf19aa3c', {
         status: 'Pending',
       });
 
-      expect(jobCountMock).toHaveBeenCalledTimes(1);
-      expect(jobCountMock).toHaveBeenCalledWith({
-        id: '170dd8c0-8bad-498b-bb26-671dcf19aa3c',
-      });
-      expect(jobSaveMock).toHaveBeenCalledTimes(0);
       expect(response.status).toBe(httpStatusCodes.NOT_FOUND);
       expect(response).toSatisfyApiSpec();
     });
+
+    it.each([OperationStatus.COMPLETED, OperationStatus.EXPIRED, OperationStatus.ABORTED])(
+      'should return status conflict error on update job attempt when trying to update job with status %s',
+      async function (status) {
+        jobRepositoryMocks.findOneMock.mockResolvedValue({
+          id: '170dd8c0-8bad-498b-bb26-671dcf19aa3c',
+          status: status,
+        });
+
+        const response = await requestSender.updateResource('170dd8c0-8bad-498b-bb26-671dcf19aa3c', {
+          status: OperationStatus.COMPLETED,
+        });
+
+        expect(response.status).toBe(httpStatusCodes.CONFLICT);
+        expect(response).toSatisfyApiSpec();
+      }
+    );
 
     it('should return status code 404 on DELETE request for non existing job', async function () {
       const jobCountMock = jobRepositoryMocks.countMock;
@@ -1203,10 +1206,16 @@ describe('job', function () {
     describe('reset', () => {
       it('returns 400 when job is not resettable', async () => {
         const id = 'dabf6137-8160-4b62-9110-2d1c1195398b';
+        jobRepositoryMocks.findOneMock.mockResolvedValue({
+          id,
+          status: OperationStatus.FAILED,
+          isCleaned: false,
+        });
         jobRepositoryMocks.queryBuilder.getCount.mockResolvedValue(0);
         const body = {
           newExpirationDate: undefined,
         };
+
         const res = await requestSender.reset(id, body);
 
         expect(res.status).toBe(httpStatusCodes.BAD_REQUEST);
@@ -1217,10 +1226,40 @@ describe('job', function () {
         expect(queryRunnerMocks.release).toHaveBeenCalledTimes(1);
 
         expect(jobRepositoryMocks.queryBuilder.getCount).toHaveBeenCalledTimes(1);
-        expect(jobRepositoryMocks.findOneMock).toHaveBeenCalledTimes(0);
+        expect(jobRepositoryMocks.findOneMock).toHaveBeenCalledTimes(1);
         expect(taskRepositoryMocks.queryBuilder.execute).toHaveBeenCalledTimes(0);
         expect(res).toSatisfyApiSpec();
       });
+
+      it.each([OperationStatus.COMPLETED, OperationStatus.EXPIRED, OperationStatus.ABORTED])(
+        'should return conflict error when job status is: %s while resetting',
+        async function (status) {
+          const id = 'dabf6137-8160-4b62-9110-2d1c1195398b';
+
+          jobRepositoryMocks.findOneMock.mockResolvedValue({
+            id,
+            status,
+            isCleaned: false,
+          });
+
+          jobRepositoryMocks.countMock.mockResolvedValue(1);
+          jobRepositoryMocks.queryBuilder.getCount.mockResolvedValue(1);
+
+          const body = {
+            newExpirationDate: undefined,
+          };
+
+          const res = await requestSender.reset(id, body);
+
+          expect(res.status).toBe(httpStatusCodes.CONFLICT);
+          expect(jobRepositoryMocks.findOneMock).toHaveBeenCalledTimes(1);
+          expect(jobRepositoryMocks.findOneMock).toHaveBeenCalledWith(id);
+          expect(queryRunnerMocks.connect).toHaveBeenCalledTimes(0);
+          expect(taskRepositoryMocks.queryBuilder.execute).toHaveBeenCalledTimes(0);
+          expect(res).toSatisfyApiSpec();
+        },
+        500000
+      );
     });
   });
 });

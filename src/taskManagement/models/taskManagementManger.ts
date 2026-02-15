@@ -61,7 +61,7 @@ export class TaskManagementManager {
       this.logger.error({ jobId: req.jobId, msg: message });
       throw new NotFoundError(message);
     }
-    if ((jobEntity.status as OperationStatus) === OperationStatus.COMPLETED || (jobEntity.status as OperationStatus) === OperationStatus.ABORTED) {
+    if (jobEntity.status === OperationStatus.COMPLETED || jobEntity.status === OperationStatus.ABORTED) {
       const message = 'Job abort request failed, job status cannot be one of: "Completed" or "Aborted"';
       this.logger.error({ jobStatus: jobEntity.status, msg: message });
       throw new BadRequestError(message);

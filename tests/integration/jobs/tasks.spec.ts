@@ -50,9 +50,7 @@ describe('tasks', function () {
   });
 
   describe('Happy Path', function () {
-    const validStatuses = Object.values(OperationStatus).filter((status) => status !== OperationStatus.ABORTED);
-
-    it.each(validStatuses)(
+    it.each([OperationStatus.PENDING, OperationStatus.IN_PROGRESS, OperationStatus.SUSPENDED, OperationStatus.FAILED])(
       'should create task and return status code 201 and the created task id for available job status: %s',
       async function (status) {
         const createTaskModel = {
@@ -579,24 +577,77 @@ describe('tasks', function () {
       expect(response).toSatisfyApiSpec();
     });
 
-    it('should throw an Conflict Error in attempt to create task for aborted job', async function () {
-      const createTaskModel = {
-        description: '1',
-        parameters: {
-          a: 2,
-        },
-        reason: '3',
-        percentage: 4,
-        type: '5',
-      };
+    it.each([OperationStatus.COMPLETED, OperationStatus.ABORTED, OperationStatus.EXPIRED])(
+      'should throw a Conflict Error in attempt to create task for job status: %s',
+      async function (status) {
+        const createTaskModel = {
+          description: '1',
+          parameters: {
+            a: 2,
+          },
+          reason: '3',
+          percentage: 4,
+          type: '5',
+        };
 
-      getJobSpy.mockResolvedValue({ status: OperationStatus.ABORTED });
+        getJobSpy.mockResolvedValue({ status });
 
-      const response = await requestSender.createResource(jobId, createTaskModel);
+        const response = await requestSender.createResource(jobId, createTaskModel);
 
-      expect(response.status).toBe(httpStatusCodes.CONFLICT);
-      expect(getJobSpy).toHaveBeenCalledTimes(1);
-      expect(response).toSatisfyApiSpec();
-    });
+        expect(response.status).toBe(httpStatusCodes.CONFLICT);
+        expect(getJobSpy).toHaveBeenCalledTimes(1);
+        expect(response).toSatisfyApiSpec();
+      }
+    );
+
+    it.each([OperationStatus.PENDING, OperationStatus.IN_PROGRESS, OperationStatus.SUSPENDED])(
+      'should throw a Conflict Error in attempt to create task that cannot be duplicated job status: %s',
+      async function (status) {
+        const createTaskModel = {
+          description: '1',
+          parameters: {
+            a: 2,
+          },
+          reason: '3',
+          percentage: 4,
+          type: '5',
+        };
+        getJobSpy.mockResolvedValue({ status });
+
+        const taskSaveMock = taskRepositoryMocks.saveMock;
+        taskSaveMock.mockRejectedValue({ code: '23P01', message: 'UQ_uniqueness_on_job_and_type' });
+
+        const response = await requestSender.createResource(jobId, createTaskModel);
+
+        expect(response.status).toBe(httpStatusCodes.CONFLICT);
+        expect(getJobSpy).toHaveBeenCalledTimes(2);
+        expect(response).toSatisfyApiSpec();
+      }
+    );
+
+    it.each([OperationStatus.PENDING, OperationStatus.IN_PROGRESS, OperationStatus.SUSPENDED])(
+      'should throw a Not Found Error in attempt to create task that its job is (FK) is missing: %s',
+      async function (status) {
+        const createTaskModel = {
+          description: '1',
+          parameters: {
+            a: 2,
+          },
+          reason: '3',
+          percentage: 4,
+          type: '5',
+        };
+        getJobSpy.mockResolvedValue({ status });
+
+        const taskSaveMock = taskRepositoryMocks.saveMock;
+        taskSaveMock.mockRejectedValue({ code: '23503', message: 'FK_task_job_id' });
+
+        const response = await requestSender.createResource(jobId, createTaskModel);
+
+        expect(response.status).toBe(httpStatusCodes.NOT_FOUND);
+        expect(getJobSpy).toHaveBeenCalledTimes(2);
+        expect(response).toSatisfyApiSpec();
+      }
+    );
   });
 });

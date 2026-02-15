@@ -141,6 +141,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorMessage'
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMessage'
         '404':
           description: Job not found
           content:
@@ -232,6 +238,12 @@ paths:
                 code: JOB_RESET_SUCCESSFULLY
         '400':
           description: job is not resettable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMessage'
+        '409':
+          description: Conflict
           content:
             application/json:
               schema:
