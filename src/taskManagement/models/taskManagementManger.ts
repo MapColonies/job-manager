@@ -1,5 +1,5 @@
 import { Logger } from '@map-colonies/js-logger';
-import { NotFoundError, BadRequestError } from '@map-colonies/error-types';
+import { NotFoundError } from '@map-colonies/error-types';
 import { Tracer } from '@opentelemetry/api';
 import { withSpanAsyncV4 } from '@map-colonies/telemetry';
 import { inject, injectable } from 'tsyringe';
