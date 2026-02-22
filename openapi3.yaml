@@ -562,6 +562,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorMessage'
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMessage'
       tags:
         - tasksManagement
 components:
