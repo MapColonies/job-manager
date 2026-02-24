@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-misused-promises */
 import { Router } from 'express';
 import { FactoryFunction } from 'tsyringe';
 import { JobController } from '../controllers/jobController';
 import { TaskController } from '../controllers/taskController';
+import { validateJobStatusMiddleware } from '../../common/middlewares/validateJobStatusMiddleware';
 
 const jobRouterFactory: FactoryFunction<Router> = (dependencyContainer) => {
   const router = Router();
@@ -13,13 +15,13 @@ const jobRouterFactory: FactoryFunction<Router> = (dependencyContainer) => {
   router.post('/', jobsController.createResource);
   router.get('/parameters', jobsController.getJobByJobsParameters);
   router.get('/:jobId', jobsController.getResource);
-  router.put('/:jobId', jobsController.updateResource);
+  router.put('/:jobId', validateJobStatusMiddleware, jobsController.updateResource);
   router.delete('/:jobId', jobsController.deleteResource);
   router.post('/:jobId/resettable', jobsController.isResettable);
-  router.post('/:jobId/reset', jobsController.resetJob);
+  router.post('/:jobId/reset', validateJobStatusMiddleware, jobsController.resetJob);
 
   router.get('/:jobId/tasks', tasksController.getResources);
-  router.post('/:jobId/tasks', tasksController.createResource);
+  router.post('/:jobId/tasks', validateJobStatusMiddleware, tasksController.createResource);
   router.get('/:jobId/tasks/:taskId', tasksController.getResource);
   router.put('/:jobId/tasks/:taskId', tasksController.updateResource);
   router.delete('/:jobId/tasks/:taskId', tasksController.deleteResource);

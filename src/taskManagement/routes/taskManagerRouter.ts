@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-misused-promises */
 import { Router } from 'express';
 import { FactoryFunction } from 'tsyringe';
 import { TaskManagementController } from '../controllers/taskManagementController';
 import { TaskController } from '../../jobs/controllers/taskController';
+import { validateJobStatusMiddleware } from '../../common/middlewares/validateJobStatusMiddleware';
 
 const taskManagerRouterFactory: FactoryFunction<Router> = (dependencyContainer) => {
   const router = Router();
@@ -15,7 +17,7 @@ const taskManagerRouterFactory: FactoryFunction<Router> = (dependencyContainer) 
   router.post('/findInactive', tasksManagementController.findInactiveTasks);
   router.post('/releaseInactive', tasksManagementController.releaseInactive);
   router.post('/updateExpiredStatus', tasksManagementController.updateExpiredStatus);
-  router.post('/abort/:jobId', tasksManagementController.abort);
+  router.post('/abort/:jobId', validateJobStatusMiddleware, tasksManagementController.abort);
 
   return router;
 };

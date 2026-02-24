@@ -402,23 +402,9 @@ describe('tasks', function () {
       });
     });
 
-    describe('Bad Path', () => {
-      it('return 400 when job status not Pending/In-progress', async () => {
-        jobRepositoryMocks.countMock.mockResolvedValue(1);
-        const jobModelEntity = createJobDataForGetJob();
-        jobRepositoryMocks.findOneMock.mockResolvedValue(jobModelToEntity({ ...(jobModelEntity as JobEntity), status: OperationStatus.COMPLETED }));
-        const response = await requestSender.abortJobAndTasks(jobId);
-
-        expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
-        expect(jobRepositoryMocks.saveMock).toHaveBeenCalledTimes(0);
-        expect(taskRepositoryMocks.updateMock).toHaveBeenCalledTimes(0);
-        expect(response).toSatisfyApiSpec();
-      });
-    });
-
     describe('Sad Path', () => {
       it('return 404 when job dont exists', async () => {
-        jobRepositoryMocks.countMock.mockResolvedValue(0);
+        jobRepositoryMocks.findOneMock.mockResolvedValue(undefined);
         const response = await requestSender.abortJobAndTasks(jobId);
 
         expect(response.status).toBe(httpStatusCodes.NOT_FOUND);
@@ -426,6 +412,20 @@ describe('tasks', function () {
         expect(taskRepositoryMocks.updateMock).toHaveBeenCalledTimes(0);
         expect(response).toSatisfyApiSpec();
       });
+
+      it.each([OperationStatus.COMPLETED, OperationStatus.EXPIRED, OperationStatus.ABORTED])(
+        'return 409 when current job status is %s',
+        async (status) => {
+          const jobModelEntity = createJobDataForGetJob();
+          jobRepositoryMocks.findOneMock.mockResolvedValue(jobModelToEntity({ ...(jobModelEntity as JobEntity), status }));
+          const response = await requestSender.abortJobAndTasks(jobId);
+
+          expect(response.status).toBe(httpStatusCodes.CONFLICT);
+          expect(jobRepositoryMocks.saveMock).toHaveBeenCalledTimes(0);
+          expect(taskRepositoryMocks.updateMock).toHaveBeenCalledTimes(0);
+          expect(response).toSatisfyApiSpec();
+        }
+      );
     });
   });
 });
