@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.1.1](https://github.com/MapColonies/job-manager/compare/v4.1.0...v4.1.1) (2026-01-29)
+
+
+### Bug Fixes
+
+* shouldExcludeParameters support in findJobsByCriteria for excluding export jobs in Catalog App ([#55](https://github.com/MapColonies/job-manager/issues/55)) ([5f78dc4](https://github.com/MapColonies/job-manager/commit/5f78dc4fe07d994043c23df76ece2c976b1bd4b9))
+
 ## [4.1.0](https://github.com/MapColonies/job-manager/compare/v4.0.1...v4.1.0) (2026-01-08)
 
 

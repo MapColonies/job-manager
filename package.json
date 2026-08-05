@@ -1,7 +1,7 @@
 {
   "name": "job-manager",
-  "version": "4.1.0",
-  "description": "Service for handling mapcolonies job & task statuses",
+  "version": "4.1.1",
+  "description": "Service for handling mapcolonies jobs & tasks",
   "main": "./src/index.ts",
   "scripts": {
     "test:unit": "jest --config=./tests/configurations/unit/jest.config.js",
