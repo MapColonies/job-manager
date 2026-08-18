@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: Job Service
   description: Job Service
-  version: 4.1.1
+  version: 5.0.0
 paths:
   /jobs:
     get:
@@ -141,14 +141,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorMessage'
-        '409':
-          description: Conflict
+        '404':
+          description: Job not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorMessage'
-        '404':
-          description: Job not found
+        '409':
+          description: Conflict
           content:
             application/json:
               schema:

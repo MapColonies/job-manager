@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.0.0](https://github.com/MapColonies/job-manager/compare/v4.1.0...v5.0.0) (2026-08-18)
+
+
+### ⚠ BREAKING CHANGES
+
+* added final job statuses middleware handler on crud operations  (MAPCO-9859) (#56)
+
+### Features
+
+* added final job statuses middleware handler on crud operations  (MAPCO-9859) ([#56](https://github.com/MapColonies/job-manager/issues/56)) ([ab6a58a](https://github.com/MapColonies/job-manager/commit/ab6a58adf5c2bdbbe58516763ca446e16d33a40f))
+
+
+### Bug Fixes
+
+* remove final job status validation middleware from job update route (MAPCO-11459) ([#58](https://github.com/MapColonies/job-manager/issues/58)) ([e5a1d35](https://github.com/MapColonies/job-manager/commit/e5a1d35538e40c1899f807d938af22e9ea8dcc85))
+* shouldExcludeParameters support in findJobsByCriteria for excluding export jobs in Catalog App ([#55](https://github.com/MapColonies/job-manager/issues/55)) ([5f78dc4](https://github.com/MapColonies/job-manager/commit/5f78dc4fe07d994043c23df76ece2c976b1bd4b9))
+
 ### [4.1.1](https://github.com/MapColonies/job-manager/compare/v4.1.0...v4.1.1) (2026-01-29)
 
 
