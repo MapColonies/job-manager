@@ -916,6 +916,31 @@ describe('job', function () {
         expect(response).toSatisfyApiSpec();
       });
 
+      it.each([OperationStatus.COMPLETED, OperationStatus.EXPIRED, OperationStatus.ABORTED])(
+        'should update job in final status %s and return 200',
+        async function (status) {
+          const jobCountMock = jobRepositoryMocks.countMock;
+          const jobSaveMock = jobRepositoryMocks.saveMock;
+
+          jobRepositoryMocks.findOneMock.mockResolvedValue({ id: '170dd8c0-8bad-498b-bb26-671dcf19aa3c', status });
+          jobCountMock.mockResolvedValue(1);
+          jobSaveMock.mockResolvedValue({});
+
+          const response = await requestSender.updateResource('170dd8c0-8bad-498b-bb26-671dcf19aa3c', {
+            status: OperationStatus.COMPLETED,
+          });
+
+          expect(response.status).toBe(httpStatusCodes.OK);
+          expect(response.body).toEqual({ code: ResponseCodes.JOB_UPDATED });
+          expect(jobSaveMock).toHaveBeenCalledTimes(1);
+          expect(jobSaveMock).toHaveBeenCalledWith({
+            id: '170dd8c0-8bad-498b-bb26-671dcf19aa3c',
+            status: OperationStatus.COMPLETED,
+          });
+          expect(response).toSatisfyApiSpec();
+        }
+      );
+
       it('should delete job without tasks and return 200', async function () {
         const jobDeleteMock = jobRepositoryMocks.deleteMock;
         const jobCountMock = jobRepositoryMocks.countMock;
@@ -1149,23 +1174,6 @@ describe('job', function () {
       expect(response.status).toBe(httpStatusCodes.NOT_FOUND);
       expect(response).toSatisfyApiSpec();
     });
-
-    it.each([OperationStatus.COMPLETED, OperationStatus.EXPIRED, OperationStatus.ABORTED])(
-      'should return status conflict error on update job attempt when trying to update job with status %s',
-      async function (status) {
-        jobRepositoryMocks.findOneMock.mockResolvedValue({
-          id: '170dd8c0-8bad-498b-bb26-671dcf19aa3c',
-          status: status,
-        });
-
-        const response = await requestSender.updateResource('170dd8c0-8bad-498b-bb26-671dcf19aa3c', {
-          status: OperationStatus.COMPLETED,
-        });
-
-        expect(response.status).toBe(httpStatusCodes.CONFLICT);
-        expect(response).toSatisfyApiSpec();
-      }
-    );
 
     it('should return status code 404 on DELETE request for non existing job', async function () {
       const jobCountMock = jobRepositoryMocks.countMock;
